@@ -1,0 +1,12 @@
+[submodule "orodruin/vendor/decorator"]
+	path = orodruin/vendor/decorator
+	url = https://github.com/micheles/decorator
+	branch = 4.4.2
+[submodule "orodruin/vendor/networkx"]
+	path = orodruin/vendor/networkx
+	url = https://github.com/networkx/networkx
+	branch = networkx-2.5
+[submodule "orodruin/vendor/pydantic"]
+	path = orodruin/vendor/pydantic
+	url = https://github.com/samuelcolvin/pydantic
+	branch = v1.7.2
