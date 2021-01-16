@@ -5,9 +5,10 @@ it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
 import json
-from pathlib import PurePosixPath
+from json import encoder
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
+from pathlib import PurePath, PurePosixPath
 
 from orodruin.port import Port, PortSide
 
@@ -24,13 +25,13 @@ class ComponentDoesNotExistError(ComponentError):
     """Component does not exist."""
 
 
-class UUIDEncoder(json.JSONEncoder):
+class OrodruinEncoder(json.JSONEncoder):
     """JSON Encoder to serialize UUIDs properly."""
 
     def default(self, o: Any):
-        if isinstance(o, UUID):
+        if isinstance(o, PurePath):
             # if the obj is uuid, we simply return the value of uuid
-            return o.hex
+            return str(o)
         return json.JSONEncoder.default(self, o)
 
 
@@ -102,7 +103,7 @@ class Component:
 
     def add_port(self, name: str, port_side: PortSide):
         """Add a `Port` to this Component."""
-        port = Port(name)
+        port = Port(name, self)
 
         if port_side == PortSide.input:
             self._inputs.append(port)
@@ -160,7 +161,6 @@ class Component:
         """
         data = {
             "name": self._name,
-            "uuid": self._uuid,
             "components": [c.as_dict() for c in self._components],
         }
 
@@ -178,4 +178,4 @@ class Component:
 
     def as_json(self, indent: int = 2):
         """Returns the serialized representation of the rig."""
-        return json.dumps(self.as_dict(), indent=indent, cls=UUIDEncoder)
+        return json.dumps(self.as_dict(), indent=indent, cls=OrodruinEncoder)

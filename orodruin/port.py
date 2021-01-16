@@ -4,19 +4,27 @@ A Port is only meant to be attached on a Component
 It can be connected to other Ports
 """
 from enum import Enum
-from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING, Any, Dict, List
+
+from pathlib import PurePosixPath
+
+if TYPE_CHECKING:
+    from orodruin.component import Component
 
 
 class PortError(Exception):
     """Generic Port Error."""
 
 
-class PortAlreadyConnected(PortError):
+class PortAlreadyConnectedError(PortError):
     """Port Already Connected Error."""
 
 
-class PortNotConnected(PortError):
+class ConnectionOnSameComponenentError(PortError):
+    """Both ports about to be connected are on the same component."""
+
+
+class PortNotConnectedError(PortError):
     """Port Not Connected Error."""
 
 
@@ -34,23 +42,22 @@ class Port:
     It can be connected to other Ports
     """
 
-    def __init__(self, name: str, uuid: Optional[UUID] = None) -> None:
+    def __init__(self, name: str, component: "Component") -> None:
         self._name: str = name
-        self._connections: List[Port] = []
+        self._connections: List["Port"] = []
+        self._component: "Component" = component
 
         # TODO: implement port types
         # self._value: Any = None
 
-        self._uuid: UUID
-        if uuid:
-            self._uuid = uuid
-        else:
-            self._uuid = uuid4()
-
     def connect(self, other: "Port"):
         """Connect this port to another port."""
+        if other.component() is self._component:
+            raise ConnectionOnSameComponenentError(
+                f"{self.name()} and {other.name()} can't be connected because they both are on the same component '{self._component.name()}'"
+            )
         if other in self._connections:
-            raise PortAlreadyConnected(
+            raise PortAlreadyConnectedError(
                 f"port {self.name()} is already connected to {other.name()}"
             )
         self._connections.append(other)
@@ -59,15 +66,18 @@ class Port:
     def disconnect(self, other: "Port"):
         """Disconnect this port from the other Port."""
         if other not in self._connections:
-            raise PortNotConnected(
+            raise PortNotConnectedError(
                 f"port {self.name()} is not connected to {other.name()}"
             )
         self._connections.remove(other)
         other._connections.remove(self)
 
-    def connections(self):
+    def connections(self) -> List["Port"]:
         """The connected Ports of this Port."""
         return self._connections
+
+    def component(self) -> "Component":
+        return self._component
 
     def name(self):
         """Name of the Port."""
@@ -77,16 +87,17 @@ class Port:
         """Set the name of the Port."""
         self._name = name
 
-    def uuid(self):
-        """UUID of the Component"""
-        return self._uuid
+    def path(self) -> PurePosixPath:
+        return self._component.path() / f".{self._name}"
 
     def as_dict(self) -> Dict[str, Any]:
         """Returns a dict representing the Port and its connections."""
         data = {
             "name": self._name,
-            "uuid": self._uuid,
-            "connections": [c.uuid() for c in self._connections],
+            "connections": [
+                c.path().relative_to(self._component.parent().path())
+                for c in self._connections
+            ],
         }
 
         return data

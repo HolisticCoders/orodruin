@@ -139,55 +139,50 @@ def test_as_dict():
 
     expected_data = {
         "name": "parent",
-        "uuid": parent.uuid(),
         "components": [
             {
                 "name": "child A",
-                "uuid": child_a.uuid(),
                 "components": [],
                 "inputs": [
                     {
                         "name": "input1",
-                        "uuid": child_a.input1.uuid(),
                         "connections": [],
                     },
                     {
                         "name": "input2",
-                        "uuid": child_a.input2.uuid(),
                         "connections": [],
                     },
                 ],
                 "outputs": [
                     {
                         "name": "output",
-                        "uuid": child_a.output.uuid(),
                         "connections": [
-                            child_b.input1.uuid(),
-                            child_b.input2.uuid(),
+                            child_b.input1.path().relative_to(child_b.parent().path()),
+                            child_b.input2.path().relative_to(child_b.parent().path()),
                         ],
                     },
                 ],
             },
             {
                 "name": "child B",
-                "uuid": child_b.uuid(),
                 "components": [],
                 "inputs": [
                     {
                         "name": "input1",
-                        "uuid": child_b.input1.uuid(),
-                        "connections": [child_a.output.uuid()],
+                        "connections": [
+                            child_a.output.path().relative_to(child_b.parent().path())
+                        ],
                     },
                     {
                         "name": "input2",
-                        "uuid": child_b.input2.uuid(),
-                        "connections": [child_a.output.uuid()],
+                        "connections": [
+                            child_a.output.path().relative_to(child_b.parent().path())
+                        ],
                     },
                 ],
                 "outputs": [
                     {
                         "name": "output",
-                        "uuid": child_b.output.uuid(),
                         "connections": [],
                     },
                 ],
