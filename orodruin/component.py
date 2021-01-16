@@ -17,7 +17,11 @@ class ComponentError(Exception):
 
 
 class ParentToSelfError(ComponentError):
-    """Generic Component Error"""
+    """Component parented to itself."""
+
+
+class ComponentDoesNotExistError(ComponentError):
+    """Component does not exist."""
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -38,6 +42,8 @@ class Component:
     and can contain other Components as a subgraph
     """
 
+    _instances: Dict[UUID, "Component"] = {}
+
     def __init__(self, name: str, uuid: Optional[UUID] = None) -> None:
         self._name: str = name
 
@@ -46,11 +52,30 @@ class Component:
         else:
             self._uuid: UUID = uuid4()
 
+        Component._instances[self._uuid] = self
+
         self._inputs: List[Port] = []
         self._outputs: List[Port] = []
 
         self._components: List[Component] = []
         self._parent: Optional[Component] = None
+
+    @staticmethod
+    def from_uuid(uuid: UUID) -> "Component":
+        """return an existing component instance from its uuid"""
+        instance = Component._instances.get(uuid)
+        if not instance:
+            raise ComponentDoesNotExistError(
+                f"Component with uuid {uuid} does not exist"
+            )
+        return instance
+
+    @staticmethod
+    def from_path(path: str) -> "Component":
+        for instance in Component._instances.values():
+            if path == str(instance.path()):
+                return instance
+        raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     def __getattr__(self, name: str) -> Optional[Port]:
         for port in self._inputs:

@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from orodruin.component import Component, ParentToSelfError
+from orodruin.component import Component, ComponentDoesNotExistError, ParentToSelfError
 from orodruin.port import Port, PortSide
 
 
@@ -16,6 +16,30 @@ def test_init_component_with_uuid():
     uuid = uuid4()
     component = Component("Component", uuid)
     assert component.uuid() == uuid
+
+
+def test_get_component_from_uuid():
+    component = Component("root")
+    same_component = Component.from_uuid(component.uuid())
+
+    assert component is same_component
+
+
+def test_get_component_from_inexistant_uuid():
+    with pytest.raises(ComponentDoesNotExistError):
+        Component.from_uuid(uuid4())
+
+
+def test_get_component_from_path():
+    component = Component("root")
+    same_component = Component.from_path("/root")
+
+    assert component is same_component
+
+
+def test_get_component_from_inexistant_path():
+    with pytest.raises(ComponentDoesNotExistError):
+        Component.from_path("/root")
 
 
 def test_add_ports():
