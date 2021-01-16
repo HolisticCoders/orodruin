@@ -5,6 +5,7 @@ it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
 import json
+from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
@@ -91,8 +92,14 @@ class Component:
         """Set the name of the component."""
         self._name = name
 
-    def uuid(self):
-        """UUID of the Component"""
+    def path(self) -> PurePosixPath:
+        if self._parent is None:
+            path = PurePosixPath(f"/{self._name}")
+        else:
+            path = self._parent.path().joinpath(f"{self._name}")
+        return path
+
+    def uuid(self) -> UUID:
         return self._uuid
 
     def inputs(self):

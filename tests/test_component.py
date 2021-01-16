@@ -1,3 +1,4 @@
+from pathlib import PurePosixPath
 from uuid import uuid4
 
 import pytest
@@ -36,6 +37,22 @@ def test_set_name():
     component.set_name("new name")
 
     assert component.name() == "new name"
+
+
+def test_path_root_component():
+    component = Component("root")
+    assert component.path() == PurePosixPath("/root")
+
+
+def test_path_nested_component():
+    root = Component("root")
+    child_a = Component("Child A")
+    child_b = Component("Child B")
+
+    child_a.set_parent(root)
+    child_b.set_parent(child_a)
+
+    assert child_b.path() == PurePosixPath("/root/Child A/Child B")
 
 
 def test_access_port():
