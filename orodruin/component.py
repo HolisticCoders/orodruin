@@ -11,6 +11,14 @@ from uuid import UUID, uuid4
 from orodruin.port import Port, PortSide
 
 
+class ComponentError(Exception):
+    """Generic Component Error"""
+
+
+class ParentToSelfError(ComponentError):
+    """Generic Component Error"""
+
+
 class UUIDEncoder(json.JSONEncoder):
     """JSON Encoder to serialize UUIDs properly."""
 
@@ -105,6 +113,9 @@ class Component:
 
     def set_parent(self, other: "Component"):
         """Set the parent of the component."""
+        if other is self:
+            raise ParentToSelfError(f"Cannot parent {self._name} to itself")
+
         self._parent = other
         if self not in other.components():
             other._components.append(self)

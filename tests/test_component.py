@@ -1,5 +1,8 @@
 from uuid import uuid4
-from orodruin.component import Component
+
+import pytest
+
+from orodruin.component import Component, ParentToSelfError
 from orodruin.port import Port, PortSide
 
 
@@ -64,6 +67,13 @@ def test_parent_component_twice():
     child.set_parent(parent)
 
     assert parent.components().count(child) == 1
+
+
+def test_parent_to_self():
+    component = Component("component")
+
+    with pytest.raises(ParentToSelfError):
+        component.set_parent(component)
 
 
 def test_as_dict():
