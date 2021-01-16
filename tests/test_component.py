@@ -1,9 +1,17 @@
+from uuid import uuid4
 from orodruin.component import Component
 from orodruin.port import Port, PortSide
 
 
 def test_init_component():
-    Component("Component")
+    component = Component("component")
+    assert component.name() == "component"
+
+
+def test_init_component_with_uuid():
+    uuid = uuid4()
+    component = Component("Component", uuid)
+    assert component.uuid() == uuid
 
 
 def test_add_ports():
@@ -142,5 +150,23 @@ def test_as_dict():
 
 
 def test_as_json():
-    component = Component("component")
-    component.as_json()
+    parent = Component("parent")
+
+    child_a = Component("child A")
+    child_a.set_parent(parent)
+
+    child_b = Component("child B")
+    child_b.set_parent(parent)
+
+    child_a.add_port("input1", PortSide.input)
+    child_a.add_port("input2", PortSide.input)
+    child_a.add_port("output", PortSide.output)
+
+    child_b.add_port("input1", PortSide.input)
+    child_b.add_port("input2", PortSide.input)
+    child_b.add_port("output", PortSide.output)
+
+    child_a.output.connect(child_b.input1)
+    child_a.output.connect(child_b.input2)
+
+    parent.as_json()

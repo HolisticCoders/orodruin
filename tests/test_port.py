@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from orodruin.port import Port, PortAlreadyConnected, PortNotConnected
@@ -6,6 +8,12 @@ from orodruin.port import Port, PortAlreadyConnected, PortNotConnected
 def test_init_port():
     port = Port("port")
     assert port.name() == "port"
+
+
+def test_init_component_with_uuid():
+    uuid = uuid4()
+    port = Port("port", uuid)
+    assert port.uuid() == uuid
 
 
 def test_set_port_name():
