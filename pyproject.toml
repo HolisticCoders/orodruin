@@ -3,7 +3,7 @@ name = "orodruin"
 version = "0.1.0"
 description = "A Python rigging graph library."
 license = "LICENSE.md"
-authors = ["Aphosis <aphosis.github@gmail.com>"]
+authors = ["Loïc Pinsard <muream@gmail.com>", "Aphosis <aphosis.github@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/HolisticCoders/orodruin"
 repository = "https://github.com/HolisticCoders/orodruin"
@@ -36,7 +36,7 @@ disable = ["fixme", "import-error", "duplicate-code"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--ignore=orodruin/vendor --doctest-modules --cov=orodruin --cov-report html"
+addopts = "--doctest-modules --cov=orodruin --cov-report html"
 testpaths = [
     "tests",
     "orodruin",
