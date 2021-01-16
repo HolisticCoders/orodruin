@@ -3,8 +3,12 @@ from uuid import uuid4
 
 import pytest
 
-from orodruin.component import Component, ComponentDoesNotExistError, ParentToSelfError
-from orodruin.port import Port, PortSide
+from orodruin.component import (
+    Component,
+    ComponentDoesNotExistError,
+    ParentToSelfError,
+)
+from orodruin.port import Port
 
 
 def test_init_component():
@@ -45,15 +49,13 @@ def test_get_component_from_inexistant_path():
 def test_add_ports():
     component = Component("component")
 
-    assert len(component.inputs()) == 0
-    assert len(component.outputs()) == 0
+    assert len(component.ports()) == 0
 
-    component.add_port("input1", PortSide.input)
-    component.add_port("input2", PortSide.input)
-    component.add_port("output", PortSide.output)
+    component.add_port("input1")
+    component.add_port("input2")
+    component.add_port("output")
 
-    assert len(component.inputs()) == 2
-    assert len(component.outputs()) == 1
+    assert len(component.ports()) == 3
 
 
 def test_set_name():
@@ -81,7 +83,7 @@ def test_path_nested_component():
 
 def test_access_port():
     component = Component("component")
-    component.add_port("input1", PortSide.input)
+    component.add_port("input1")
     assert isinstance(component.input1, Port)
 
 
@@ -126,70 +128,55 @@ def test_as_dict():
     child_b = Component("child B")
     child_b.set_parent(parent)
 
-    child_a.add_port("input1", PortSide.input)
-    child_a.add_port("input2", PortSide.input)
-    child_a.add_port("output", PortSide.output)
+    child_a.add_port("input1")
+    child_a.add_port("input2")
+    child_a.add_port("output")
 
-    child_b.add_port("input1", PortSide.input)
-    child_b.add_port("input2", PortSide.input)
-    child_b.add_port("output", PortSide.output)
+    child_b.add_port("input1")
+    child_b.add_port("input2")
+    child_b.add_port("output")
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
 
     expected_data = {
-        "name": "parent",
         "components": [
             {
-                "name": "child A",
                 "components": [],
-                "inputs": [
-                    {
-                        "name": "input1",
-                        "connections": [],
-                    },
-                    {
-                        "name": "input2",
-                        "connections": [],
-                    },
-                ],
-                "outputs": [
+                "name": "child A",
+                "ports": [
+                    {"name": "input1", "source": None, "targets": []},
+                    {"name": "input2", "source": None, "targets": []},
                     {
                         "name": "output",
-                        "connections": [
-                            child_b.input1.path().relative_to(child_b.parent().path()),
-                            child_b.input2.path().relative_to(child_b.parent().path()),
+                        "source": None,
+                        "targets": [
+                            PurePosixPath("child B.input1"),
+                            PurePosixPath("child B.input2"),
                         ],
                     },
                 ],
             },
             {
-                "name": "child B",
                 "components": [],
-                "inputs": [
+                "name": "child B",
+                "ports": [
                     {
                         "name": "input1",
-                        "connections": [
-                            child_a.output.path().relative_to(child_b.parent().path())
-                        ],
+                        "source": PurePosixPath("child A.output"),
+                        "targets": [],
                     },
                     {
                         "name": "input2",
-                        "connections": [
-                            child_a.output.path().relative_to(child_b.parent().path())
-                        ],
+                        "source": PurePosixPath("child A.output"),
+                        "targets": [],
                     },
-                ],
-                "outputs": [
-                    {
-                        "name": "output",
-                        "connections": [],
-                    },
+                    {"name": "output", "source": None, "targets": []},
                 ],
             },
         ],
-        "inputs": [],
-        "outputs": [],
+        "name": "parent",
+        "ports": [],
     }
 
     assert parent.as_dict() == expected_data
@@ -204,13 +191,13 @@ def test_as_json():
     child_b = Component("child B")
     child_b.set_parent(parent)
 
-    child_a.add_port("input1", PortSide.input)
-    child_a.add_port("input2", PortSide.input)
-    child_a.add_port("output", PortSide.output)
+    child_a.add_port("input1")
+    child_a.add_port("input2")
+    child_a.add_port("output")
 
-    child_b.add_port("input1", PortSide.input)
-    child_b.add_port("input2", PortSide.input)
-    child_b.add_port("output", PortSide.output)
+    child_b.add_port("input1")
+    child_b.add_port("input2")
+    child_b.add_port("output")
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)

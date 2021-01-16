@@ -3,10 +3,8 @@
 A Port is only meant to be attached on a Component
 It can be connected to other Ports
 """
-from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List
-
 from pathlib import PurePosixPath
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from orodruin.component import Component
@@ -28,11 +26,8 @@ class PortNotConnectedError(PortError):
     """Port Not Connected Error."""
 
 
-class PortSide(Enum):
-    """Side of a Port on a Component."""
-
-    input = 1
-    output = 2
+class SetConnectedPortError(PortError):
+    """Raised when setting a port that is connected."""
 
 
 class Port:
@@ -44,39 +39,81 @@ class Port:
 
     def __init__(self, name: str, component: "Component") -> None:
         self._name: str = name
-        self._connections: List["Port"] = []
         self._component: "Component" = component
 
-        # TODO: implement port types
-        # self._value: Any = None
+        self._value: Any = 0
 
-    def connect(self, other: "Port"):
-        """Connect this port to another port."""
+        self._source: Optional["Port"] = None
+        self._targets: List["Port"] = []
+
+    def set(self, value: Any):
+        """Set the value of the Port.
+
+        Raises:
+            SetConnectedPortError: when called and the port is connected.
+        """
+
+        if self._source:
+            raise SetConnectedPortError(
+                f"Port {self.name} is connected and cannot be set."
+            )
+        self._value = value
+
+    def get(self) -> Any:
+        """Get the value of the Port.
+
+        When connected, it recursively gets the source's value
+        until a non connected port is found.
+        """
+
+        if self._source:
+            return self._source.get()
+
+        return self._value
+
+    def connect(self, other: "Port", force: bool = False):
+        """Connect this port to another port.
+
+        Raises:
+            ConnectionOnSameComponenentError: when trying to connect on another port of
+                the same Component
+            PortAlreadyConnectedError: when connecting to an already connected port
+                and the force argument is False
+        """
         if other.component() is self._component:
             raise ConnectionOnSameComponenentError(
-                f"{self.name()} and {other.name()} can't be connected because they both are on the same component '{self._component.name()}'"
+                f"{self.name()} and {other.name()} can't be connected because "
+                f"they both are on the same component '{self._component.name()}'"
             )
-        if other in self._connections:
+        if other.source() and not force:
             raise PortAlreadyConnectedError(
-                f"port {self.name()} is already connected to {other.name()}"
+                f"port {other.name()} is already connected to {other.source().name()}, "
+                "use `force=True` to connect regardless."
             )
-        self._connections.append(other)
-        other._connections.append(self)
+        if other.source() and force:
+            other.source().disconnect(other)
+
+        self._targets.append(other)
+        other._source = self
 
     def disconnect(self, other: "Port"):
         """Disconnect this port from the other Port."""
-        if other not in self._connections:
-            raise PortNotConnectedError(
-                f"port {self.name()} is not connected to {other.name()}"
-            )
-        self._connections.remove(other)
-        other._connections.remove(self)
+        if other not in self._targets:
+            return
 
-    def connections(self) -> List["Port"]:
-        """The connected Ports of this Port."""
-        return self._connections
+        self._targets.remove(other)
+        other._source = None
+
+    def source(self) -> Optional["Port"]:
+        """List of the Ports connected to this Port."""
+        return self._source
+
+    def targets(self) -> List["Port"]:
+        """List of the Ports this Port connects to."""
+        return self._targets
 
     def component(self) -> "Component":
+        """The Component this Port is attached on."""
         return self._component
 
     def name(self):
@@ -88,15 +125,21 @@ class Port:
         self._name = name
 
     def path(self) -> PurePosixPath:
-        return self._component.path() / f".{self._name}"
+        """The full Path of this Port."""
+        return self._component.path().with_suffix(f".{self._name}")
 
     def as_dict(self) -> Dict[str, Any]:
         """Returns a dict representing the Port and its connections."""
         data = {
             "name": self._name,
-            "connections": [
+            "source": (
+                self._source.path().relative_to(self._component.parent().path())
+                if self._source
+                else None
+            ),
+            "targets": [
                 c.path().relative_to(self._component.parent().path())
-                for c in self._connections
+                for c in self._targets
             ],
         }
 

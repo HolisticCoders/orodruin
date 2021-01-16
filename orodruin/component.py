@@ -5,12 +5,11 @@ it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
 import json
-from json import encoder
+from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from pathlib import PurePath, PurePosixPath
 
-from orodruin.port import Port, PortSide
+from orodruin.port import Port
 
 
 class ComponentError(Exception):
@@ -55,8 +54,7 @@ class Component:
 
         Component._instances[self._uuid] = self
 
-        self._inputs: List[Port] = []
-        self._outputs: List[Port] = []
+        self._ports: List[Port] = []
 
         self._components: List[Component] = []
         self._parent: Optional[Component] = None
@@ -73,17 +71,15 @@ class Component:
 
     @staticmethod
     def from_path(path: str) -> "Component":
+        """Return an existing Component from the given path."""
         for instance in Component._instances.values():
             if path == str(instance.path()):
                 return instance
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     def __getattr__(self, name: str) -> Optional[Port]:
-        for port in self._inputs:
-            if port.name() == name:
-                return port
-
-        for port in self._outputs:
+        """Get the Ports of this Component if the Python attribut doesn't exist."""
+        for port in self._ports:
             if port.name() == name:
                 return port
 
@@ -101,14 +97,10 @@ class Component:
         """Cleans up the Component to be ready for Animation."""
         raise NotImplementedError
 
-    def add_port(self, name: str, port_side: PortSide):
+    def add_port(self, name: str):
         """Add a `Port` to this Component."""
         port = Port(name, self)
-
-        if port_side == PortSide.input:
-            self._inputs.append(port)
-        elif port_side == PortSide.output:
-            self._outputs.append(port)
+        self._ports.append(port)
 
     def name(self) -> str:
         """Name of the Component."""
@@ -119,6 +111,7 @@ class Component:
         self._name = name
 
     def path(self) -> PurePosixPath:
+        """The full Path of this Component."""
         if self._parent is None:
             path = PurePosixPath(f"/{self._name}")
         else:
@@ -126,15 +119,12 @@ class Component:
         return path
 
     def uuid(self) -> UUID:
+        """The UUID of this Component."""
         return self._uuid
 
-    def inputs(self):
-        """Input Ports of the Component."""
-        return self._inputs
-
-    def outputs(self):
-        """Output Ports of the Component."""
-        return self._outputs
+    def ports(self):
+        """List of the Component's Ports."""
+        return self._ports
 
     def components(self):
         """Sub-components of the component."""
@@ -165,14 +155,9 @@ class Component:
         }
 
         inputs = []
-        for port in self._inputs:
+        for port in self._ports:
             inputs.append(port.as_dict())
-        data["inputs"] = inputs
-
-        outputs = []
-        for port in self._outputs:
-            outputs.append(port.as_dict())
-        data["outputs"] = outputs
+        data["ports"] = inputs
 
         return data
 
