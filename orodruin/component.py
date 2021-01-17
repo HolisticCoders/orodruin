@@ -44,6 +44,11 @@ class Component:
 
     _instances: Dict[UUID, "Component"] = {}
 
+    @classmethod
+    def instances(cls):
+        """All Component instances."""
+        return cls._instances
+
     def __init__(self, name: str, uuid: Optional[UUID] = None) -> None:
         self._name: str = name
 

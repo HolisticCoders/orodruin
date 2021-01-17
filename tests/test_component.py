@@ -24,6 +24,18 @@ def test_init_component_with_uuid(create_component: Callable[..., Component]):
     assert component.uuid() == uuid
 
 
+def test_delete_component():
+    assert len(Component.instances()) == 0
+
+    component = Component("component")
+
+    assert len(Component.instances()) == 1
+
+    component.delete()
+
+    assert len(Component.instances()) == 0
+
+
 def test_get_component_from_uuid(root_component: Component):
     same_component = Component.from_uuid(root_component.uuid())
 
