@@ -141,7 +141,8 @@ class Component:
 
         self._parent = other
         if self not in other.components():
-            other._components.append(self)
+            # TODO: refactor private member access
+            other._components.append(self)  # pylint: disable= protected-access
 
     def as_dict(self) -> Dict[str, Any]:
         """Returns a dict representing the Component.
@@ -164,3 +165,11 @@ class Component:
     def as_json(self, indent: int = 2):
         """Returns the serialized representation of the rig."""
         return json.dumps(self.as_dict(), indent=indent, cls=OrodruinEncoder)
+
+    def delete(self):
+        """Delete the component.
+
+        Note: The component is only deleted from the list of instances
+            and will only truly be deleted once it goes out of scope.
+        """
+        del Component._instances[self._uuid]

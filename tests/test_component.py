@@ -1,4 +1,6 @@
+# pylint: disable = missing-module-docstring, missing-function-docstring
 from pathlib import PurePosixPath
+from typing import Callable
 from uuid import uuid4
 
 import pytest
@@ -11,22 +13,21 @@ from orodruin.component import (
 from orodruin.port import Port
 
 
-def test_init_component():
-    component = Component("component")
+def test_init_component(create_component: Callable[..., Component]):
+    component = create_component("component")
     assert component.name() == "component"
 
 
-def test_init_component_with_uuid():
+def test_init_component_with_uuid(create_component: Callable[..., Component]):
     uuid = uuid4()
-    component = Component("Component", uuid)
+    component = create_component("Component", uuid)
     assert component.uuid() == uuid
 
 
-def test_get_component_from_uuid():
-    component = Component("root")
-    same_component = Component.from_uuid(component.uuid())
+def test_get_component_from_uuid(root_component: Component):
+    same_component = Component.from_uuid(root_component.uuid())
 
-    assert component is same_component
+    assert root_component is same_component
 
 
 def test_get_component_from_inexistant_uuid():
@@ -34,11 +35,10 @@ def test_get_component_from_inexistant_uuid():
         Component.from_uuid(uuid4())
 
 
-def test_get_component_from_path():
-    component = Component("root")
+def test_get_component_from_path(root_component: Component):
     same_component = Component.from_path("/root")
 
-    assert component is same_component
+    assert root_component is same_component
 
 
 def test_get_component_from_inexistant_path():
@@ -46,8 +46,9 @@ def test_get_component_from_inexistant_path():
         Component.from_path("/root")
 
 
-def test_add_ports():
-    component = Component("component")
+def test_add_ports(create_component: Callable[..., Component]):
+
+    component = create_component("component")
 
     assert len(component.ports()) == 0
 
@@ -58,43 +59,44 @@ def test_add_ports():
     assert len(component.ports()) == 3
 
 
-def test_set_name():
-    component = Component("original name")
+def test_set_name(create_component: Callable[..., Component]):
+    component = create_component("original name")
     component.set_name("new name")
 
     assert component.name() == "new name"
 
 
-def test_path_root_component():
-    component = Component("root")
-    assert component.path() == PurePosixPath("/root")
+def test_path_root_component(root_component: Component):
+    assert root_component.path() == PurePosixPath("/root")
 
 
-def test_path_nested_component():
-    root = Component("root")
-    child_a = Component("Child A")
-    child_b = Component("Child B")
+def test_path_nested_component(
+    root_component: Component,
+    create_component: Callable[..., Component],
+):
+    child_a = create_component("Child A")
+    child_b = create_component("Child B")
 
-    child_a.set_parent(root)
+    child_a.set_parent(root_component)
     child_b.set_parent(child_a)
 
     assert child_b.path() == PurePosixPath("/root/Child A/Child B")
 
 
-def test_access_port():
-    component = Component("component")
+def test_access_port(create_component: Callable[..., Component]):
+    component = create_component("component")
     component.add_port("input1")
     assert isinstance(component.input1, Port)
 
 
-def test_access_innexisting_port():
-    component = Component("component")
+def test_access_innexisting_port(create_component: Callable[..., Component]):
+    component = create_component("component")
     assert component.this_is_not_a_port is None
 
 
-def test_parent_component():
-    parent = Component("parent")
-    child = Component("child")
+def test_parent_component(create_component: Callable[..., Component]):
+    parent = create_component("parent")
+    child = create_component("child")
 
     child.set_parent(parent)
 
@@ -102,9 +104,9 @@ def test_parent_component():
     assert child in parent.components()
 
 
-def test_parent_component_twice():
-    parent = Component("parent")
-    child = Component("child")
+def test_parent_component_twice(create_component: Callable[..., Component]):
+    parent = create_component("parent")
+    child = create_component("child")
 
     child.set_parent(parent)
     child.set_parent(parent)
@@ -112,20 +114,20 @@ def test_parent_component_twice():
     assert parent.components().count(child) == 1
 
 
-def test_parent_to_self():
-    component = Component("component")
+def test_parent_to_self(create_component: Callable[..., Component]):
+    component = create_component("component")
 
     with pytest.raises(ParentToSelfError):
         component.set_parent(component)
 
 
-def test_as_dict():
-    parent = Component("parent")
+def test_as_dict(create_component: Callable[..., Component]):
+    parent = create_component("parent")
 
-    child_a = Component("child A")
+    child_a = create_component("child A")
     child_a.set_parent(parent)
 
-    child_b = Component("child B")
+    child_b = create_component("child B")
     child_b.set_parent(parent)
 
     child_a.add_port("input1")
@@ -182,13 +184,13 @@ def test_as_dict():
     assert parent.as_dict() == expected_data
 
 
-def test_as_json():
-    parent = Component("parent")
+def test_as_json(create_component: Callable[..., Component]):
+    parent = create_component("parent")
 
-    child_a = Component("child A")
+    child_a = create_component("child A")
     child_a.set_parent(parent)
 
-    child_b = Component("child B")
+    child_b = create_component("child B")
     child_b.set_parent(parent)
 
     child_a.add_port("input1")

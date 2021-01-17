@@ -7,7 +7,7 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from orodruin.component import Component
+    from orodruin.component import Component  # pylint: disable = cyclic-import
 
 
 class PortError(Exception):
