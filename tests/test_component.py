@@ -10,7 +10,7 @@ from orodruin.component import (
     ComponentDoesNotExistError,
     ParentToSelfError,
 )
-from orodruin.port import Port
+from orodruin.port import Port, PortType
 
 
 def test_init_component(create_component: Callable[..., Component]):
@@ -64,9 +64,9 @@ def test_add_ports(create_component: Callable[..., Component]):
 
     assert len(component.ports()) == 0
 
-    component.add_port("input1")
-    component.add_port("input2")
-    component.add_port("output")
+    component.add_port("input1", PortType.int)
+    component.add_port("input2", PortType.int)
+    component.add_port("output", PortType.int)
 
     assert len(component.ports()) == 3
 
@@ -97,7 +97,7 @@ def test_path_nested_component(
 
 def test_access_port(create_component: Callable[..., Component]):
     component = create_component("component")
-    component.add_port("input1")
+    component.add_port("input1", PortType.int)
     assert isinstance(component.input1, Port)
 
 
@@ -142,13 +142,13 @@ def test_as_dict(create_component: Callable[..., Component]):
     child_b = create_component("child B")
     child_b.set_parent(parent)
 
-    child_a.add_port("input1")
-    child_a.add_port("input2")
-    child_a.add_port("output")
+    child_a.add_port("input1", PortType.int)
+    child_a.add_port("input2", PortType.int)
+    child_a.add_port("output", PortType.int)
 
-    child_b.add_port("input1")
-    child_b.add_port("input2")
-    child_b.add_port("output")
+    child_b.add_port("input1", PortType.int)
+    child_b.add_port("input2", PortType.int)
+    child_b.add_port("output", PortType.int)
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
@@ -159,10 +159,11 @@ def test_as_dict(create_component: Callable[..., Component]):
                 "components": [],
                 "name": "child A",
                 "ports": [
-                    {"name": "input1", "source": None, "targets": []},
-                    {"name": "input2", "source": None, "targets": []},
+                    {"name": "input1", "type": "int", "source": None, "targets": []},
+                    {"name": "input2", "type": "int", "source": None, "targets": []},
                     {
                         "name": "output",
+                        "type": "int",
                         "source": None,
                         "targets": [
                             PurePosixPath("child B.input1"),
@@ -177,15 +178,17 @@ def test_as_dict(create_component: Callable[..., Component]):
                 "ports": [
                     {
                         "name": "input1",
+                        "type": "int",
                         "source": PurePosixPath("child A.output"),
                         "targets": [],
                     },
                     {
                         "name": "input2",
+                        "type": "int",
                         "source": PurePosixPath("child A.output"),
                         "targets": [],
                     },
-                    {"name": "output", "source": None, "targets": []},
+                    {"name": "output", "type": "int", "source": None, "targets": []},
                 ],
             },
         ],
@@ -205,13 +208,13 @@ def test_as_json(create_component: Callable[..., Component]):
     child_b = create_component("child B")
     child_b.set_parent(parent)
 
-    child_a.add_port("input1")
-    child_a.add_port("input2")
-    child_a.add_port("output")
+    child_a.add_port("input1", PortType.int)
+    child_a.add_port("input2", PortType.int)
+    child_a.add_port("output", PortType.int)
 
-    child_b.add_port("input1")
-    child_b.add_port("input2")
-    child_b.add_port("output")
+    child_b.add_port("input1", PortType.int)
+    child_b.add_port("input2", PortType.int)
+    child_b.add_port("output", PortType.int)
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)

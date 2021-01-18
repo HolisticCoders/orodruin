@@ -3,11 +3,30 @@
 A Port is only meant to be attached on a Component
 It can be connected to other Ports
 """
+from enum import Enum
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from orodruin.attribute import (
+    BoolAttribute,
+    FloatAttribute,
+    IntAttribute,
+    MatrixAttribute,
+    StringAttribute,
+)
+
 if TYPE_CHECKING:
     from orodruin.component import Component  # pylint: disable = cyclic-import
+
+
+class PortType(Enum):
+    """Enum representing all the types an attribute can be."""
+
+    int = IntAttribute
+    float = FloatAttribute
+    bool = BoolAttribute
+    string = StringAttribute
+    matrix = MatrixAttribute
 
 
 class PortError(Exception):
@@ -37,11 +56,20 @@ class Port:
     It can be connected to other Ports
     """
 
-    def __init__(self, name: str, component: "Component") -> None:
+    def __init__(
+        self,
+        name: str,
+        port_type: PortType,
+        component: "Component",
+        array: bool = False,
+    ) -> None:
         self._name: str = name
         self._component: "Component" = component
 
-        self._value: Any = 0
+        self._type = port_type
+        self._array = array
+
+        self._value: Any = self._type.value.default_value
 
         self._source: Optional["Port"] = None
         self._targets: List["Port"] = []
@@ -57,6 +85,15 @@ class Port:
             raise SetConnectedPortError(
                 f"Port {self.name} is connected and cannot be set."
             )
+
+        python_type = self._type.value.python_type
+        if python_type is not None:
+            if not isinstance(value, python_type):
+                raise TypeError(
+                    f"Can't set port {self._name} to a value of {value}. "
+                    f"The port is of type {self._type.name}"
+                )
+
         self._value = value
 
     def get(self) -> Any:
@@ -90,6 +127,14 @@ class Port:
                 f"port {other.name()} is already connected to {other.source().name()}, "
                 "use `force=True` to connect regardless."
             )
+
+        if self._type.name != other.type().name:
+            raise TypeError(
+                "Can't connect two ports of different types. "
+                f"{self.name()}<{self._type.name}> to "
+                f"{other.name()}<{other.type().name}>"
+            )
+
         if other.source() and force:
             other.source().disconnect(other)
 
@@ -128,10 +173,15 @@ class Port:
         """The full Path of this Port."""
         return self._component.path().with_suffix(f".{self._name}")
 
+    def type(self) -> PortType:
+        """Type of the port."""
+        return self._type
+
     def as_dict(self) -> Dict[str, Any]:
         """Returns a dict representing the Port and its connections."""
         data = {
             "name": self._name,
+            "type": self._type.name,
             "source": (
                 self._source.path().relative_to(self._component.parent().path())
                 if self._source

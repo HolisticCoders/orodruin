@@ -9,7 +9,7 @@ from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
-from orodruin.port import Port
+from orodruin.port import Port, PortType
 
 
 class ComponentError(Exception):
@@ -102,9 +102,9 @@ class Component:
         """Cleans up the Component to be ready for Animation."""
         raise NotImplementedError
 
-    def add_port(self, name: str):
+    def add_port(self, name: str, port_type: PortType):
         """Add a `Port` to this Component."""
-        port = Port(name, self)
+        port = Port(name, port_type, self)
         self._ports.append(port)
 
     def name(self) -> str:
