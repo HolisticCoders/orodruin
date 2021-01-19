@@ -54,3 +54,6 @@ class MultiPort(Sequence):
 
         for index, port in enumerate(self._ports):
             port.set_name(f"{self._name}[{index}]")
+
+    def type(self):
+        return self._type
