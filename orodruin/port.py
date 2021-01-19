@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from orodruin.attribute import (
+from .attribute import (
     BoolAttribute,
     FloatAttribute,
     IntAttribute,
@@ -16,7 +16,7 @@ from orodruin.attribute import (
 )
 
 if TYPE_CHECKING:
-    from orodruin.component import Component  # pylint: disable = cyclic-import
+    from .component import Component  # pylint: disable = cyclic-import
 
 
 class PortType(Enum):
@@ -53,7 +53,7 @@ class Port:
     """Orodruin's Port class
 
     A Port is only meant to be attached on a Component
-    It can be connected to other Ports
+    It can be connected to other Ports and hold a value
     """
 
     def __init__(
@@ -61,13 +61,11 @@ class Port:
         name: str,
         port_type: PortType,
         component: "Component",
-        array: bool = False,
     ) -> None:
         self._name: str = name
         self._component: "Component" = component
 
         self._type = port_type
-        self._array = array
 
         self._value: Any = self._type.value.default_value
 

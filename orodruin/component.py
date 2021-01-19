@@ -6,10 +6,11 @@ and can contain other Components as a subgraph
 """
 import json
 from pathlib import PurePath, PurePosixPath
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
-from orodruin.port import Port, PortType
+from .multiport import MultiPort
+from .port import Port, PortType
 
 
 class ComponentError(Exception):
@@ -82,7 +83,7 @@ class Component:
                 return instance
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
-    def __getattr__(self, name: str) -> Optional[Port]:
+    def __getattr__(self, name: str) -> Optional[Union[Port, MultiPort]]:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
         for port in self._ports:
             if port.name() == name:
@@ -102,9 +103,12 @@ class Component:
         """Cleans up the Component to be ready for Animation."""
         raise NotImplementedError
 
-    def add_port(self, name: str, port_type: PortType):
+    def add_port(self, name: str, port_type: PortType, multi=False):
         """Add a `Port` to this Component."""
-        port = Port(name, port_type, self)
+        if multi:
+            port = MultiPort(name, port_type, self)
+        else:
+            port = Port(name, port_type, self)
         self._ports.append(port)
 
     def name(self) -> str:
