@@ -137,7 +137,7 @@ class Port:
         else:
             self._targets.append(other)
 
-    def _receive_connection(self, other: Port, force: bool):
+    def _receive_connection(self, other: "Port", force: bool):
         """Connect the other Port to self."""
         if self.source():
             if not force:
