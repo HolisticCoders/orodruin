@@ -5,7 +5,7 @@ It can be connected to other Ports
 """
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .attribute import (
     BoolAttribute,
@@ -17,6 +17,7 @@ from .attribute import (
 
 if TYPE_CHECKING:
     from .component import Component  # pylint: disable = cyclic-import
+    from .multiport import MultiPort  # pylint: disable = cyclic-import
 
 
 class PortType(Enum):
@@ -106,7 +107,7 @@ class Port:
 
         return self._value
 
-    def connect(self, other: "Port", force: bool = False):
+    def connect(self, other: Union["Port", "MultiPort"], force: bool = False):
         """Connect this port to another port.
 
         Raises:
@@ -120,11 +121,6 @@ class Port:
                 f"{self.name()} and {other.name()} can't be connected because "
                 f"they both are on the same component '{self._component.name()}'"
             )
-        if other.source() and not force:
-            raise PortAlreadyConnectedError(
-                f"port {other.name()} is already connected to {other.source().name()}, "
-                "use `force=True` to connect regardless."
-            )
 
         if self._type.name != other.type().name:
             raise TypeError(
@@ -133,11 +129,29 @@ class Port:
                 f"{other.name()}<{other.type().name}>"
             )
 
-        if other.source() and force:
+        try:
+            # protected-access warning is disabled on the next line
+            other = other._receive_connection(self, force)  # pylint: disable = W0212
+        except PortAlreadyConnectedError as error:
+            raise PortAlreadyConnectedError from error
+        else:
+            self._targets.append(other)
+
+    def _receive_connection(self, other: Port, force: bool):
+        """Connect the other Port to self."""
+        if self.source():
+            if not force:
+                raise PortAlreadyConnectedError(
+                    f"port {other.name()} is already connected to "
+                    f"{other.source().name()}, "
+                    "use `force=True` to connect regardless."
+                )
+
+        if self.source() and force:
             other.source().disconnect(other)
 
-        self._targets.append(other)
-        other._source = self
+        self._source = other
+        return self
 
     def disconnect(self, other: "Port"):
         """Disconnect this port from the other Port."""

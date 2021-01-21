@@ -56,4 +56,16 @@ class MultiPort(Sequence):
             port.set_name(f"{self._name}[{index}]")
 
     def type(self):
+        """Type of the port."""
         return self._type
+
+    def component(self):
+        """The Component this Port is attached on."""
+        return self._component
+
+    def _receive_connection(self, other: Port, force: bool):
+        """Create a new sub port and connect the other Port to it."""
+        self.add_port()
+        port = self[-1]
+        port._receive_connection(other, force)  # pylint: disable= protected-access
+        return port

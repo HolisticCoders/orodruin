@@ -97,11 +97,9 @@ class Component:
         This method should be overriden for any Component
         that needs a direct implementation in each DCC
         """
-        raise NotImplementedError
 
     def publish(self) -> None:
         """Cleans up the Component to be ready for Animation."""
-        raise NotImplementedError
 
     def add_port(self, name: str, port_type: PortType, multi=False):
         """Add a `Port` to this Component."""
