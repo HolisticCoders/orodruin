@@ -1,14 +1,18 @@
+# pylint: disable = too-many-ancestors
 """Multi Port is a handle on a sequence of ports."""
-from collections.abc import Sequence
+from collections.abc import MutableSequence
 from typing import TYPE_CHECKING, List
 
-from .port import Port, PortType
+from .graph_manager import GraphManager
+from .port import PortType
 
 if TYPE_CHECKING:
     from orodruin.component import Component  # pylint: disable = cyclic-import
 
+    from .port import Port  # pylint: disable = cyclic-import
 
-class MultiPort(Sequence):
+
+class PortCollection(MutableSequence):
     """Handle over a sequence of ports
 
     It can be added to a Component like regular Ports but don't own any value directly.
@@ -19,6 +23,7 @@ class MultiPort(Sequence):
         name: str,
         port_type: PortType,
         component: "Component",
+        size: int = 0,
     ) -> None:
         super().__init__()
 
@@ -29,31 +34,37 @@ class MultiPort(Sequence):
 
         self._ports: List["Port"] = []
 
-    def __getitem__(self, index):
+        for _ in range(size):
+            self.add_port()
+
+    def __getitem__(self, index: int):
         return self._ports[index]
 
-    def __len__(self, *args, **kwargs):
+    def __setitem__(self, index: int, value: "Port"):
+        self._ports[index] = value
+
+    def __delitem__(self, index: int):
+        del self._ports[index]
+
+    def __len__(self):
         return len(self._ports)
 
+    def insert(self, index: int, value: "Port"):
+        self._ports.insert(index, value)
+
     def add_port(self):
-        """Add a Port to this MultiPort."""
+        """Add a Port to this PortCollection."""
+        from .port import Port  # pylint: disable = import-outside-toplevel
+
         index = len(self._ports)
         port = Port(f"{self._name}[{index}]", self._type, self._component)
-        self._ports.append(port)
+        self.append(port)
+
+        GraphManager.sync_port_sizes(self)
 
     def name(self):
         """Name of the Port."""
         return self._name
-
-    def set_name(self, value: str):
-        """Set the name of the MultiPort.
-
-        This will rename all the sub-Ports accordingly.
-        """
-        self._name = value
-
-        for index, port in enumerate(self._ports):
-            port.set_name(f"{self._name}[{index}]")
 
     def type(self):
         """Type of the port."""
@@ -63,9 +74,6 @@ class MultiPort(Sequence):
         """The Component this Port is attached on."""
         return self._component
 
-    def _receive_connection(self, other: Port, force: bool):
-        """Create a new sub port and connect the other Port to it."""
-        self.add_port()
-        port = self[-1]
-        port._receive_connection(other, force)  # pylint: disable= protected-access
-        return port
+    def ports(self):
+        """The ports owned by this PortCollection."""
+        return self._ports

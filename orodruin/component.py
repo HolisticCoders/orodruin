@@ -9,8 +9,8 @@ from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
-from .multiport import MultiPort
 from .port import Port, PortType
+from .port_collection import PortCollection
 
 
 class ComponentError(Exception):
@@ -61,6 +61,8 @@ class Component:
         Component._instances[self._uuid] = self
 
         self._ports: List[Port] = []
+        self._port_collections: List[PortCollection] = []
+        self._synced_ports: List[PortCollection] = {}
 
         self._components: List[Component] = []
         self._parent: Optional[Component] = None
@@ -83,9 +85,9 @@ class Component:
                 return instance
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
-    def __getattr__(self, name: str) -> Optional[Union[Port, MultiPort]]:
+    def __getattr__(self, name: str) -> Optional[Union[Port, PortCollection]]:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
-        for port in self._ports:
+        for port in self._ports + self._port_collections:
             if port.name() == name:
                 return port
 
@@ -101,13 +103,15 @@ class Component:
     def publish(self) -> None:
         """Cleans up the Component to be ready for Animation."""
 
-    def add_port(self, name: str, port_type: PortType, multi=False):
+    def add_port(self, name: str, port_type: PortType):
         """Add a `Port` to this Component."""
-        if multi:
-            port = MultiPort(name, port_type, self)
-        else:
-            port = Port(name, port_type, self)
+        port = Port(name, port_type, self)
         self._ports.append(port)
+
+    def add_port_collection(self, name: str, port_type: PortType, size: int = 0):
+        """Add a `PortCollection` to this Component."""
+        port = PortCollection(name, port_type, self, size)
+        self._port_collections.append(port)
 
     def name(self) -> str:
         """Name of the Component."""
@@ -131,7 +135,11 @@ class Component:
 
     def ports(self):
         """List of the Component's Ports."""
-        return self._ports
+        return self._ports + self._port_collections
+
+    def sequence_ports(self):
+        """List of the Component's Ports."""
+        return self._sequence_ports
 
     def components(self):
         """Sub-components of the component."""
@@ -180,3 +188,14 @@ class Component:
             and will only truly be deleted once it goes out of scope.
         """
         del Component._instances[self._uuid]
+
+    def sync_port_sizes(self, main: PortCollection, follower: PortCollection):
+        """Register Ports that needs their sizes synced.
+
+        The follower port will be synced with the main's.
+        """
+        slaves = self._synced_ports.get(main, [])
+
+        if follower not in slaves:
+            slaves.append(follower)
+            self._synced_ports[main] = slaves

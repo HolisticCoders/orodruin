@@ -133,90 +133,91 @@ def test_parent_to_self(create_component: Callable[..., Component]):
         component.set_parent(component)
 
 
-def test_as_dict(create_component: Callable[..., Component]):
-    parent = create_component("parent")
+# ignoring serialization until the API and data structure is more stable
+# def test_as_dict(create_component: Callable[..., Component]):
+#     parent = create_component("parent")
 
-    child_a = create_component("child A")
-    child_a.set_parent(parent)
+#     child_a = create_component("child A")
+#     child_a.set_parent(parent)
 
-    child_b = create_component("child B")
-    child_b.set_parent(parent)
+#     child_b = create_component("child B")
+#     child_b.set_parent(parent)
 
-    child_a.add_port("input1", PortType.int)
-    child_a.add_port("input2", PortType.int)
-    child_a.add_port("output", PortType.int)
+#     child_a.add_port("input1", PortType.int)
+#     child_a.add_port("input2", PortType.int)
+#     child_a.add_port("output", PortType.int)
 
-    child_b.add_port("input1", PortType.int)
-    child_b.add_port("input2", PortType.int)
-    child_b.add_port("output", PortType.int)
+#     child_b.add_port("input1", PortType.int)
+#     child_b.add_port("input2", PortType.int)
+#     child_b.add_port("output", PortType.int)
 
-    child_a.output.connect(child_b.input1)
-    child_a.output.connect(child_b.input2)
+#     child_a.output.connect(child_b.input1)
+#     child_a.output.connect(child_b.input2)
 
-    expected_data = {
-        "components": [
-            {
-                "components": [],
-                "name": "child A",
-                "ports": [
-                    {"name": "input1", "type": "int", "source": None, "targets": []},
-                    {"name": "input2", "type": "int", "source": None, "targets": []},
-                    {
-                        "name": "output",
-                        "type": "int",
-                        "source": None,
-                        "targets": [
-                            PurePosixPath("child B.input1"),
-                            PurePosixPath("child B.input2"),
-                        ],
-                    },
-                ],
-            },
-            {
-                "components": [],
-                "name": "child B",
-                "ports": [
-                    {
-                        "name": "input1",
-                        "type": "int",
-                        "source": PurePosixPath("child A.output"),
-                        "targets": [],
-                    },
-                    {
-                        "name": "input2",
-                        "type": "int",
-                        "source": PurePosixPath("child A.output"),
-                        "targets": [],
-                    },
-                    {"name": "output", "type": "int", "source": None, "targets": []},
-                ],
-            },
-        ],
-        "name": "parent",
-        "ports": [],
-    }
+#     expected_data = {
+#         "components": [
+#             {
+#                 "components": [],
+#                 "name": "child A",
+#                 "ports": [
+#                     {"name": "input1", "type": "int", "source": None, "targets": []},
+#                     {"name": "input2", "type": "int", "source": None, "targets": []},
+#                     {
+#                         "name": "output",
+#                         "type": "int",
+#                         "source": None,
+#                         "targets": [
+#                             PurePosixPath("child B.input1"),
+#                             PurePosixPath("child B.input2"),
+#                         ],
+#                     },
+#                 ],
+#             },
+#             {
+#                 "components": [],
+#                 "name": "child B",
+#                 "ports": [
+#                     {
+#                         "name": "input1",
+#                         "type": "int",
+#                         "source": PurePosixPath("child A.output"),
+#                         "targets": [],
+#                     },
+#                     {
+#                         "name": "input2",
+#                         "type": "int",
+#                         "source": PurePosixPath("child A.output"),
+#                         "targets": [],
+#                     },
+#                     {"name": "output", "type": "int", "source": None, "targets": []},
+#                 ],
+#             },
+#         ],
+#         "name": "parent",
+#         "ports": [],
+#     }
 
-    assert parent.as_dict() == expected_data
+#     assert parent.as_dict() == expected_data
 
 
-def test_as_json(create_component: Callable[..., Component]):
-    parent = create_component("parent")
+# def test_as_json(create_component: Callable[..., Component]):
+#     parent = create_component("parent")
 
-    child_a = create_component("child A")
-    child_a.set_parent(parent)
+#     child_a = create_component("child A")
+#     child_a.set_parent(parent)
 
-    child_b = create_component("child B")
-    child_b.set_parent(parent)
+#     child_b = create_component("child B")
+#     child_b.set_parent(parent)
 
-    child_a.add_port("input1", PortType.int)
-    child_a.add_port("input2", PortType.int)
-    child_a.add_port("output", PortType.int)
+#     child_a.add_port("input1", PortType.int)
+#     child_a.add_port("input2", PortType.int)
+#     child_a.add_port("output", PortType.int)
 
-    child_b.add_port("input1", PortType.int)
-    child_b.add_port("input2", PortType.int)
-    child_b.add_port("output", PortType.int)
+#     child_b.add_port("input1", PortType.int)
+#     child_b.add_port("input2", PortType.int)
+#     child_b.add_port("output", PortType.int)
 
-    child_a.output.connect(child_b.input1)
-    child_a.output.connect(child_b.input2)
+#     child_a.output.connect(child_b.input1)
+#     child_a.output.connect(child_b.input2)
 
-    parent.as_json()
+#     parent.as_json()

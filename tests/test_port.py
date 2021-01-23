@@ -4,7 +4,8 @@ from typing import Callable
 import pytest
 
 from orodruin.component import Component
-from orodruin.port import Port, PortAlreadyConnectedError, PortType
+from orodruin.graph_manager import PortAlreadyConnectedError
+from orodruin.port import Port, PortType
 
 
 def test_init_port(create_component: Callable[..., Component]):

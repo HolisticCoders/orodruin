@@ -5,7 +5,9 @@ It can be connected to other Ports
 """
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+from orodruin.graph_manager import GraphManager
 
 from .attribute import (
     BoolAttribute,
@@ -17,7 +19,13 @@ from .attribute import (
 
 if TYPE_CHECKING:
     from .component import Component  # pylint: disable = cyclic-import
-    from .multiport import MultiPort  # pylint: disable = cyclic-import
+    from .port_collection import (
+        PortCollection,  # pylint: disable = cyclic-import
+    )
+
+
+class SetConnectedPortError(ConnectionError):
+    """Raised when setting a port that is connected."""
 
 
 class PortType(Enum):
@@ -28,26 +36,6 @@ class PortType(Enum):
     bool = BoolAttribute
     string = StringAttribute
     matrix = MatrixAttribute
-
-
-class PortError(Exception):
-    """Generic Port Error."""
-
-
-class PortAlreadyConnectedError(PortError):
-    """Port Already Connected Error."""
-
-
-class ConnectionOnSameComponenentError(PortError):
-    """Both ports about to be connected are on the same component."""
-
-
-class PortNotConnectedError(PortError):
-    """Port Not Connected Error."""
-
-
-class SetConnectedPortError(PortError):
-    """Raised when setting a port that is connected."""
 
 
 class Port:
@@ -107,59 +95,13 @@ class Port:
 
         return self._value
 
-    def connect(self, other: Union["Port", "MultiPort"], force: bool = False):
-        """Connect this port to another port.
-
-        Raises:
-            ConnectionOnSameComponenentError: when trying to connect on another port of
-                the same Component
-            PortAlreadyConnectedError: when connecting to an already connected port
-                and the force argument is False
-        """
-        if other.component() is self._component:
-            raise ConnectionOnSameComponenentError(
-                f"{self.name()} and {other.name()} can't be connected because "
-                f"they both are on the same component '{self._component.name()}'"
-            )
-
-        if self._type.name != other.type().name:
-            raise TypeError(
-                "Can't connect two ports of different types. "
-                f"{self.name()}<{self._type.name}> to "
-                f"{other.name()}<{other.type().name}>"
-            )
-
-        try:
-            # protected-access warning is disabled on the next line
-            other = other._receive_connection(self, force)  # pylint: disable = W0212
-        except PortAlreadyConnectedError as error:
-            raise PortAlreadyConnectedError from error
-        else:
-            self._targets.append(other)
-
-    def _receive_connection(self, other: "Port", force: bool):
-        """Connect the other Port to self."""
-        if self.source():
-            if not force:
-                raise PortAlreadyConnectedError(
-                    f"port {other.name()} is already connected to "
-                    f"{other.source().name()}, "
-                    "use `force=True` to connect regardless."
-                )
-
-        if self.source() and force:
-            other.source().disconnect(other)
-
-        self._source = other
-        return self
+    def connect(self, other: "Port", force: bool = False):
+        """Connect this port to another port."""
+        GraphManager.connect_ports(self, other, force)
 
     def disconnect(self, other: "Port"):
         """Disconnect this port from the other Port."""
-        if other not in self._targets:
-            return
-
-        self._targets.remove(other)
-        other._source = None
+        GraphManager.disconnect_ports(self, other)
 
     def source(self) -> Optional["Port"]:
         """List of the Ports connected to this Port."""
