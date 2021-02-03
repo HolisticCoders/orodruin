@@ -1,0 +1,10 @@
+{
+    "name": "TestComponent",
+    "components": [],
+    "ports": [
+        {
+            "name": "input",
+            "type": "int"
+        }
+    ]
+}
