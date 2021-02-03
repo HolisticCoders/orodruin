@@ -4,8 +4,7 @@ A component can be seen as both a node and a graph,
 it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
-import json
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
@@ -23,16 +22,6 @@ class ParentToSelfError(ComponentError):
 
 class ComponentDoesNotExistError(ComponentError):
     """Component does not exist."""
-
-
-class OrodruinEncoder(json.JSONEncoder):
-    """JSON Encoder to serialize UUIDs properly."""
-
-    def default(self, o: Any):
-        if isinstance(o, PurePath):
-            # if the obj is uuid, we simply return the value of uuid
-            return str(o)
-        return json.JSONEncoder.default(self, o)
 
 
 class Component:
@@ -176,10 +165,6 @@ class Component:
         data["ports"] = inputs
 
         return data
-
-    def as_json(self, indent: int = 2):
-        """Returns the serialized representation of the rig."""
-        return json.dumps(self.as_dict(), indent=indent, cls=OrodruinEncoder)
 
     def delete(self):
         """Delete the component.
