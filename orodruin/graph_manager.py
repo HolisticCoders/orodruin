@@ -1,8 +1,9 @@
 # pylint: disable = protected-access
 """GraphManager handles graph modifications and and ensures a valid state."""
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Set, Union
 
 if TYPE_CHECKING:
+    from .component import Component  # pylint: disable = cyclic-import
     from .port import Port  # pylint: disable = cyclic-import
     from .port_collection import (
         PortCollection,  # pylint: disable = cyclic-import
@@ -21,8 +22,37 @@ class PortNotConnectedError(ConnectionError):
     """Port Not Connected Error."""
 
 
+class ComponentDoesNotExistError(ValueError):
+    """Given component doesn't exist."""
+
+
 class GraphManager:
     """GraphManager handles graph modifications and and ensures a valid state."""
+
+    _components: Set["Component"] = set()
+
+    @classmethod
+    def register_component(cls, component: "Component") -> None:
+        """Register a new component."""
+        cls._components.add(component)
+
+    @classmethod
+    def clear_registered_components(cls):
+        """Clear all registered components."""
+        cls._components = set()
+
+    @classmethod
+    def components(cls):
+        """All registered Component instances."""
+        return cls._components
+
+    @classmethod
+    def component_from_path(cls, path: str) -> "Component":
+        """Return an existing Component from the given path."""
+        for instance in cls._components:
+            if path == str(instance.path()):
+                return instance
+        raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     @staticmethod
     def connect_ports(

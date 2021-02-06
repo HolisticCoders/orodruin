@@ -2,14 +2,16 @@
 import pytest
 
 from orodruin.component import Component
+from orodruin.graph_manager import GraphManager
 from orodruin.io import component_as_json
 from orodruin.port import PortType
 
 
 @pytest.fixture(autouse=True)
-def delete_components():
+def clear_registered_components():
+
     yield
-    Component._instances = {}  # pylint: disable = protected-access
+    GraphManager.clear_registered_components()
 
 
 def test_as_json():

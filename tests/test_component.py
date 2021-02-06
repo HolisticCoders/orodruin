@@ -1,66 +1,28 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 from pathlib import PurePosixPath
-from typing import Callable
-from uuid import uuid4
 
 import pytest
 
-from orodruin.component import (
-    Component,
-    ComponentDoesNotExistError,
-    ParentToSelfError,
-)
+from orodruin.component import Component, ParentToSelfError
+from orodruin.graph_manager import GraphManager
 from orodruin.port import Port, PortType
 
 
-def test_init_component(create_component: Callable[..., Component]):
-    component = create_component("component")
+@pytest.fixture(autouse=True)
+def clear_registered_components():
+
+    yield
+    GraphManager.clear_registered_components()
+
+
+def test_init_component():
+    component = Component("component")
     assert component.name() == "component"
 
 
-def test_init_component_with_uuid(create_component: Callable[..., Component]):
-    uuid = uuid4()
-    component = create_component("Component", uuid)
-    assert component.uuid() == uuid
-
-
-def test_delete_component():
-    assert len(Component.instances()) == 0
+def test_add_ports():
 
     component = Component("component")
-
-    assert len(Component.instances()) == 1
-
-    component.delete()
-
-    assert len(Component.instances()) == 0
-
-
-def test_get_component_from_uuid(root_component: Component):
-    same_component = Component.from_uuid(root_component.uuid())
-
-    assert root_component is same_component
-
-
-def test_get_component_from_inexistant_uuid():
-    with pytest.raises(ComponentDoesNotExistError):
-        Component.from_uuid(uuid4())
-
-
-def test_get_component_from_path(root_component: Component):
-    same_component = Component.from_path("/root")
-
-    assert root_component is same_component
-
-
-def test_get_component_from_inexistant_path():
-    with pytest.raises(ComponentDoesNotExistError):
-        Component.from_path("/root")
-
-
-def test_add_ports(create_component: Callable[..., Component]):
-
-    component = create_component("component")
 
     assert len(component.ports()) == 0
 
@@ -71,23 +33,22 @@ def test_add_ports(create_component: Callable[..., Component]):
     assert len(component.ports()) == 3
 
 
-def test_set_name(create_component: Callable[..., Component]):
-    component = create_component("original name")
+def test_set_name():
+    component = Component("original name")
     component.set_name("new name")
 
     assert component.name() == "new name"
 
 
-def test_path_root_component(root_component: Component):
+def test_path_root_component():
+    root_component = Component("root")
     assert root_component.path() == PurePosixPath("/root")
 
 
-def test_path_nested_component(
-    root_component: Component,
-    create_component: Callable[..., Component],
-):
-    child_a = create_component("Child A")
-    child_b = create_component("Child B")
+def test_path_nested_component():
+    root_component = Component("root")
+    child_a = Component("Child A")
+    child_b = Component("Child B")
 
     child_a.set_parent(root_component)
     child_b.set_parent(child_a)
@@ -95,20 +56,20 @@ def test_path_nested_component(
     assert child_b.path() == PurePosixPath("/root/Child A/Child B")
 
 
-def test_access_port(create_component: Callable[..., Component]):
-    component = create_component("component")
+def test_access_port():
+    component = Component("component")
     component.add_port("input1", PortType.int)
     assert isinstance(component.input1, Port)
 
 
-def test_access_innexisting_port(create_component: Callable[..., Component]):
-    component = create_component("component")
+def test_access_innexisting_port():
+    component = Component("component")
     assert component.this_is_not_a_port is None
 
 
-def test_parent_component(create_component: Callable[..., Component]):
-    parent = create_component("parent")
-    child = create_component("child")
+def test_parent_component():
+    parent = Component("parent")
+    child = Component("child")
 
     child.set_parent(parent)
 
@@ -116,9 +77,9 @@ def test_parent_component(create_component: Callable[..., Component]):
     assert child in parent.components()
 
 
-def test_parent_component_twice(create_component: Callable[..., Component]):
-    parent = create_component("parent")
-    child = create_component("child")
+def test_parent_component_twice():
+    parent = Component("parent")
+    child = Component("child")
 
     child.set_parent(parent)
     child.set_parent(parent)
@@ -126,98 +87,74 @@ def test_parent_component_twice(create_component: Callable[..., Component]):
     assert parent.components().count(child) == 1
 
 
-def test_parent_to_self(create_component: Callable[..., Component]):
-    component = create_component("component")
+def test_parent_to_self():
+    component = Component("component")
 
     with pytest.raises(ParentToSelfError):
         component.set_parent(component)
 
 
-# ignoring serialization until the API and data structure is more stable
-# def test_as_dict(create_component: Callable[..., Component]):
-#     parent = create_component("parent")
+def test_as_dict():
+    parent = Component("parent")
 
-#     child_a = create_component("child A")
-#     child_a.set_parent(parent)
+    child_a = Component("child A")
+    child_a.set_parent(parent)
 
-#     child_b = create_component("child B")
-#     child_b.set_parent(parent)
+    child_b = Component("child B")
+    child_b.set_parent(parent)
 
-#     child_a.add_port("input1", PortType.int)
-#     child_a.add_port("input2", PortType.int)
-#     child_a.add_port("output", PortType.int)
+    child_a.add_port("input1", PortType.int)
+    child_a.add_port("input2", PortType.int)
+    child_a.add_port("output", PortType.int)
 
-#     child_b.add_port("input1", PortType.int)
-#     child_b.add_port("input2", PortType.int)
-#     child_b.add_port("output", PortType.int)
+    child_b.add_port("input1", PortType.int)
+    child_b.add_port("input2", PortType.int)
+    child_b.add_port("output", PortType.int)
 
-#     child_a.output.connect(child_b.input1)
-#     child_a.output.connect(child_b.input2)
+    child_a.output.connect(child_b.input1)
+    child_a.output.connect(child_b.input2)
 
-#     expected_data = {
-#         "components": [
-#             {
-#                 "components": [],
-#                 "name": "child A",
-#                 "ports": [
-#                     {"name": "input1", "type": "int", "source": None, "targets": []},
-#                     {"name": "input2", "type": "int", "source": None, "targets": []},
-#                     {
-#                         "name": "output",
-#                         "type": "int",
-#                         "source": None,
-#                         "targets": [
-#                             PurePosixPath("child B.input1"),
-#                             PurePosixPath("child B.input2"),
-#                         ],
-#                     },
-#                 ],
-#             },
-#             {
-#                 "components": [],
-#                 "name": "child B",
-#                 "ports": [
-#                     {
-#                         "name": "input1",
-#                         "type": "int",
-#                         "source": PurePosixPath("child A.output"),
-#                         "targets": [],
-#                     },
-#                     {
-#                         "name": "input2",
-#                         "type": "int",
-#                         "source": PurePosixPath("child A.output"),
-#                         "targets": [],
-#                     },
-#                     {"name": "output", "type": "int", "source": None, "targets": []},
-#                 ],
-#             },
-#         ],
-#         "name": "parent",
-#         "ports": [],
-#     }
+    expected_data = {
+        "components": [
+            {
+                "components": [],
+                "name": "child A",
+                "ports": [
+                    {"name": "input1", "type": "int", "source": None, "targets": []},
+                    {"name": "input2", "type": "int", "source": None, "targets": []},
+                    {
+                        "name": "output",
+                        "type": "int",
+                        "source": None,
+                        "targets": [
+                            PurePosixPath("child B.input1"),
+                            PurePosixPath("child B.input2"),
+                        ],
+                    },
+                ],
+            },
+            {
+                "components": [],
+                "name": "child B",
+                "ports": [
+                    {
+                        "name": "input1",
+                        "type": "int",
+                        "source": PurePosixPath("child A.output"),
+                        "targets": [],
+                    },
+                    {
+                        "name": "input2",
+                        "type": "int",
+                        "source": PurePosixPath("child A.output"),
+                        "targets": [],
+                    },
+                    {"name": "output", "type": "int", "source": None, "targets": []},
+                ],
+            },
+        ],
+        "name": "parent",
+        "ports": [],
+    }
 
-#     assert parent.as_dict() == expected_data
-
-
-# def test_as_json(create_component: Callable[..., Component]):
-#     parent = create_component("parent")
-
-#     child_a = create_component("child A")
-#     child_a.set_parent(parent)
-
-#     child_b = create_component("child B")
-#     child_b.set_parent(parent)
-
-#     child_a.add_port("input1", PortType.int)
-#     child_a.add_port("input2", PortType.int)
-#     child_a.add_port("output", PortType.int)
-
-#     child_b.add_port("input1", PortType.int)
-#     child_b.add_port("input2", PortType.int)
-#     child_b.add_port("output", PortType.int)
-
-#     child_a.output.connect(child_b.input1)
-#     child_a.output.connect(child_b.input2)
-
-#     parent.as_json()
+    assert parent.as_dict() == expected_data

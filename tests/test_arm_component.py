@@ -1,21 +1,21 @@
 # pylint: disable = missing-module-docstring
 # pylint: disable = missing-function-docstring
 # pylint: disable = missing-class-docstring
-from typing import Callable
-
 import pytest
 
 from orodruin.component import Component
+from orodruin.graph_manager import GraphManager
 from orodruin.port import PortType
 
 
 @pytest.fixture(autouse=True)
-def delete_components():
+def clear_registered_components():
+
     yield
-    Component._instances = {}  # pylint: disable = protected-access
+    GraphManager.clear_registered_components()
 
 
-def test_arm_component(create_component: Callable[..., Component]):
+def test_arm_component():
     class ChainFK(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
@@ -40,7 +40,7 @@ def test_arm_component(create_component: Callable[..., Component]):
 
             self.sync_port_sizes(self.input_a, self.output)
 
-    arm = create_component("arm")
+    arm = Component("arm")
     arm.add_port("fk_ik_blend", PortType.float)
     arm.add_port("ik_base", PortType.matrix)
     arm.add_port("ik_end", PortType.matrix)

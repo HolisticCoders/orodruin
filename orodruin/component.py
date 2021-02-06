@@ -6,8 +6,8 @@ and can contain other Components as a subgraph
 """
 from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Union
-from uuid import UUID, uuid4
 
+from .graph_manager import GraphManager
 from .port import Port, PortType
 from .port_collection import PortCollection
 
@@ -32,22 +32,10 @@ class Component:
     and can contain other Components as a subgraph
     """
 
-    _instances: Dict[UUID, "Component"] = {}
-
-    @classmethod
-    def instances(cls):
-        """All Component instances."""
-        return cls._instances
-
-    def __init__(self, name: str, uuid: Optional[UUID] = None) -> None:
+    def __init__(self, name: str) -> None:
         self._name: str = name
 
-        if uuid:
-            self._uuid: UUID = uuid
-        else:
-            self._uuid: UUID = uuid4()
-
-        Component._instances[self._uuid] = self
+        GraphManager.register_component(self)
 
         self._ports: List[Port] = []
         self._port_collections: List[PortCollection] = []
@@ -55,24 +43,6 @@ class Component:
 
         self._components: List[Component] = []
         self._parent: Optional[Component] = None
-
-    @staticmethod
-    def from_uuid(uuid: UUID) -> "Component":
-        """return an existing component instance from its uuid"""
-        instance = Component._instances.get(uuid)
-        if not instance:
-            raise ComponentDoesNotExistError(
-                f"Component with uuid {uuid} does not exist"
-            )
-        return instance
-
-    @staticmethod
-    def from_path(path: str) -> "Component":
-        """Return an existing Component from the given path."""
-        for instance in Component._instances.values():
-            if path == str(instance.path()):
-                return instance
-        raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     def __getattr__(self, name: str) -> Optional[Union[Port, PortCollection]]:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
@@ -118,10 +88,6 @@ class Component:
             path = self._parent.path().joinpath(f"{self._name}")
         return path
 
-    def uuid(self) -> UUID:
-        """The UUID of this Component."""
-        return self._uuid
-
     def ports(self):
         """List of the Component's Ports."""
         return self._ports + self._port_collections
@@ -165,14 +131,6 @@ class Component:
         data["ports"] = inputs
 
         return data
-
-    def delete(self):
-        """Delete the component.
-
-        Note: The component is only deleted from the list of instances
-            and will only truly be deleted once it goes out of scope.
-        """
-        del Component._instances[self._uuid]
 
     def sync_port_sizes(self, main: PortCollection, follower: PortCollection):
         """Register Ports that needs their sizes synced.
