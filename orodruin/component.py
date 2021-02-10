@@ -80,12 +80,16 @@ class Component:
         """Set the name of the component."""
         self._name = name
 
-    def path(self) -> PurePosixPath:
-        """The full Path of this Component."""
+    def path(self, relative_to: Optional["Component"] = None) -> PurePosixPath:
+        """The Path of this Component, absolute or relative."""
         if self._parent is None:
             path = PurePosixPath(f"/{self._name}")
         else:
             path = self._parent.path().joinpath(f"{self._name}")
+
+        if relative_to:
+            path = path.relative_to(relative_to.path())
+
         return path
 
     def ports(self):
@@ -129,6 +133,29 @@ class Component:
         for port in self._ports:
             inputs.append(port.as_dict())
         data["ports"] = inputs
+
+        connections = []
+        for component in self._components:
+            for port in component.ports():
+                source = port.source()
+                if source:
+                    connection = (
+                        source.path(relative_to=self),
+                        port.path(relative_to=self),
+                    )
+                    if connection not in connections:
+                        connections.append(connection)
+
+                targets = port.targets()
+                for target in targets:
+                    connection = (
+                        port.path(relative_to=self),
+                        target.path(relative_to=self),
+                    )
+                    if connection not in connections:
+                        connections.append(connection)
+
+        data["connections"] = connections
 
         return data
 

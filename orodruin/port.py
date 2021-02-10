@@ -19,9 +19,6 @@ from .attribute import (
 
 if TYPE_CHECKING:
     from .component import Component  # pylint: disable = cyclic-import
-    from .port_collection import (
-        PortCollection,  # pylint: disable = cyclic-import
-    )
 
 
 class SetConnectedPortError(ConnectionError):
@@ -123,9 +120,15 @@ class Port:
         """Set the name of the Port."""
         self._name = name
 
-    def path(self) -> PurePosixPath:
-        """The full Path of this Port."""
-        return self._component.path().with_suffix(f".{self._name}")
+    def path(self, relative_to: Optional["Component"] = None) -> PurePosixPath:
+        """The Path of this Port, absolute or relative."""
+        path = self._component.path().with_suffix(f".{self._name}")
+        if relative_to:
+            if relative_to is self._component:
+                path = path = PurePosixPath(f".{self._name}")
+            else:
+                path = path.relative_to(relative_to.path())
+        return path
 
     def type(self) -> PortType:
         """Type of the port."""
@@ -136,15 +139,7 @@ class Port:
         data = {
             "name": self._name,
             "type": self._type.name,
-            "source": (
-                self._source.path().relative_to(self._component.parent().path())
-                if self._source
-                else None
-            ),
-            "targets": [
-                c.path().relative_to(self._component.parent().path())
-                for c in self._targets
-            ],
+            "value": self.get(),
         }
 
         return data

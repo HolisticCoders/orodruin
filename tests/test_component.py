@@ -47,13 +47,24 @@ def test_path_root_component():
 
 def test_path_nested_component():
     root_component = Component("root")
-    child_a = Component("Child A")
-    child_b = Component("Child B")
+    child_a = Component("child_a")
+    child_b = Component("child_b")
 
     child_a.set_parent(root_component)
     child_b.set_parent(child_a)
 
-    assert child_b.path() == PurePosixPath("/root/Child A/Child B")
+    assert child_b.path() == PurePosixPath("/root/child_a/child_b")
+
+
+def test_path_nested_component_relative():
+    root_component = Component("root")
+    child_a = Component("child_a")
+    child_b = Component("child_b")
+
+    child_a.set_parent(root_component)
+    child_b.set_parent(child_a)
+
+    assert child_b.path(relative_to=child_a) == PurePosixPath("child_b")
 
 
 def test_access_port():
@@ -95,13 +106,16 @@ def test_parent_to_self():
 
 
 def test_as_dict():
-    parent = Component("parent")
+    root = Component("root")
+    root.add_port("input1", PortType.int)
+    root.add_port("input2", PortType.int)
+    root.add_port("output", PortType.int)
 
-    child_a = Component("child A")
-    child_a.set_parent(parent)
+    child_a = Component("child_a")
+    child_a.set_parent(root)
 
-    child_b = Component("child B")
-    child_b.set_parent(parent)
+    child_b = Component("child_b")
+    child_b.set_parent(root)
 
     child_a.add_port("input1", PortType.int)
     child_a.add_port("input2", PortType.int)
@@ -111,50 +125,84 @@ def test_as_dict():
     child_b.add_port("input2", PortType.int)
     child_b.add_port("output", PortType.int)
 
+    root.input1.connect(child_a.input1)
+    root.input2.connect(child_a.input2)
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
+    child_b.output.connect(root.output)
 
     expected_data = {
         "components": [
             {
                 "components": [],
-                "name": "child A",
+                "connections": [],
+                "name": "child_a",
                 "ports": [
-                    {"name": "input1", "type": "int", "source": None, "targets": []},
-                    {"name": "input2", "type": "int", "source": None, "targets": []},
+                    {
+                        "name": "input1",
+                        "type": "int",
+                        "value": 0,
+                    },
+                    {
+                        "name": "input2",
+                        "type": "int",
+                        "value": 0,
+                    },
                     {
                         "name": "output",
                         "type": "int",
-                        "source": None,
-                        "targets": [
-                            PurePosixPath("child B.input1"),
-                            PurePosixPath("child B.input2"),
-                        ],
+                        "value": 0,
                     },
                 ],
             },
             {
                 "components": [],
-                "name": "child B",
+                "connections": [],
+                "name": "child_b",
                 "ports": [
                     {
                         "name": "input1",
                         "type": "int",
-                        "source": PurePosixPath("child A.output"),
-                        "targets": [],
+                        "value": 0,
                     },
                     {
                         "name": "input2",
                         "type": "int",
-                        "source": PurePosixPath("child A.output"),
-                        "targets": [],
+                        "value": 0,
                     },
-                    {"name": "output", "type": "int", "source": None, "targets": []},
+                    {
+                        "name": "output",
+                        "type": "int",
+                        "value": 0,
+                    },
                 ],
             },
         ],
-        "name": "parent",
-        "ports": [],
+        "name": "root",
+        "ports": [
+            {
+                "name": "input1",
+                "type": "int",
+                "value": 0,
+            },
+            {
+                "name": "input2",
+                "type": "int",
+                "value": 0,
+            },
+            {
+                "name": "output",
+                "type": "int",
+                "value": 0,
+            },
+        ],
+        "connections": [
+            (PurePosixPath(".input1"), PurePosixPath("child_a.input1")),
+            (PurePosixPath(".input2"), PurePosixPath("child_a.input2")),
+            (PurePosixPath("child_a.output"), PurePosixPath("child_b.input1")),
+            (PurePosixPath("child_a.output"), PurePosixPath("child_b.input2")),
+            (PurePosixPath("child_b.output"), PurePosixPath(".output")),
+        ],
     }
 
-    assert parent.as_dict() == expected_data
+    assert root.as_dict() == expected_data

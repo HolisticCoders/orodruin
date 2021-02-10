@@ -66,13 +66,13 @@ class GraphManager:
             PortAlreadyConnectedError: when connecting to an already connected port
                 and the force argument is False
         """
-        if target.component() is source._component:
+        if target.component() is source.component():
             raise ConnectionOnSameComponenentError(
                 f"{source.name()} and {target.name()} can't be connected because "
                 f"they both are on the same component '{source._component.name()}'"
             )
 
-        if source._type.name != target.type().name:
+        if source.type().name != target.type().name:
             raise TypeError(
                 "Can't connect two ports of different types. "
                 f"{source.name()}<{source._type.name}> to "
