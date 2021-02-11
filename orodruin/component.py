@@ -52,6 +52,10 @@ class Component:
 
         return None
 
+    def port(self, name) -> Port:
+        """Get a Port of this node from the its name."""
+        return getattr(self, name)
+
     def build(self) -> None:
         """Build the inner Graph of this Component.
 

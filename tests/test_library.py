@@ -65,5 +65,5 @@ def test_remove_libraries():
 def test_get_component():
     library_path = (Path(__file__) / ".." / "library").resolve()
     register_library(library_path)
-    component = get_component("TestComponent")
-    assert component == library_path / "orodruin" / "TestComponent.json"
+    component = get_component("SimpleComponent")
+    assert component == library_path / "orodruin" / "SimpleComponent.json"

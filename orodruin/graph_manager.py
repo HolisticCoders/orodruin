@@ -55,6 +55,20 @@ class GraphManager:
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     @staticmethod
+    def port_from_path(component: "Component", port_path: str):
+        """Get a port from the given path, relative to the component."""
+        if port_path.startswith("."):
+            port = component.port(port_path.strip("."))
+        else:
+            component_name, port_name = port_path.split(".")
+            sub_component = next(
+                (c for c in component.components() if c.name() == component_name), None
+            )
+            port = sub_component.port(port_name)
+
+        return port
+
+    @staticmethod
     def connect_ports(
         source: "Port", target: Union["Port", "PortCollection"], force: bool = False
     ):

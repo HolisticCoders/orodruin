@@ -78,18 +78,18 @@ def test_connect_different_type_ports():
 
 def test_set_port_value():
     component = Component("component")
-    component.add_port("port", PortType.int)
+    component.add_port("my_port", PortType.int)
 
-    component.port.set(1)
-    assert component.port.get() == 1
+    component.my_port.set(1)
+    assert component.my_port.get() == 1
 
 
 def test_set_port_wrong_value_type():
     component = Component("component")
-    component.add_port("port", PortType.string)
+    component.add_port("my_port", PortType.string)
 
     with pytest.raises(TypeError):
-        component.port.set(1)
+        component.my_port.set(1)
 
 
 def test_get_connected_port_value():
