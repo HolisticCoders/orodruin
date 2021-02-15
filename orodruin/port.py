@@ -67,7 +67,7 @@ class Port:
 
         if self._source:
             raise SetConnectedPortError(
-                f"Port {self.name} is connected and cannot be set."
+                f"Port {self.name()} is connected and cannot be set."
             )
 
         python_type = self._type.value.python_type

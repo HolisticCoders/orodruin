@@ -137,6 +137,7 @@ def test_as_dict():
                 "components": [],
                 "connections": [],
                 "name": "child_a",
+                "type": "Component",
                 "ports": [
                     {
                         "name": "input1",
@@ -159,6 +160,7 @@ def test_as_dict():
                 "components": [],
                 "connections": [],
                 "name": "child_b",
+                "type": "Component",
                 "ports": [
                     {
                         "name": "input1",
@@ -179,6 +181,7 @@ def test_as_dict():
             },
         ],
         "name": "root",
+        "type": "Component",
         "ports": [
             {
                 "name": "input1",

@@ -37,6 +37,8 @@ class Component:
 
         GraphManager.register_component(self)
 
+        self._type = "Component"
+
         self._ports: List[Port] = []
         self._port_collections: List[PortCollection] = []
         self._synced_ports: List[PortCollection] = {}
@@ -84,6 +86,14 @@ class Component:
         """Set the name of the component."""
         self._name = name
 
+    def type(self) -> str:
+        """Type of the Component."""
+        return self._type
+
+    def set_type(self, component_type: str):
+        """Set the type of the component."""
+        self._type = component_type
+
     def path(self, relative_to: Optional["Component"] = None) -> PurePosixPath:
         """The Path of this Component, absolute or relative."""
         if self._parent is None:
@@ -130,6 +140,7 @@ class Component:
         """
         data = {
             "name": self._name,
+            "type": self._type,
             "components": [c.as_dict() for c in self._components],
         }
 

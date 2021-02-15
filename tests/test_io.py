@@ -17,7 +17,7 @@ from orodruin.port import PortType
 
 @pytest.fixture(autouse=True)
 def clear_registered_components():
-    library_path = (Path(__file__) / ".." / "library").resolve()
+    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     register_library(library_path)
 
     yield
@@ -64,6 +64,26 @@ def test_simple_component_from_json():
 
 def test_nested_component_from_json():
     component_file = get_component("NestedComponent")
+    component = component_from_json(component_file)
+
+    with open(component_file, "r") as handle:
+        file_content = handle.read()
+
+    assert component_as_json(component) == file_content
+
+
+def test_referencing_component_from_json():
+    component_file = get_component("ReferencingSimpleComponent")
+    component = component_from_json(component_file)
+
+    with open(component_file, "r") as handle:
+        file_content = handle.read()
+
+    assert component_as_json(component) == file_content
+
+
+def test_referencing_nested_component_from_json():
+    component_file = get_component("ReferencingNestedComponent")
     component = component_from_json(component_file)
 
     with open(component_file, "r") as handle:

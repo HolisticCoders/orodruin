@@ -21,7 +21,7 @@ def unregister_libraries():
 def test_register_library():
     assert len(list_libraries()) == 0
 
-    library_path = (Path(__file__) / ".." / "library").resolve()
+    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     register_library(library_path)
 
     assert len(list_libraries()) == 1
@@ -43,7 +43,7 @@ def test_register_file_as_library():
 
 def test_list_libraries():
 
-    library_path = (Path(__file__) / ".." / "library").resolve()
+    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     register_library(library_path)
 
     assert library_path in list_libraries()
@@ -52,7 +52,7 @@ def test_list_libraries():
 def test_remove_libraries():
     assert len(list_libraries()) == 0
 
-    library_path = (Path(__file__) / ".." / "library").resolve()
+    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     register_library(library_path)
 
     assert len(list_libraries()) == 1
@@ -63,7 +63,7 @@ def test_remove_libraries():
 
 
 def test_get_component():
-    library_path = (Path(__file__) / ".." / "library").resolve()
+    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     register_library(library_path)
     component = get_component("SimpleComponent")
     assert component == library_path / "orodruin" / "SimpleComponent.json"

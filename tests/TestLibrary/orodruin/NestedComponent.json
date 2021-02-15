@@ -1,8 +1,10 @@
 {
     "name": "root",
+    "type": "Component",
     "components": [
         {
             "name": "child_a",
+            "type": "Component",
             "components": [],
             "ports": [
                 {
@@ -25,6 +27,7 @@
         },
         {
             "name": "child_b",
+            "type": "Component",
             "components": [],
             "ports": [
                 {

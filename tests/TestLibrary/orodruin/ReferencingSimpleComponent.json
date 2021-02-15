@@ -1,0 +1,47 @@
+{
+    "name": "asdf",
+    "type": "Component",
+    "components": [
+        {
+            "name": "referenced_component",
+            "type": "TestLibrary::SimpleComponent",
+            "components": [],
+            "ports": [
+                {
+                    "name": "input1",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "input2",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "output",
+                    "type": "int",
+                    "value": 2
+                }
+            ],
+            "connections": []
+        }
+    ],
+    "ports": [
+        {
+            "name": "input1",
+            "type": "int",
+            "value": 1
+        },
+        {
+            "name": "input2",
+            "type": "int",
+            "value": 1
+        },
+        {
+            "name": "output",
+            "type": "int",
+            "value": 2
+        }
+    ],
+    "connections": []
+}

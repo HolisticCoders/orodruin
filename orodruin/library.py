@@ -6,6 +6,10 @@ from typing import List
 LIBRARIES_ENV_VAR = "ORODRUIN_LIBRARIES"
 
 
+class NoRegisteredLibraryError(Exception):
+    """No libraries are registered."""
+
+
 class ComponentNotFoundError(Exception):
     """Component not found in libraries."""
 
@@ -53,18 +57,33 @@ def _set_libraries_var(libraries: List[os.PathLike]) -> None:
     os.environ[LIBRARIES_ENV_VAR] = libraries_string
 
 
-def get_component(component: str) -> os.PathLike:
+def get_component(component_name: str) -> os.PathLike:
     """Get the component file from the libraries.
 
     This is a very naïve implementation that returns the first matching file.
     """
-    for library in list_libraries():
-        orodruin_folder = library / "orodruin"
-        for item in orodruin_folder.iterdir():
-            if item.is_file():
-                if item.stem == component:
-                    return item
+    if "::" in component_name:
+        namespace, component_name = component_name.split("::")
+    else:
+        namespace = None
+
+    libraries = list_libraries()
+    if not libraries:
+        raise NoRegisteredLibraryError("No libraries are registered")
+
+    for library in libraries:
+        if namespace and namespace == library:
+            library_path = library
+            break
+    else:
+        library_path = libraries[0]
+
+    orodruin_folder = library_path / "orodruin"
+    for item in orodruin_folder.iterdir():
+        if item.is_file():
+            if item.stem == component_name:
+                return item
 
     raise ComponentNotFoundError(
-        f"No component named {component} found in any registered libraries"
+        f"No component named {component_name} found in any registered libraries"
     )
