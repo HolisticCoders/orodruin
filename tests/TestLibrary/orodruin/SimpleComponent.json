@@ -1,22 +1,18 @@
 {
-    "name": "root",
-    "type": "Component",
+    "definitions": {},
     "components": [],
     "ports": [
         {
             "name": "input1",
-            "type": "int",
-            "value": 1
+            "type": "int"
         },
         {
             "name": "input2",
-            "type": "int",
-            "value": 1
+            "type": "int"
         },
         {
             "name": "output",
-            "type": "int",
-            "value": 2
+            "type": "int"
         }
     ],
     "connections": []

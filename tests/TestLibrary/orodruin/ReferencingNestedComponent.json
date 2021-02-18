@@ -1,46 +1,28 @@
 {
-    "name": "asdf",
-    "type": "Component",
+    "definitions": {},
     "components": [
         {
-            "name": "referenced_component",
             "type": "TestLibrary::NestedComponent",
-            "components": [],
-            "ports": [
-                {
-                    "name": "input1",
-                    "type": "int",
-                    "value": 0
-                },
-                {
-                    "name": "input2",
-                    "type": "int",
-                    "value": 0
-                },
-                {
-                    "name": "output",
-                    "type": "int",
-                    "value": 0
-                }
-            ],
-            "connections": []
+            "name": "referenced_component",
+            "ports": {
+                "input1": 1,
+                "input2": 1,
+                "output": 2
+            }
         }
     ],
     "ports": [
         {
             "name": "input1",
-            "type": "int",
-            "value": 1
+            "type": "int"
         },
         {
             "name": "input2",
-            "type": "int",
-            "value": 1
+            "type": "int"
         },
         {
             "name": "output",
-            "type": "int",
-            "value": 2
+            "type": "int"
         }
     ],
     "connections": []

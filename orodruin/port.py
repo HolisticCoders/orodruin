@@ -5,7 +5,7 @@ It can be connected to other Ports
 """
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from orodruin.graph_manager import GraphManager
 
@@ -133,13 +133,3 @@ class Port:
     def type(self) -> PortType:
         """Type of the port."""
         return self._type
-
-    def as_dict(self) -> Dict[str, Any]:
-        """Returns a dict representing the Port and its connections."""
-        data = {
-            "name": self._name,
-            "type": self._type.name,
-            "value": self.get(),
-        }
-
-        return data

@@ -1,69 +1,76 @@
 {
-    "name": "root",
-    "type": "Component",
-    "components": [
-        {
-            "name": "child_a",
-            "type": "Component",
+    "definitions": {
+        "03fc2487-ab6f-4556-9d0d-ac229f436ada": {
+            "definitions": {},
             "components": [],
             "ports": [
                 {
                     "name": "input1",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 },
                 {
                     "name": "input2",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 },
                 {
                     "name": "output",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 }
             ],
             "connections": []
         },
-        {
-            "name": "child_b",
-            "type": "Component",
+        "08d4cb04-ddbb-4716-8dfb-2dbada1a5df1": {
+            "definitions": {},
             "components": [],
             "ports": [
                 {
                     "name": "input1",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 },
                 {
                     "name": "input2",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 },
                 {
                     "name": "output",
-                    "type": "int",
-                    "value": 0
+                    "type": "int"
                 }
             ],
             "connections": []
+        }
+    },
+    "components": [
+        {
+            "type": "Internal::03fc2487-ab6f-4556-9d0d-ac229f436ada",
+            "name": "child_a",
+            "ports": {
+                "input1": 0,
+                "input2": 0,
+                "output": 0
+            }
+        },
+        {
+            "type": "Internal::08d4cb04-ddbb-4716-8dfb-2dbada1a5df1",
+            "name": "child_b",
+            "ports": {
+                "input1": 0,
+                "input2": 0,
+                "output": 0
+            }
         }
     ],
     "ports": [
         {
             "name": "input1",
-            "type": "int",
-            "value": 0
+            "type": "int"
         },
         {
             "name": "input2",
-            "type": "int",
-            "value": 0
+            "type": "int"
         },
         {
             "name": "output",
-            "type": "int",
-            "value": 0
+            "type": "int"
         }
     ],
     "connections": [

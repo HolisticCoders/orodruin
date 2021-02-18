@@ -1,3 +1,4 @@
+# pylint: disable = too-many-instance-attributes
 """Orodruin's Component Class.
 
 A component can be seen as both a node and a graph,
@@ -5,7 +6,8 @@ it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
+from uuid import UUID, uuid4
 
 from .graph_manager import GraphManager
 from .port import Port, PortType
@@ -37,7 +39,8 @@ class Component:
 
         GraphManager.register_component(self)
 
-        self._type = "Component"
+        self._library = None
+        self._type = uuid4()
 
         self._ports: List[Port] = []
         self._port_collections: List[PortCollection] = []
@@ -88,11 +91,26 @@ class Component:
 
     def type(self) -> str:
         """Type of the Component."""
+
         return self._type
 
     def set_type(self, component_type: str):
         """Set the type of the component."""
+
+        try:
+            component_type = UUID(component_type)
+        except ValueError:
+            pass
+
         self._type = component_type
+
+    def library(self) -> Optional[str]:
+        """Type of the Component."""
+        return self._library
+
+    def set_library(self, component_library: Optional[str]):
+        """Set the library of the component."""
+        self._library = component_library
 
     def path(self, relative_to: Optional["Component"] = None) -> PurePosixPath:
         """The Path of this Component, absolute or relative."""
@@ -131,48 +149,6 @@ class Component:
         if self not in other.components():
             # TODO: refactor private member access
             other._components.append(self)  # pylint: disable= protected-access
-
-    def as_dict(self) -> Dict[str, Any]:
-        """Returns a dict representing the Component.
-
-        This is recursively called on all the subcomponents,
-        returning a dict that represents the entire rig.
-        """
-        data = {
-            "name": self._name,
-            "type": self._type,
-            "components": [c.as_dict() for c in self._components],
-        }
-
-        inputs = []
-        for port in self._ports:
-            inputs.append(port.as_dict())
-        data["ports"] = inputs
-
-        connections = []
-        for component in self._components:
-            for port in component.ports():
-                source = port.source()
-                if source:
-                    connection = (
-                        source.path(relative_to=self),
-                        port.path(relative_to=self),
-                    )
-                    if connection not in connections:
-                        connections.append(connection)
-
-                targets = port.targets()
-                for target in targets:
-                    connection = (
-                        port.path(relative_to=self),
-                        target.path(relative_to=self),
-                    )
-                    if connection not in connections:
-                        connections.append(connection)
-
-        data["connections"] = connections
-
-        return data
 
     def sync_port_sizes(self, main: PortCollection, follower: PortCollection):
         """Register Ports that needs their sizes synced.
