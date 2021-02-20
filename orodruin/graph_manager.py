@@ -18,6 +18,20 @@ class ConnectionOnSameComponenentError(ConnectionError):
     """Both ports about to be connected are on the same component."""
 
 
+class OutOfScopeConnectionError(ConnectionError):
+    """Connection from two components not in the same scope."""
+
+
+class ConnectionToSameDirectionError(ConnectionError):
+    """Two ports of the same direction and scope are being connected together."""
+
+
+class ConnectionToDifferentDirectionError(ConnectionError):
+    """Two ports of the component and its parent direction are being connected together
+    while they have the same direction.
+    """
+
+
 class PortNotConnectedError(ConnectionError):
     """Port Not Connected Error."""
 
@@ -86,11 +100,39 @@ class GraphManager:
                 f"they both are on the same component '{source._component.name()}'"
             )
 
-        if source.type().name != target.type().name:
+        if source.type() != target.type():
             raise TypeError(
                 "Can't connect two ports of different types. "
                 f"{source.name()}<{source._type.name}> to "
                 f"{target.name()}<{target.type().name}>"
+            )
+
+        same_scope_connection = (
+            source.component().parent() == target.component().parent()
+        )
+        connection_with_parent = (
+            source.component().parent() == target.component()
+            or source.component() == target.component().parent()
+        )
+        if same_scope_connection:
+            if source.direction() == target.direction():
+                raise ConnectionToSameDirectionError(
+                    f"port {source.name()} and{target.name()} "
+                    f"are of the same direction. "
+                    f"Connection in the same scope can only go from input to output."
+                )
+        elif connection_with_parent:
+            if source.direction() != target.direction():
+                raise ConnectionToDifferentDirectionError(
+                    f"port {source.name()} and{target.name()} "
+                    f"are of different directions. "
+                    f"connection from or to the parent component "
+                    "can only be of the same direction."
+                )
+        else:
+            raise OutOfScopeConnectionError(
+                f"port {source.name()} and{target.name()} "
+                f"don't exist in the same scope"
             )
 
         from .port import Port  # pylint: disable = import-outside-toplevel

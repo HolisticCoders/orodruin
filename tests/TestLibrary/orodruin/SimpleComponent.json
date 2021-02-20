@@ -4,14 +4,17 @@
     "ports": [
         {
             "name": "input1",
+            "direction": "input",
             "type": "int"
         },
         {
             "name": "input2",
+            "direction": "input",
             "type": "int"
         },
         {
             "name": "output",
+            "direction": "output",
             "type": "int"
         }
     ],

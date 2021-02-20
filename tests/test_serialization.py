@@ -11,7 +11,7 @@ from orodruin.library import (
     register_library,
     unregister_library,
 )
-from orodruin.port import PortType
+from orodruin.port import Port
 from orodruin.serialization import (
     component_as_json,
     component_definition_data,
@@ -35,9 +35,9 @@ def clear_registered_components():
 
 def test_component_instance_data():
     root = Component("root")
-    root.add_port("input1", PortType.int)
-    root.add_port("input2", PortType.int)
-    root.add_port("output", PortType.int)
+    root.add_port("input1", Port.Direction.input, Port.Type.int)
+    root.add_port("input2", Port.Direction.input, Port.Type.int)
+    root.add_port("output", Port.Direction.output, Port.Type.int)
     root.input1.set(1)
     root.input2.set(2)
     root.output.set(3)
@@ -57,20 +57,20 @@ def test_component_instance_data():
 
 def test_component_definition_data():
     root = Component("root")
-    root.add_port("input1", PortType.int)
-    root.add_port("input2", PortType.int)
-    root.add_port("output", PortType.int)
+    root.add_port("input1", Port.Direction.input, Port.Type.int)
+    root.add_port("input2", Port.Direction.input, Port.Type.int)
+    root.add_port("output", Port.Direction.output, Port.Type.int)
 
     child_a = Component("child_a")
-    child_a.add_port("input1", PortType.int)
-    child_a.add_port("input2", PortType.int)
-    child_a.add_port("output", PortType.int)
+    child_a.add_port("input1", Port.Direction.input, Port.Type.int)
+    child_a.add_port("input2", Port.Direction.input, Port.Type.int)
+    child_a.add_port("output", Port.Direction.output, Port.Type.int)
     child_a.set_parent(root)
 
     child_b = Component("child_b")
-    child_b.add_port("input1", PortType.int)
-    child_b.add_port("input2", PortType.int)
-    child_b.add_port("output", PortType.int)
+    child_b.add_port("input1", Port.Direction.input, Port.Type.int)
+    child_b.add_port("input2", Port.Direction.input, Port.Type.int)
+    child_b.add_port("output", Port.Direction.output, Port.Type.int)
     child_b.set_parent(root)
 
     root.input1.connect(child_a.input1)
@@ -88,14 +88,17 @@ def test_component_definition_data():
                 "ports": [
                     {
                         "name": "input1",
+                        "direction": "input",
                         "type": "int",
                     },
                     {
                         "name": "input2",
+                        "direction": "input",
                         "type": "int",
                     },
                     {
                         "name": "output",
+                        "direction": "output",
                         "type": "int",
                     },
                 ],
@@ -107,14 +110,17 @@ def test_component_definition_data():
                 "ports": [
                     {
                         "name": "input1",
+                        "direction": "input",
                         "type": "int",
                     },
                     {
                         "name": "input2",
+                        "direction": "input",
                         "type": "int",
                     },
                     {
                         "name": "output",
+                        "direction": "output",
                         "type": "int",
                     },
                 ],
@@ -143,14 +149,17 @@ def test_component_definition_data():
         "ports": [
             {
                 "name": "input1",
+                "direction": "input",
                 "type": "int",
             },
             {
                 "name": "input2",
+                "direction": "input",
                 "type": "int",
             },
             {
                 "name": "output",
+                "direction": "output",
                 "type": "int",
             },
         ],
@@ -170,15 +179,15 @@ def test_component_as_json():
     root = Component("root")
 
     child_a = Component("child_a")
-    child_a.add_port("input1", PortType.int)
-    child_a.add_port("input2", PortType.int)
-    child_a.add_port("output", PortType.int)
+    child_a.add_port("input1", Port.Direction.input, Port.Type.int)
+    child_a.add_port("input2", Port.Direction.input, Port.Type.int)
+    child_a.add_port("output", Port.Direction.output, Port.Type.int)
     child_a.set_parent(root)
 
     child_b = Component("child_b")
-    child_b.add_port("input1", PortType.int)
-    child_b.add_port("input2", PortType.int)
-    child_b.add_port("output", PortType.int)
+    child_b.add_port("input1", Port.Direction.input, Port.Type.int)
+    child_b.add_port("input2", Port.Direction.input, Port.Type.int)
+    child_b.add_port("output", Port.Direction.output, Port.Type.int)
     child_b.set_parent(root)
 
     child_a.output.connect(child_b.input1)
@@ -229,4 +238,5 @@ def test_referencing_nested_component_from_json():
     # external connection.
     # The `component_as_json` thinks that the new component is connected to its inner
     # component but the ReferencingNestedComponent doesn't define that.
+
     assert component_as_json(component) == file_content

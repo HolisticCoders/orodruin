@@ -5,25 +5,12 @@
             "type": "TestLibrary::NestedComponent",
             "name": "referenced_component",
             "ports": {
-                "input1": 1,
-                "input2": 1,
-                "output": 2
+                "input1": 0,
+                "input2": 0,
+                "output": 0
             }
         }
     ],
-    "ports": [
-        {
-            "name": "input1",
-            "type": "int"
-        },
-        {
-            "name": "input2",
-            "type": "int"
-        },
-        {
-            "name": "output",
-            "type": "int"
-        }
-    ],
+    "ports": [],
     "connections": []
 }

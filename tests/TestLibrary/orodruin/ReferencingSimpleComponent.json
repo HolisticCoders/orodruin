@@ -11,19 +11,6 @@
             }
         }
     ],
-    "ports": [
-        {
-            "name": "input1",
-            "type": "int"
-        },
-        {
-            "name": "input2",
-            "type": "int"
-        },
-        {
-            "name": "output",
-            "type": "int"
-        }
-    ],
+    "ports": [],
     "connections": []
 }

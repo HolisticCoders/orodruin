@@ -32,7 +32,7 @@ ensure_newline_before_comments = true
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 88
-disable = ["fixme", "import-error", "duplicate-code"]
+disable = ["fixme", "import-error", "duplicate-code", "too-many-arguments"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

@@ -4,12 +4,10 @@ from collections.abc import MutableSequence
 from typing import TYPE_CHECKING, List
 
 from .graph_manager import GraphManager
-from .port import PortType
+from .port import Port
 
 if TYPE_CHECKING:
     from orodruin.component import Component  # pylint: disable = cyclic-import
-
-    from .port import Port  # pylint: disable = cyclic-import
 
 
 class PortCollection(MutableSequence):
@@ -21,7 +19,8 @@ class PortCollection(MutableSequence):
     def __init__(
         self,
         name: str,
-        port_type: PortType,
+        direction: Port.Direction,
+        port_type: Port.Type,
         component: "Component",
         size: int = 0,
     ) -> None:
@@ -31,6 +30,7 @@ class PortCollection(MutableSequence):
         self._component: "Component" = component
 
         self._type = port_type
+        self._direction = direction
 
         self._ports: List["Port"] = []
 
@@ -54,10 +54,13 @@ class PortCollection(MutableSequence):
 
     def add_port(self):
         """Add a Port to this PortCollection."""
-        from .port import Port  # pylint: disable = import-outside-toplevel
-
         index = len(self._ports)
-        port = Port(f"{self._name}[{index}]", self._type, self._component)
+        port = Port(
+            f"{self._name}[{index}]",
+            self._direction,
+            self._type,
+            self._component,
+        )
         self.append(port)
 
         GraphManager.sync_port_sizes(self)
@@ -69,6 +72,10 @@ class PortCollection(MutableSequence):
     def type(self):
         """Type of the port."""
         return self._type
+
+    def direction(self) -> Port.Direction:
+        """Direction of the port."""
+        return self._direction
 
     def component(self):
         """The Component this Port is attached on."""

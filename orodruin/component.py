@@ -10,7 +10,7 @@ from typing import List, Optional, Union
 from uuid import UUID, uuid4
 
 from .graph_manager import GraphManager
-from .port import Port, PortType
+from .port import Port
 from .port_collection import PortCollection
 
 
@@ -71,14 +71,20 @@ class Component:
     def publish(self) -> None:
         """Cleans up the Component to be ready for Animation."""
 
-    def add_port(self, name: str, port_type: PortType):
+    def add_port(self, name: str, direction: Port.Direction, port_type: Port.Type):
         """Add a `Port` to this Component."""
-        port = Port(name, port_type, self)
+        port = Port(name, direction, port_type, self)
         self._ports.append(port)
 
-    def add_port_collection(self, name: str, port_type: PortType, size: int = 0):
+    def add_port_collection(
+        self,
+        name: str,
+        direction: Port.Direction,
+        port_type: Port.Type,
+        size: int = 0,
+    ):
         """Add a `PortCollection` to this Component."""
-        port = PortCollection(name, port_type, self, size)
+        port = PortCollection(name, direction, port_type, self, size)
         self._port_collections.append(port)
 
     def name(self) -> str:

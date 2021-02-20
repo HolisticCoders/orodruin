@@ -8,7 +8,7 @@ from uuid import UUID
 from .component import Component
 from .graph_manager import GraphManager
 from .library import get_component
-from .port import Port, PortType, SetConnectedPortError
+from .port import Port, SetConnectedPortError
 
 
 class OrodruinEncoder(json.JSONEncoder):
@@ -17,6 +17,7 @@ class OrodruinEncoder(json.JSONEncoder):
     def default(self, o: Any):
         if isinstance(o, PurePosixPath):
             return str(o)
+
         if isinstance(o, UUID):
             return str(o)
 
@@ -38,6 +39,7 @@ def port_definition_data(port: Port) -> Dict[str, Any]:
     """Returns a dict representing the given Port definition."""
     data = {
         "name": port.name(),
+        "direction": port.direction().name,
         "type": port.type().name,
     }
     return data
@@ -77,23 +79,16 @@ def component_definition_data(component: Component) -> Dict[str, Any]:
     connections = []
     for sub_component in component.components():
         for port in sub_component.ports():
-            source = port.source()
-            if source:
-                connection = (
-                    source.path(relative_to=component),
-                    port.path(relative_to=component),
-                )
-                if connection not in connections:
-                    connections.append(connection)
-
-            targets = port.targets()
-            for target in targets:
-                connection = (
-                    port.path(relative_to=component),
-                    target.path(relative_to=component),
-                )
-                if connection not in connections:
-                    connections.append(connection)
+            for connection in port.external_connections():
+                source = connection[0]
+                target = connection[1]
+                if source and target:
+                    connection = (
+                        source.path(relative_to=component),
+                        target.path(relative_to=component),
+                    )
+                    if connection not in connections:
+                        connections.append(connection)
 
     data["connections"] = connections
 
@@ -117,14 +112,15 @@ def component_from_json(file_path: PathLike) -> "Component":
     return component_from_data(data)
 
 
-def component_from_data(component_data):
+def component_from_data(component_data):  # pylint: disable = too-many-locals
     """Create a component from its serialized data."""
 
     component = Component("root")
     for port_data in component_data["ports"]:
         name = port_data["name"]
-        port_type = PortType[port_data["type"]]
-        component.add_port(name, port_type)
+        direction = Port.Direction[port_data["direction"]]
+        port_type = Port.Type[port_data["type"]]
+        component.add_port(name, direction, port_type)
 
     components = component_data["components"]
     definitions = component_data["definitions"]

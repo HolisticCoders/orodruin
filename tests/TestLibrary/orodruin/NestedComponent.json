@@ -6,14 +6,17 @@
             "ports": [
                 {
                     "name": "input1",
+                    "direction": "input",
                     "type": "int"
                 },
                 {
                     "name": "input2",
+                    "direction": "input",
                     "type": "int"
                 },
                 {
                     "name": "output",
+                    "direction": "output",
                     "type": "int"
                 }
             ],
@@ -25,14 +28,17 @@
             "ports": [
                 {
                     "name": "input1",
+                    "direction": "input",
                     "type": "int"
                 },
                 {
                     "name": "input2",
+                    "direction": "input",
                     "type": "int"
                 },
                 {
                     "name": "output",
+                    "direction": "output",
                     "type": "int"
                 }
             ],
@@ -62,14 +68,17 @@
     "ports": [
         {
             "name": "input1",
+            "direction": "input",
             "type": "int"
         },
         {
             "name": "input2",
+            "direction": "input",
             "type": "int"
         },
         {
             "name": "output",
+            "direction": "output",
             "type": "int"
         }
     ],
@@ -84,11 +93,11 @@
         ],
         [
             "child_a.output",
-            "child_b.input1"
+            "child_b.input2"
         ],
         [
             "child_a.output",
-            "child_b.input2"
+            "child_b.input1"
         ],
         [
             "child_b.output",

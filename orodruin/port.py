@@ -5,7 +5,7 @@ It can be connected to other Ports
 """
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from orodruin.graph_manager import GraphManager
 
@@ -25,16 +25,6 @@ class SetConnectedPortError(ConnectionError):
     """Raised when setting a port that is connected."""
 
 
-class PortType(Enum):
-    """Enum representing all the types an attribute can be."""
-
-    int = IntAttribute
-    float = FloatAttribute
-    bool = BoolAttribute
-    string = StringAttribute
-    matrix = MatrixAttribute
-
-
 class Port:
     """Orodruin's Port class
 
@@ -42,16 +32,33 @@ class Port:
     It can be connected to other Ports and hold a value
     """
 
+    class Type(Enum):
+        """Enum representing all the types an attribute can be."""
+
+        int = IntAttribute
+        float = FloatAttribute
+        bool = BoolAttribute
+        string = StringAttribute
+        matrix = MatrixAttribute
+
+    class Direction(Enum):
+        """Directions a port can have."""
+
+        input = "input"
+        output = "output"
+
     def __init__(
         self,
         name: str,
-        port_type: PortType,
+        direction: "Port.Direction",
+        port_type: "Port.Type",
         component: "Component",
     ) -> None:
         self._name: str = name
         self._component: "Component" = component
 
         self._type = port_type
+        self._direction = direction
 
         self._value: Any = self._type.value.default_value
 
@@ -130,6 +137,38 @@ class Port:
                 path = path.relative_to(relative_to.path())
         return path
 
-    def type(self) -> PortType:
+    def type(self) -> "Port.Type":
         """Type of the port."""
         return self._type
+
+    def direction(self) -> "Port.Direction":
+        """Direction of the port."""
+        return self._direction
+
+    def external_connections(self) -> List[Tuple["Port", "Port"]]:
+        """Returns all the connections external to the port's component."""
+        # the source of an input port can only be outside of the component
+        if self._direction is Port.Direction.input:
+            if self._source:
+                return [(self._source, self)]
+
+        # the targets of an input port can only be outside of the component
+        elif self._direction is Port.Direction.output:
+            connections = [(self, t) for t in self._targets]
+            return connections
+
+        return []
+
+    def internal_connections(self) -> List[Tuple["Port", "Port"]]:
+        """Returns all the connections internal to the port's component."""
+        # the targets of an input port can only be inside of the component
+        if self._direction is Port.Direction.input:
+            connections = [(self, t) for t in self._targets]
+            return connections
+
+        # the source of an input port can only be inside of the component
+        if self._direction is Port.Direction.output:
+            if self._source:
+                return [(self._source, self)]
+
+        return []
