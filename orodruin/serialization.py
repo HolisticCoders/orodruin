@@ -7,7 +7,6 @@ from uuid import UUID
 
 from .component import Component
 from .graph_manager import GraphManager
-from .library import get_component
 from .port import Port, SetConnectedPortError
 
 
@@ -133,8 +132,12 @@ def component_from_data(component_data):  # pylint: disable = too-many-locals
             sub_component_definition = definitions[type_uuid]
             sub_component = component_from_data(sub_component_definition)
         else:
-            referenced_component_path = get_component(sub_component_type)
-            sub_component = component_from_json(referenced_component_path)
+
+            from .library import (  # pylint: disable = import-outside-toplevel, cyclic-import
+                LibraryManager,
+            )
+
+            sub_component = LibraryManager.get_component(sub_component_type)
 
         sub_component.set_parent(component)
         sub_component.set_name(sub_component_name)

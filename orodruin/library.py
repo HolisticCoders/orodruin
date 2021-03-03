@@ -1,9 +1,13 @@
 """Orodruin Library Management."""
 import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
-LIBRARIES_ENV_VAR = "ORODRUIN_LIBRARIES"
+from .component import Component
+from .serialization import (
+    component_from_json,  # pylint: disable = cyclic-import
+)
 
 
 class NoRegisteredLibraryError(Exception):
@@ -14,76 +18,141 @@ class ComponentNotFoundError(Exception):
     """Component not found in libraries."""
 
 
-def list_libraries() -> List[os.PathLike]:
-    """List all the registered libraries."""
-    libraries_string = os.environ.get(LIBRARIES_ENV_VAR)
-
-    if libraries_string:
-        return [Path(p) for p in libraries_string.split(";")]
-
-    return []
+class TargetDoesNotExistError(Exception):
+    """Target does not exist in library"""
 
 
-def register_library(path: os.PathLike) -> None:
-    """Register the given library."""
+@dataclass
+class Library:
+    """Orodruin Library Class.
 
-    if not path.exists():
-        raise NotADirectoryError(f"path '{path}' does not exist.")
-
-    if not path.is_dir():
-        raise NotADirectoryError(f"path `{path}` is not a directory.")
-
-    libraries = list_libraries()
-    if path not in libraries:
-        libraries.append(os.fspath(path))
-
-    _set_libraries_var(libraries)
-
-
-def unregister_library(path: os.PathLike) -> None:
-    """Unregister the given library."""
-    libraries = list_libraries()
-
-    if path in libraries:
-        libraries.remove(path)
-
-    _set_libraries_var(libraries)
-
-
-def _set_libraries_var(libraries: List[os.PathLike]) -> None:
-    """Set the environment variable with the given libraries."""
-    libraries = [os.fspath(p) for p in libraries]
-    libraries_string = ";".join(libraries)
-    os.environ[LIBRARIES_ENV_VAR] = libraries_string
-
-
-def get_component(component_name: str) -> os.PathLike:
-    """Get the component file from the libraries.
-
-    This is a very naïve implementation that returns the first matching file.
+    A Library is a collection of serialized Components.
+    Each subfolder of the collection represents a "target" implemention
+    of the components for the library.
+    The generic Components are saved in the "orodruin" target.
+    Any DCC Specific Component should be defined in the appropriate target folder.
     """
-    if "::" in component_name:
-        namespace, component_name = component_name.split("::")
-    else:
-        namespace = None
 
-    libraries = list_libraries()
-    if not libraries:
-        raise NoRegisteredLibraryError("No libraries are registered")
+    path: os.PathLike
 
-    for library in libraries:
-        if namespace and namespace == library:
-            library_path = library
-            break
-    else:
-        library_path = libraries[0]
+    def name(self) -> str:
+        """Name of the Library."""
+        return self.path.name
 
-    orodruin_folder = library_path / "orodruin"
-    for item in orodruin_folder.iterdir():
-        if item.is_file():
-            if item.stem == component_name:
-                return item
+    def target_path(self, target_name: str) -> Optional[os.PathLike]:
+        """Return the full path of a target from its name."""
+        for target in self.path.iterdir():
+            if target.name == target_name:
+                return target
+        return None
 
-    raise ComponentNotFoundError(
-        f"No component named {component_name} found in any registered libraries"
-    )
+    def get_component(self, component_name: str, target: str = "orodruin"):
+        """Return an Instantiated Component from a given name and target."""
+        target_path = self.target_path(target)
+
+        if not target_path:
+            raise TargetDoesNotExistError(
+                f"Library {self.name()} has no target {target}"
+            )
+
+        for component_path in target_path.iterdir():
+            if (
+                component_path.suffix == ".json"
+                and component_path.stem == component_name
+            ):
+                return component_from_json(component_path)
+
+        raise ComponentNotFoundError(
+            f"No component named {component_name} found in any registered libraries"
+        )
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, str):
+            return os.fspath(self.path) == o
+        if isinstance(o, os.PathLike):
+            return self.path == o
+        if isinstance(o, Library):
+            return self.path == o.path
+        return False
+
+
+@dataclass
+class LibraryManager:
+    """Manager Class for multiple Libraries.
+
+    This class should not be instantiated and is simply an interface
+    over the "ORODRUIN_LIBRARIES" environment Variable.
+    """
+
+    libraries_env_var = "ORODRUIN_LIBRARIES"
+
+    @classmethod
+    def libraries(cls) -> List[Library]:
+        """List all the registered libraries."""
+        libraries_string = os.environ.get(cls.libraries_env_var)
+
+        if not libraries_string:
+            return []
+
+        return [Library(Path(p)) for p in libraries_string.split(";")]
+
+    @classmethod
+    def register_library(cls, path: os.PathLike) -> None:
+        """Register the given library."""
+
+        if not path.exists():
+            raise NotADirectoryError(f"path '{path}' does not exist.")
+
+        if not path.is_dir():
+            raise NotADirectoryError(f"path `{path}` is not a directory.")
+
+        libraries = cls.libraries()
+        library = Library(path)
+        if path not in libraries:
+            libraries.append(library)
+
+        cls._set_libraries_var(libraries)
+
+    @classmethod
+    def unregister_library(cls, path: os.PathLike) -> None:
+        """Unregister the given library."""
+        libraries = [l for l in cls.libraries() if l.path != path]
+
+        cls._set_libraries_var(libraries)
+
+    @classmethod
+    def _set_libraries_var(cls, libraries: List[Library]) -> None:
+        """Set the environment variable with the given libraries."""
+        libraries = [os.fspath(l.path) for l in libraries]
+        libraries_string = ";".join(libraries)
+        os.environ[cls.libraries_env_var] = libraries_string
+
+    @classmethod
+    def get_component(cls, component_name: str, target: str = "orodruin") -> Component:
+        """Get the component file from the libraries."""
+        if "::" in component_name:
+            namespace, component_name = component_name.split("::")
+        else:
+            namespace = None
+
+        libraries = cls.libraries()
+        if not libraries:
+            raise NoRegisteredLibraryError("No libraries are registered")
+
+        if namespace:
+            for library in libraries:
+                if namespace and namespace == library.name():
+                    try:
+                        return library.get_component(component_name, target)
+                    except (TargetDoesNotExistError, ComponentNotFoundError):
+                        pass
+        else:
+            for library in libraries:
+                try:
+                    return library.get_component(component_name, target)
+                except (TargetDoesNotExistError, ComponentNotFoundError):
+                    pass
+
+        raise ComponentNotFoundError(
+            f"No component named {component_name} found in any registered libraries"
+        )

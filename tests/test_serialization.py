@@ -1,21 +1,15 @@
-# pylint: disable = missing-module-docstring, missing-function-docstring
+# pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
 from pathlib import Path, PurePosixPath
 
 import pytest
 
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager
-from orodruin.library import (
-    get_component,
-    list_libraries,
-    register_library,
-    unregister_library,
-)
+from orodruin.library import LibraryManager
 from orodruin.port import Port
 from orodruin.serialization import (
     component_as_json,
     component_definition_data,
-    component_from_json,
     component_instance_data,
 )
 
@@ -23,14 +17,14 @@ from orodruin.serialization import (
 @pytest.fixture(autouse=True)
 def clear_registered_components():
     library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
-    register_library(library_path)
+    LibraryManager.register_library(library_path)
 
     yield
 
     GraphManager.clear_registered_components()
 
-    for library in list_libraries():
-        unregister_library(library)
+    for library in LibraryManager.libraries():
+        LibraryManager.unregister_library(library)
 
 
 def test_component_instance_data():
@@ -197,10 +191,11 @@ def test_component_as_json():
 
 
 def test_simple_component_from_json():
-    component_file = get_component("SimpleComponent")
-
-    component = component_from_json(component_file)
-
+    component_name = "SimpleComponent"
+    component = LibraryManager.get_component(component_name)
+    component_file = (
+        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+    )
     with open(component_file, "r") as handle:
         file_content = handle.read()
 
@@ -208,8 +203,11 @@ def test_simple_component_from_json():
 
 
 def test_nested_component_from_json():
-    component_file = get_component("NestedComponent")
-    component = component_from_json(component_file)
+    component_name = "NestedComponent"
+    component = LibraryManager.get_component(component_name)
+    component_file = (
+        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+    )
 
     with open(component_file, "r") as handle:
         file_content = handle.read()
@@ -218,8 +216,11 @@ def test_nested_component_from_json():
 
 
 def test_referencing_component_from_json():
-    component_file = get_component("ReferencingSimpleComponent")
-    component = component_from_json(component_file)
+    component_name = "ReferencingSimpleComponent"
+    component = LibraryManager.get_component(component_name)
+    component_file = (
+        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+    )
 
     with open(component_file, "r") as handle:
         file_content = handle.read()
@@ -228,15 +229,13 @@ def test_referencing_component_from_json():
 
 
 def test_referencing_nested_component_from_json():
-    component_file = get_component("ReferencingNestedComponent")
-    component = component_from_json(component_file)
+    component_name = "ReferencingNestedComponent"
+    component = LibraryManager.get_component(component_name)
+    component_file = (
+        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+    )
 
     with open(component_file, "r") as handle:
         file_content = handle.read()
-
-    # FIXME: Fails because there is no difference between an internal and
-    # external connection.
-    # The `component_as_json` thinks that the new component is connected to its inner
-    # component but the ReferencingNestedComponent doesn't define that.
 
     assert component_as_json(component) == file_content
