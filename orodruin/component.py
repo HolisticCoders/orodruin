@@ -6,12 +6,15 @@ it has `Ports` to receive and pass Data through the graph
 and can contain other Components as a subgraph
 """
 from pathlib import PurePosixPath
-from typing import List, Optional, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 from uuid import UUID, uuid4
 
 from .graph_manager import GraphManager
 from .port import Port
 from .port_collection import PortCollection
+
+if TYPE_CHECKING:
+    from .library import Library
 
 
 class ComponentError(Exception):
@@ -110,11 +113,11 @@ class Component:
 
         self._type = component_type
 
-    def library(self) -> Optional[str]:
+    def library(self) -> Optional["Library"]:
         """Type of the Component."""
         return self._library
 
-    def set_library(self, component_library: Optional[str]):
+    def set_library(self, component_library: Optional["Library"]):
         """Set the library of the component."""
         self._library = component_library
 
