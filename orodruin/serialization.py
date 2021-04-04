@@ -25,7 +25,11 @@ class OrodruinEncoder(json.JSONEncoder):
 
 def component_instance_data(component: Component) -> Dict[str, Any]:
     """Return the data representation of the instanced component."""
-    library = component.library() or "Internal"
+    library = component.library()
+    if library:
+        library = library.name()
+    else:
+        "Internal"
     data = {
         "type": f"{library}::{component.type()}",
         "name": component.name(),

@@ -60,7 +60,11 @@ class Library:
                 component_path.suffix == ".json"
                 and component_path.stem == component_name
             ):
-                return component_from_json(component_path)
+                component = component_from_json(component_path)
+                component.set_library(self)
+                component.set_type(component_name)
+                component.set_name(component_name)
+                return component
 
         raise ComponentNotFoundError(
             f"No component named {component_name} found in any registered libraries"
