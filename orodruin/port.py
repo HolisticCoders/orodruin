@@ -15,6 +15,7 @@ from .attribute import (
     IntAttribute,
     MatrixAttribute,
     StringAttribute,
+    ComponentAttribute,
 )
 
 if TYPE_CHECKING:
@@ -40,6 +41,7 @@ class Port:
         bool = BoolAttribute
         string = StringAttribute
         matrix = MatrixAttribute
+        reference = ComponentAttribute
 
     class Direction(Enum):
         """Directions a port can have."""
@@ -76,15 +78,7 @@ class Port:
             raise SetConnectedPortError(
                 f"Port {self.name()} is connected and cannot be set."
             )
-
-        python_type = self._type.value.python_type
-        if python_type is not None:
-            if not isinstance(value, python_type):
-                raise TypeError(
-                    f"Can't set port {self._name} to a value of {value}. "
-                    f"The port is of type {self._type.name}"
-                )
-
+        # TODO: validate the type of the value.
         self._value = value
 
     def get(self) -> Any:
