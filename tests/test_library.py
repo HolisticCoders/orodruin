@@ -61,5 +61,7 @@ def test_unregister_library():
 def test_get_component():
     library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     LibraryManager.register_library(library_path)
+
     component = LibraryManager.get_component("SimpleComponent")
+
     assert isinstance(component, Component)

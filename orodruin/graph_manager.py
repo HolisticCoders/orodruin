@@ -1,13 +1,12 @@
 # pylint: disable = protected-access
 """GraphManager handles graph modifications and and ensures a valid state."""
-from typing import TYPE_CHECKING, Set, Union
+from typing import TYPE_CHECKING, List, Optional, TypeVar
 
 if TYPE_CHECKING:
     from .component import Component  # pylint: disable = cyclic-import
-    from .port import Port  # pylint: disable = cyclic-import
-    from .port_collection import (
-        PortCollection,  # pylint: disable = cyclic-import
-    )
+    from .port import MultiPort, Port  # pylint: disable = cyclic-import
+
+T = TypeVar("T")  # pylint: disable = invalid-name
 
 
 class PortAlreadyConnectedError(ConnectionError):
@@ -43,20 +42,21 @@ class ComponentDoesNotExistError(ValueError):
 class GraphManager:
     """GraphManager handles graph modifications and and ensures a valid state."""
 
-    _components: Set["Component"] = set()
+    _components: List["Component"] = []
 
     @classmethod
     def register_component(cls, component: "Component") -> None:
         """Register a new component."""
-        cls._components.add(component)
+        if component not in cls._components:
+            cls._components.append(component)
 
     @classmethod
-    def clear_registered_components(cls):
+    def clear_registered_components(cls) -> None:
         """Clear all registered components."""
-        cls._components = set()
+        cls._components = []
 
     @classmethod
-    def components(cls):
+    def components(cls) -> List["Component"]:
         """All registered Component instances."""
         return cls._components
 
@@ -64,27 +64,31 @@ class GraphManager:
     def component_from_path(cls, path: str) -> "Component":
         """Return an existing Component from the given path."""
         for instance in cls._components:
-            if path == str(instance.path()):
+            if path == str(instance.path):
                 return instance
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     @staticmethod
-    def port_from_path(component: "Component", port_path: str):
+    def port_from_path(component: "Component", port_path: str) -> Optional["PortBase"]:
         """Get a port from the given path, relative to the component."""
         if port_path.startswith("."):
             port = component.port(port_path.strip("."))
         else:
             component_name, port_name = port_path.split(".")
             sub_component = next(
-                (c for c in component.components() if c.name() == component_name), None
+                (c for c in component.components if c.name == component_name), None
             )
+            if not sub_component:
+                raise ValueError(f"no port {port_path} found relative to {component}")
             port = sub_component.port(port_name)
 
         return port
 
     @staticmethod
     def connect_ports(
-        source: "Port", target: Union["Port", "PortCollection"], force: bool = False
+        source: "Port",
+        target: "Port",
+        force: bool = False,
     ):
         """
         Connect the source port to the target port.
@@ -94,64 +98,57 @@ class GraphManager:
             PortAlreadyConnectedError: when connecting to an already connected port
                 and the force argument is False
         """
-        if target.component() is source.component():
+        if target.component is source.component:
             raise ConnectionOnSameComponenentError(
-                f"{source.name()} and {target.name()} can't be connected because "
-                f"they both are on the same component '{source._component.name()}'"
+                f"{source.name} and {target.name} can't be connected because "
+                f"they both are on the same component '{source.component.name}'"
             )
 
-        if source.type() != target.type():
+        if source.type is not target.type:
             raise TypeError(
                 "Can't connect two ports of different types. "
-                f"{source.name()}<{source._type.name}> to "
-                f"{target.name()}<{target.type().name}>"
+                f"{source.name}<{source.type.name}> to "
+                f"{target.name}<{target.type.name}>"
             )
 
-        same_scope_connection = (
-            source.component().parent() == target.component().parent()
-        )
+        same_scope_connection = source.component.parent == target.component.parent
         connection_with_parent = (
-            source.component().parent() == target.component()
-            or source.component() == target.component().parent()
+            source.component.parent == target.component
+            or source.component == target.component.parent
         )
         if same_scope_connection:
-            if source.direction() == target.direction():
+            if source.direction == target.direction:
                 raise ConnectionToSameDirectionError(
-                    f"port {source.name()} and{target.name()} "
+                    f"port {source.name} and{target.name} "
                     f"are of the same direction. "
                     f"Connection in the same scope can only go from input to output."
                 )
         elif connection_with_parent:
-            if source.direction() != target.direction():
+            if source.direction != target.direction:
                 raise ConnectionToDifferentDirectionError(
-                    f"port {source.name()} and{target.name()} "
+                    f"port {source.name} and{target.name} "
                     f"are of different directions. "
                     f"connection from or to the parent component "
                     "can only be of the same direction."
                 )
         else:
             raise OutOfScopeConnectionError(
-                f"port {source.name()} and{target.name()} "
-                f"don't exist in the same scope"
+                f"port {source.name} and{target.name} " f"don't exist in the same scope"
             )
 
-        from .port import Port  # pylint: disable = import-outside-toplevel
-        from .port_collection import (  # pylint: disable = import-outside-toplevel
-            PortCollection,
-        )
+        from .port import SinglePort  # pylint: disable = import-outside-toplevel
 
-        if isinstance(target, Port):
-            if target.source() and not force:
+        if isinstance(target, SinglePort):
+            if target.source and not force:
                 raise PortAlreadyConnectedError(
-                    f"port {target.name()} is already connected to "
-                    f"{target.source().name()}, "
+                    f"port {target.name} is already connected to "
+                    f"{target.source.name}, "
                     "use `force=True` to connect regardless."
                 )
 
-            if target.source() and force:
-                GraphManager.disconnect_ports(target.source(), target)
-
-        elif isinstance(target, PortCollection):
+            if target.source and force:
+                GraphManager.disconnect_ports(target.source, target)
+        else:
             target.add_port()
             target = target[-1]
 
@@ -161,14 +158,14 @@ class GraphManager:
     @staticmethod
     def disconnect_ports(source: "Port", target: "Port"):
         """Disconnect the two given ports."""
-        if target not in source._targets:
+        if target not in source.targets:
             return
         source._targets.remove(target)
         target._source = None
 
     @staticmethod
-    def sync_port_sizes(port: "PortCollection"):
+    def sync_port_sizes(port: "MultiPort"):
         """Sync all the follower ports of the given port."""
-        component = port.component()
-        for synced_port in component._synced_ports.get(port, []):
+        component = port.component
+        for synced_port in component._synced_ports.get(port.name, []):
             synced_port.add_port()

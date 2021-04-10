@@ -10,6 +10,7 @@ repository = "https://github.com/HolisticCoders/orodruin"
 
 [tool.poetry.dependencies]
 python = "^3.7"
+typing-extensions = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
@@ -18,12 +19,14 @@ pylint = "^2.6.0"
 isort = "^5.6.4"
 pre-commit = "^2.8.2"
 pytest-cov = "^2.10.1"
+mypy = "^0.812"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
+profile = "black"
 multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
@@ -32,7 +35,14 @@ ensure_newline_before_comments = true
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 88
-disable = ["fixme", "import-error", "duplicate-code", "too-many-arguments"]
+disable = [
+    "fixme",
+    "import-error",
+    "duplicate-code",
+    "too-many-arguments",
+    "too-many-instance-attributes",
+    "missing-module-docstring"
+]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

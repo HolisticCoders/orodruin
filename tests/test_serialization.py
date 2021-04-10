@@ -28,7 +28,7 @@ def clear_registered_components():
 
 
 def test_component_instance_data():
-    root = Component("root")
+    root = Component.new("root")
     root.add_port("input1", Port.Direction.input, Port.Type.int)
     root.add_port("input2", Port.Direction.input, Port.Type.int)
     root.add_port("output", Port.Direction.output, Port.Type.int)
@@ -37,7 +37,7 @@ def test_component_instance_data():
     root.output.set(3)
 
     expected_data = {
-        "type": f"Internal::{root.type()}",
+        "type": f"Internal::{root.type}",
         "name": "root",
         "ports": {
             "input1": 1,
@@ -50,22 +50,22 @@ def test_component_instance_data():
 
 
 def test_component_definition_data():
-    root = Component("root")
+    root = Component.new("root")
     root.add_port("input1", Port.Direction.input, Port.Type.int)
     root.add_port("input2", Port.Direction.input, Port.Type.int)
     root.add_port("output", Port.Direction.output, Port.Type.int)
 
-    child_a = Component("child_a")
+    child_a = Component.new("child_a")
     child_a.add_port("input1", Port.Direction.input, Port.Type.int)
     child_a.add_port("input2", Port.Direction.input, Port.Type.int)
     child_a.add_port("output", Port.Direction.output, Port.Type.int)
-    child_a.set_parent(root)
+    child_a.parent = root
 
-    child_b = Component("child_b")
+    child_b = Component.new("child_b")
     child_b.add_port("input1", Port.Direction.input, Port.Type.int)
     child_b.add_port("input2", Port.Direction.input, Port.Type.int)
     child_b.add_port("output", Port.Direction.output, Port.Type.int)
-    child_b.set_parent(root)
+    child_b.parent = root
 
     root.input1.connect(child_a.input1)
     root.input2.connect(child_a.input2)
@@ -75,7 +75,7 @@ def test_component_definition_data():
 
     expected_data = {
         "definitions": {
-            str(child_a.type()): {
+            str(child_a.type): {
                 "definitions": {},
                 "components": [],
                 "connections": [],
@@ -97,7 +97,7 @@ def test_component_definition_data():
                     },
                 ],
             },
-            str(child_b.type()): {
+            str(child_b.type): {
                 "definitions": {},
                 "components": [],
                 "connections": [],
@@ -123,7 +123,7 @@ def test_component_definition_data():
         "components": [
             {
                 "name": "child_a",
-                "type": f"Internal::{child_a.type()}",
+                "type": f"Internal::{child_a.type}",
                 "ports": {
                     "input1": 0,
                     "input2": 0,
@@ -132,7 +132,7 @@ def test_component_definition_data():
             },
             {
                 "name": "child_b",
-                "type": f"Internal::{child_b.type()}",
+                "type": f"Internal::{child_b.type}",
                 "ports": {
                     "input1": 0,
                     "input2": 0,
@@ -170,19 +170,19 @@ def test_component_definition_data():
 
 
 def test_component_as_json():
-    root = Component("root")
+    root = Component.new("root")
 
-    child_a = Component("child_a")
+    child_a = Component.new("child_a")
     child_a.add_port("input1", Port.Direction.input, Port.Type.int)
     child_a.add_port("input2", Port.Direction.input, Port.Type.int)
     child_a.add_port("output", Port.Direction.output, Port.Type.int)
-    child_a.set_parent(root)
+    child_a.parent = root
 
-    child_b = Component("child_b")
+    child_b = Component.new("child_b")
     child_b.add_port("input1", Port.Direction.input, Port.Type.int)
     child_b.add_port("input2", Port.Direction.input, Port.Type.int)
     child_b.add_port("output", Port.Direction.output, Port.Type.int)
-    child_b.set_parent(root)
+    child_b.parent = root
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
