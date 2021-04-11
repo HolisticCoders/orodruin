@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict, is_dataclass
 from os import PathLike
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Dict, Optional
@@ -18,6 +19,9 @@ class OrodruinEncoder(json.JSONEncoder):
     def default(self, o: Any):
         if isinstance(o, PurePosixPath):
             return str(o)
+
+        if is_dataclass(o):
+            return asdict(o)
 
         return json.JSONEncoder.default(self, o)
 

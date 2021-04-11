@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Generic, List, Optional, Tuple, Type, TypeVar
 
 from ..graph_manager import GraphManager
 from .port import Port
+from .types import PortType
 
 if TYPE_CHECKING:
     from ..component import Component  # pylint: disable = cyclic-import
@@ -46,13 +47,13 @@ class SinglePort(Generic[T]):
         component: "Component",
     ) -> "SinglePort[T]":
         """Create a new SinglePort."""
-        return cls(
-            name,
-            direction,
-            port_type,
-            component,
-            port_type(),
-        )
+
+        if isinstance(port_type, PortType):
+            value = port_type.new()
+        else:
+            value = port_type()
+
+        return cls(name, direction, port_type, component, value)
 
     @property
     def component(self) -> "Component":

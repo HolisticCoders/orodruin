@@ -7,6 +7,7 @@ from orodruin.component import Component
 from orodruin.graph_manager import GraphManager
 from orodruin.library import LibraryManager
 from orodruin.port import Port
+from orodruin.port.types import Matrix
 from orodruin.serialization import (
     component_as_json,
     component_definition_data,
@@ -239,3 +240,13 @@ def test_referencing_nested_component_from_json():
         file_content = handle.read()
 
     assert component_as_json(component) == file_content
+
+
+def test_serialize_custom_port_type():
+    root = Component.new("root")
+
+    sub_component = Component.new("sub_component")
+    sub_component.parent = root
+
+    sub_component.add_port("matrix", Port.Direction.input, Matrix)
+    component_as_json(root)
