@@ -107,8 +107,8 @@ class GraphManager:
         if source.type is not target.type:
             raise TypeError(
                 "Can't connect two ports of different types. "
-                f"{source.name}<{source.type.name}> to "
-                f"{target.name}<{target.type.name}>"
+                f"{source.name}<{source.type.__name__}> to "
+                f"{target.name}<{target.type.__name__}>"
             )
 
         same_scope_connection = source.component.parent == target.component.parent

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from .component import Component
 from .graph_manager import GraphManager
 from .port import Port, SetConnectedPortError
+from .port import types as port_types
 
 if TYPE_CHECKING:
     from orodruin.library import Library  # pylint: disable=cyclic-import
@@ -43,7 +44,7 @@ def port_definition_data(port: Port) -> Dict[str, Any]:
     data = {
         "name": port.name,
         "direction": port.direction.name,
-        "type": port.type.name,
+        "type": port.type.__name__,
     }
     return data
 
@@ -134,10 +135,19 @@ def component_from_data(
         library=library,
         parent=parent,
     )
+
     for port_data in component_data["ports"]:
         name = port_data["name"]
         direction = Port.Direction[port_data["direction"]]
-        port_type = Port.Type[port_data["type"]]
+
+        try:
+            port_type = getattr(port_types, port_data["type"])
+        except AttributeError as error:
+            raise NameError(
+                f"Type {port_data['type']} is not registered as an "
+                "orodruin port type"
+            ) from error
+
         component.add_port(name, direction, port_type)
 
     components = component_data["components"]

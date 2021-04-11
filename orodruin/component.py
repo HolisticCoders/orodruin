@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Type
 from uuid import uuid4
 
 from .graph_manager import GraphManager
@@ -107,7 +107,7 @@ class Component:
         self,
         name: str,
         direction: Port.Direction,
-        port_type: Port.Type,
+        port_type: Type,
     ) -> None:
         """Add a `SinglePort` to this Component."""
         port = SinglePort.new(name, direction, port_type, self)
@@ -117,7 +117,7 @@ class Component:
         self,
         name: str,
         direction: Port.Direction,
-        port_type: Port.Type,
+        port_type: Type,
         size: int = 0,
     ) -> None:
         """Add a `PortCollection` to this Component."""

@@ -1,6 +1,6 @@
 # pylint: disable = too-many-ancestors
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, List, MutableSequence, TypeVar
+from typing import TYPE_CHECKING, Any, List, MutableSequence, Type, TypeVar
 
 from ..graph_manager import GraphManager
 from .port import Port
@@ -21,7 +21,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
 
     _name: str
     _direction: Port.Direction
-    _type: Port.Type
+    _type: Type[T]
     size: int
     _component: "Component"
 
@@ -36,7 +36,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
         cls,
         name: str,
         direction: Port.Direction,
-        port_type: Port.Type,
+        port_type: Type[T],
         component: "Component",
         size: int,
     ) -> "MultiPort[T]":
@@ -84,7 +84,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
             port.name = f"{self.name}[{i}]"
 
     @property
-    def type(self) -> Port.Type:
+    def type(self) -> Type:
         """Type of the port."""
         return self._type
 

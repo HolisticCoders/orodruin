@@ -15,17 +15,13 @@ def clear_registered_components():
 
 def test_init_port():
     component = Component.new("component")
-    port = SinglePort("port", Port.Direction.input, Port.Type.int, component, 0)
+    port = SinglePort("port", Port.Direction.input, int, component, 0)
     assert port.name == "port"
 
 
 def test_set_port_name():
     component = Component.new("component")
-    component.add_port(
-        "my_port",
-        Port.Direction.input,
-        Port.Type.int,
-    )
+    component.add_port("my_port", Port.Direction.input, int)
     port = component.port("my_port")
     assert port.name == "my_port"
 
@@ -36,8 +32,8 @@ def test_set_port_name():
 def test_connect_ports():
     component_a = Component.new("component_a")
     component_b = Component.new("component_b")
-    component_a.add_port("port_a", Port.Direction.output, Port.Type.int)
-    component_b.add_port("port_b", Port.Direction.input, Port.Type.int)
+    component_a.add_port("port_a", Port.Direction.output, int)
+    component_b.add_port("port_b", Port.Direction.input, int)
 
     assert len(component_a.port_a.targets) == 0
     assert component_b.port_b.source is None
@@ -53,8 +49,8 @@ def test_connect_ports():
 def test_connect_already_connected_ports():
     component_a = Component.new("component_a")
     component_b = Component.new("component_b")
-    component_a.add_port("port_a", Port.Direction.output, Port.Type.int)
-    component_b.add_port("port_b", Port.Direction.input, Port.Type.int)
+    component_a.add_port("port_a", Port.Direction.output, int)
+    component_b.add_port("port_b", Port.Direction.input, int)
 
     component_a.port_a.connect(component_b.port_b)
     with pytest.raises(PortAlreadyConnectedError):
@@ -64,8 +60,8 @@ def test_connect_already_connected_ports():
 def test_disconnect_ports():
     component_a = Component.new("component_a")
     component_b = Component.new("component_b")
-    component_a.add_port("port_a", Port.Direction.output, Port.Type.int)
-    component_b.add_port("port_b", Port.Direction.input, Port.Type.int)
+    component_a.add_port("port_a", Port.Direction.output, int)
+    component_b.add_port("port_b", Port.Direction.input, int)
 
     component_a.port_a.connect(component_b.port_b)
     component_a.port_a.disconnect(component_b.port_b)
@@ -74,8 +70,8 @@ def test_disconnect_ports():
 def test_connect_different_type_ports():
     component_a = Component.new("component_a")
     component_b = Component.new("component_b")
-    component_a.add_port("output", Port.Direction.output, Port.Type.bool)
-    component_b.add_port("input", Port.Direction.input, Port.Type.int)
+    component_a.add_port("output", Port.Direction.output, bool)
+    component_b.add_port("input", Port.Direction.input, int)
 
     with pytest.raises(TypeError):
         component_a.output.connect(component_b.input)
@@ -83,7 +79,7 @@ def test_connect_different_type_ports():
 
 def test_set_port_value():
     component = Component.new("component")
-    component.add_port("my_port", Port.Direction.input, Port.Type.int)
+    component.add_port("my_port", Port.Direction.input, int)
 
     component.my_port.set(1)
     assert component.my_port.get() == 1
@@ -91,7 +87,7 @@ def test_set_port_value():
 
 def test_set_port_wrong_value_type():
     component = Component.new("component")
-    component.add_port("my_port", Port.Direction.input, Port.Type.string)
+    component.add_port("my_port", Port.Direction.input, str)
 
     with pytest.raises(TypeError):
         component.my_port.set(1)
@@ -99,10 +95,10 @@ def test_set_port_wrong_value_type():
 
 def test_get_connected_port_value():
     component_a = Component.new("component")
-    component_a.add_port("output", Port.Direction.output, Port.Type.int)
+    component_a.add_port("output", Port.Direction.output, int)
 
     component_b = Component.new("component")
-    component_b.add_port("input", Port.Direction.input, Port.Type.int)
+    component_b.add_port("input", Port.Direction.input, int)
 
     component_a.output.connect(component_b.input)
 

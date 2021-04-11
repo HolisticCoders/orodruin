@@ -29,9 +29,9 @@ def clear_registered_components():
 
 def test_component_instance_data():
     root = Component.new("root")
-    root.add_port("input1", Port.Direction.input, Port.Type.int)
-    root.add_port("input2", Port.Direction.input, Port.Type.int)
-    root.add_port("output", Port.Direction.output, Port.Type.int)
+    root.add_port("input1", Port.Direction.input, int)
+    root.add_port("input2", Port.Direction.input, int)
+    root.add_port("output", Port.Direction.output, int)
     root.input1.set(1)
     root.input2.set(2)
     root.output.set(3)
@@ -51,20 +51,20 @@ def test_component_instance_data():
 
 def test_component_definition_data():
     root = Component.new("root")
-    root.add_port("input1", Port.Direction.input, Port.Type.int)
-    root.add_port("input2", Port.Direction.input, Port.Type.int)
-    root.add_port("output", Port.Direction.output, Port.Type.int)
+    root.add_port("input1", Port.Direction.input, int)
+    root.add_port("input2", Port.Direction.input, int)
+    root.add_port("output", Port.Direction.output, int)
 
     child_a = Component.new("child_a")
-    child_a.add_port("input1", Port.Direction.input, Port.Type.int)
-    child_a.add_port("input2", Port.Direction.input, Port.Type.int)
-    child_a.add_port("output", Port.Direction.output, Port.Type.int)
+    child_a.add_port("input1", Port.Direction.input, int)
+    child_a.add_port("input2", Port.Direction.input, int)
+    child_a.add_port("output", Port.Direction.output, int)
     child_a.parent = root
 
     child_b = Component.new("child_b")
-    child_b.add_port("input1", Port.Direction.input, Port.Type.int)
-    child_b.add_port("input2", Port.Direction.input, Port.Type.int)
-    child_b.add_port("output", Port.Direction.output, Port.Type.int)
+    child_b.add_port("input1", Port.Direction.input, int)
+    child_b.add_port("input2", Port.Direction.input, int)
+    child_b.add_port("output", Port.Direction.output, int)
     child_b.parent = root
 
     root.input1.connect(child_a.input1)
@@ -173,15 +173,15 @@ def test_component_as_json():
     root = Component.new("root")
 
     child_a = Component.new("child_a")
-    child_a.add_port("input1", Port.Direction.input, Port.Type.int)
-    child_a.add_port("input2", Port.Direction.input, Port.Type.int)
-    child_a.add_port("output", Port.Direction.output, Port.Type.int)
+    child_a.add_port("input1", Port.Direction.input, int)
+    child_a.add_port("input2", Port.Direction.input, int)
+    child_a.add_port("output", Port.Direction.output, int)
     child_a.parent = root
 
     child_b = Component.new("child_b")
-    child_b.add_port("input1", Port.Direction.input, Port.Type.int)
-    child_b.add_port("input2", Port.Direction.input, Port.Type.int)
-    child_b.add_port("output", Port.Direction.output, Port.Type.int)
+    child_b.add_port("input1", Port.Direction.input, int)
+    child_b.add_port("input2", Port.Direction.input, int)
+    child_b.add_port("output", Port.Direction.output, int)
     child_b.parent = root
 
     child_a.output.connect(child_b.input1)

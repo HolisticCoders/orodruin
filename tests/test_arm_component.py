@@ -6,6 +6,7 @@ import pytest
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager
 from orodruin.port import Port
+from orodruin.port.types import Matrix
 
 
 @pytest.fixture(autouse=True)
@@ -19,46 +20,46 @@ def test_arm_component():
     class ChainFK(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_multi_port("input", Port.Direction.input, Port.Type.matrix)
-            self.add_multi_port("output", Port.Direction.output, Port.Type.matrix)
+            self.add_multi_port("input", Port.Direction.input, Matrix)
+            self.add_multi_port("output", Port.Direction.output, Matrix)
             self.sync_port_sizes(self.input, self.output)
 
     class ChainIK(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_port("base", Port.Direction.input, Port.Type.matrix)
-            self.add_port("end", Port.Direction.input, Port.Type.matrix)
+            self.add_port("base", Port.Direction.input, Matrix)
+            self.add_port("end", Port.Direction.input, Matrix)
             self.add_multi_port(
                 "output",
                 Port.Direction.output,
-                Port.Type.matrix,
+                Matrix,
                 size=3,
             )
 
     class ChainBlender(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_port("blender", Port.Direction.input, Port.Type.float)
-            self.add_multi_port("input_a", Port.Direction.input, Port.Type.matrix)
-            self.add_multi_port("input_b", Port.Direction.input, Port.Type.matrix)
-            self.add_multi_port("output", Port.Direction.output, Port.Type.matrix)
+            self.add_port("blender", Port.Direction.input, float)
+            self.add_multi_port("input_a", Port.Direction.input, Matrix)
+            self.add_multi_port("input_b", Port.Direction.input, Matrix)
+            self.add_multi_port("output", Port.Direction.output, Matrix)
 
             self.sync_port_sizes(self.input_a, self.output)
 
     arm = Component.new("arm")
-    arm.add_port("fk_ik_blend", Port.Direction.input, Port.Type.float)
-    arm.add_port("ik_base", Port.Direction.input, Port.Type.matrix)
-    arm.add_port("ik_end", Port.Direction.input, Port.Type.matrix)
+    arm.add_port("fk_ik_blend", Port.Direction.input, float)
+    arm.add_port("ik_base", Port.Direction.input, Matrix)
+    arm.add_port("ik_end", Port.Direction.input, Matrix)
     arm.add_multi_port(
         "fk_matrices",
         Port.Direction.input,
-        Port.Type.matrix,
+        Matrix,
         size=3,
     )
     arm.add_multi_port(
         "output",
         Port.Direction.output,
-        Port.Type.matrix,
+        Matrix,
         size=3,
     )
 

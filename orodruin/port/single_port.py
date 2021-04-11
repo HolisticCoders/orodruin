@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Generic, List, Optional, Tuple, TypeVar
+from typing import TYPE_CHECKING, Generic, List, Optional, Tuple, Type, TypeVar
 
 from ..graph_manager import GraphManager
 from .port import Port
@@ -26,7 +26,7 @@ class SinglePort(Generic[T]):
 
     name: str
     _direction: Port.Direction
-    _type: Port.Type
+    _type: Type[T]
     _component: "Component"
 
     _value: T
@@ -35,14 +35,14 @@ class SinglePort(Generic[T]):
 
     def __post_init__(self):
         if self._value is None:
-            self._value = self.type.value
+            self._value = self.type()
 
     @classmethod
     def new(
         cls,
         name: str,
         direction: Port.Direction,
-        port_type: Port.Type,
+        port_type: Type[T],
         component: "Component",
     ) -> "SinglePort[T]":
         """Create a new SinglePort."""
@@ -51,7 +51,7 @@ class SinglePort(Generic[T]):
             direction,
             port_type,
             component,
-            port_type.value,
+            port_type(),
         )
 
     @property
@@ -60,7 +60,7 @@ class SinglePort(Generic[T]):
         return self._component
 
     @property
-    def type(self) -> Port.Type:
+    def type(self) -> Type[T]:
         """Type of the port."""
         return self._type
 
@@ -70,12 +70,12 @@ class SinglePort(Generic[T]):
         return self._direction
 
     @property
-    def source(self) -> Optional["Port"]:
+    def source(self) -> Optional["SinglePort[T]"]:
         """List of the Ports connected to this Port."""
         return self._source
 
     @property
-    def targets(self) -> List["Port"]:
+    def targets(self) -> List["SinglePort[T]"]:
         """List of the Ports this Port connects to."""
         return self._targets
 
@@ -85,7 +85,6 @@ class SinglePort(Generic[T]):
         When connected, it recursively gets the source's value
         until a non connected port is found.
         """
-
         if self._source:
             return self._source.get()
 
@@ -103,7 +102,12 @@ class SinglePort(Generic[T]):
                 f"Port {self.name} is connected and cannot be set."
             )
 
-        # TODO: validate the type of the value.
+        if not isinstance(value, self.type):
+            raise TypeError(
+                f"Cannot set Port {self.name}[{self.type}] to a value "
+                f"of {value}[{type(value)}]."
+            )
+
         self._value = value
 
     def connect(self, other: Port, force: bool = False):

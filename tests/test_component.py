@@ -26,9 +26,9 @@ def test_add_ports():
 
     assert len(component.ports) == 0
 
-    component.add_port("input1", Port.Direction.input, Port.Type.int)
-    component.add_port("input2", Port.Direction.input, Port.Type.int)
-    component.add_port("output", Port.Direction.output, Port.Type.int)
+    component.add_port("input1", Port.Direction.input, int)
+    component.add_port("input2", Port.Direction.input, int)
+    component.add_port("output", Port.Direction.output, int)
 
     assert len(component.ports) == 3
 
@@ -69,7 +69,7 @@ def test_path_nested_component_relative():
 
 def test_access_port():
     component = Component.new("component")
-    component.add_port("input1", Port.Direction.input, Port.Type.int)
+    component.add_port("input1", Port.Direction.input, int)
     assert isinstance(component.input1, SinglePort)
 
 
