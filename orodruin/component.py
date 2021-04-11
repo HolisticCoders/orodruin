@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type
 from uuid import uuid4
 
 from .graph_manager import GraphManager
-from .port import MultiPort, Port, SinglePort
+from .port import MultiPort, Port, PortDirection, SinglePort
 
 if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
@@ -36,13 +36,13 @@ class Component:
     name: str
     _type: str
     library: Optional[Library] = None
-    _parent: Optional["Component"] = None
+    _parent: Optional[Component] = None
 
     _single_ports: List[SinglePort] = field(default_factory=list)
     _multi_ports: List[MultiPort] = field(default_factory=list)
-    _synced_ports: Dict[str, MultiPort] = field(default_factory=dict)
+    _synced_ports: Dict[str, List[MultiPort]] = field(default_factory=dict)
 
-    _components: List["Component"] = field(default_factory=list)
+    _components: List[Component] = field(default_factory=list)
 
     @classmethod
     def new(
@@ -67,22 +67,22 @@ class Component:
         return self._type
 
     @property
-    def ports(self) -> List[Port]:
+    def ports(self) -> Sequence[Port]:
         """List of the Component's Ports."""
-        return self._single_ports + self._multi_ports
+        return self._single_ports + self._multi_ports  # type: ignore
 
     @property
-    def components(self):
+    def components(self) -> List[Component]:
         """Sub-components of the component."""
         return self._components
 
     @property
-    def parent(self):
+    def parent(self) -> Optional[Component]:
         """Parent of the component."""
         return self._parent
 
     @parent.setter
-    def parent(self, other: Component):
+    def parent(self, other: Component) -> None:
         """Set the parent of the component."""
         if other is self:
             raise ParentToSelfError(f"Cannot parent {self.name} to itself")
@@ -108,7 +108,7 @@ class Component:
     def add_port(
         self,
         name: str,
-        direction: Port.Direction,
+        direction: PortDirection,
         port_type: Type,
     ) -> None:
         """Add a `SinglePort` to this Component."""
@@ -118,20 +118,20 @@ class Component:
     def add_multi_port(
         self,
         name: str,
-        direction: Port.Direction,
+        direction: PortDirection,
         port_type: Type,
         size: int = 0,
     ) -> None:
         """Add a `PortCollection` to this Component."""
-        port = MultiPort.new(name, direction, port_type, size, self)
+        port = MultiPort.new(name, direction, port_type, self, size)
         self._multi_ports.append(port)
 
-    def sync_port_sizes(self, master: MultiPort, slave: MultiPort):
+    def sync_port_sizes(self, master: MultiPort, slave: MultiPort) -> None:
         """Register Ports that needs their sizes synced.
 
         The follower port will be synced with the main's.
         """
-        slaves: List[MultiPort] = self._synced_ports.get(master.name, [])
+        slaves = self._synced_ports.get(master.name, [])
 
         if slave not in slaves:
             slaves.append(slave)

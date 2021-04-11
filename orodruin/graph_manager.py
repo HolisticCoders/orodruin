@@ -91,7 +91,7 @@ class GraphManager:
         source: Port,
         target: Port,
         force: bool = False,
-    ):
+    ) -> None:
         """
         Connect the source port to the target port.
         Raises:
@@ -138,7 +138,10 @@ class GraphManager:
                 f"port {source.name} and{target.name} " f"don't exist in the same scope"
             )
 
-        from .port import SinglePort  # pylint: disable = import-outside-toplevel
+        from .port import (  # pylint: disable = import-outside-toplevel
+            MultiPort,
+            SinglePort,
+        )
 
         if isinstance(target, SinglePort):
             if target.source and not force:
@@ -150,7 +153,7 @@ class GraphManager:
 
             if target.source and force:
                 GraphManager.disconnect_ports(target.source, target)
-        else:
+        if isinstance(target, MultiPort):
             target.add_port()
             target = target[-1]
 
@@ -158,15 +161,16 @@ class GraphManager:
         source._targets.append(target)
 
     @staticmethod
-    def disconnect_ports(source: Port, target: Port):
+    def disconnect_ports(source: Port, target: Port) -> None:
         """Disconnect the two given ports."""
         if target not in source.targets:
             return
+
         source._targets.remove(target)
         target._source = None
 
     @staticmethod
-    def sync_port_sizes(port: MultiPort):
+    def sync_port_sizes(port: MultiPort) -> None:
         """Sync all the follower ports of the given port."""
         component = port.component
         for synced_port in component._synced_ports.get(port.name, []):

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 # pylint: disable = too-many-ancestors
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, List, MutableSequence, Type, TypeVar
+from typing import TYPE_CHECKING, Generic, List, Optional, Type, TypeVar, Union
 
 from ..graph_manager import GraphManager
-from .port import Port
+from .port import PortDirection
 from .single_port import SinglePort
 
 if TYPE_CHECKING:
@@ -15,17 +15,17 @@ T = TypeVar("T")  # pylint: disable = invalid-name
 
 
 @dataclass
-class MultiPort(MutableSequence[SinglePort[T]]):
+class MultiPort(Generic[T]):
     """Handle over a sequence of ports
 
     It can be added to a Component like regular Ports but don't own any value directly.
     """
 
     _name: str
-    _direction: Port.Direction
+    _direction: PortDirection
     _type: Type[T]
-    size: int
     _component: Component
+    size: int
 
     _ports: List[SinglePort[T]] = field(default_factory=list)
 
@@ -37,7 +37,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
     def new(
         cls,
         name: str,
-        direction: Port.Direction,
+        direction: PortDirection,
         port_type: Type[T],
         component: Component,
         size: int,
@@ -45,19 +45,19 @@ class MultiPort(MutableSequence[SinglePort[T]]):
         """Create a new component."""
         return cls(name, direction, port_type, component, size)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> SinglePort[T]:
         return self._ports[index]
 
-    def __setitem__(self, index: int, value: SinglePort[T]):
+    def __setitem__(self, index: int, value: SinglePort[T]) -> None:
         self._ports[index] = value
 
-    def __delitem__(self, index: int):
+    def __delitem__(self, index: Union[int, slice]) -> None:
         del self._ports[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._ports)
 
-    def insert(self, index: int, value: SinglePort[T]):
+    def insert(self, index: int, value: SinglePort[T]) -> None:
         """Insert a new SinglePort into the MultiPort at a specific index."""
         self._ports.insert(index, value)
 
@@ -86,16 +86,6 @@ class MultiPort(MutableSequence[SinglePort[T]]):
             port.name = f"{self.name}[{i}]"
 
     @property
-    def type(self) -> Type:
-        """Type of the port."""
-        return self._type
-
-    @property
-    def direction(self) -> Port.Direction:
-        """Direction of the port."""
-        return self._direction
-
-    @property
     def ports(self) -> List[SinglePort[T]]:
         """The SinglePorts of this MultiPort."""
         return self._ports
@@ -105,16 +95,34 @@ class MultiPort(MutableSequence[SinglePort[T]]):
         """The Component this Port is attached on."""
         return self._component
 
-    def get(self) -> List[Any]:
-        """Get the value of the all the SinglePort."""
-        return [p.get() for p in self.ports]
+    @property
+    def type(self) -> Type[T]:
+        """Type of the port."""
+        return self._type
 
-    def set(self, _: List[Any]) -> None:
+    @property
+    def direction(self) -> PortDirection:
+        """Direction of the port."""
+        return self._direction
+
+    @property
+    def source(self) -> Optional[SinglePort[T]]:
+        """Returns the Port connected to the input of this Port"""
+        raise NotImplementedError
+
+    @property
+    def targets(self) -> List[SinglePort[T]]:
+        """Returns the Ports connected to the input of this Port"""
+        raise NotImplementedError
+
+    def get(self) -> T:
+        """Get the value of the all the SinglePort."""
+        raise NotImplementedError
+
+    def set(self, _: List[T]) -> None:
         """Raises NotImplementedError."""
         # TODO: implement this.
         # This should make sure the length of the MultiPort is compatible with
         # the length of the list.
 
-        raise NotImplementedError(
-            "Values must be set individually on Port Collections."
-        )
+        raise NotImplementedError

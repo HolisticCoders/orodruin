@@ -1,22 +1,19 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
 from pathlib import Path, PurePosixPath
+from typing import Generator
 
 import pytest
 
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager
 from orodruin.library import LibraryManager
-from orodruin.port import Port
+from orodruin.port import PortDirection
 from orodruin.port.types import Matrix
-from orodruin.serialization import (
-    component_as_json,
-    component_definition_data,
-    component_instance_data,
-)
+from orodruin.serialization import ComponentSerializer
 
 
 @pytest.fixture(autouse=True)
-def clear_registered_components():
+def clear_registered_components() -> Generator:
     library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
     LibraryManager.register_library(library_path)
 
@@ -28,11 +25,11 @@ def clear_registered_components():
         LibraryManager.unregister_library(library)
 
 
-def test_component_instance_data():
+def test_component_instance_data() -> None:
     root = Component.new("root")
-    root.add_port("input1", Port.Direction.input, int)
-    root.add_port("input2", Port.Direction.input, int)
-    root.add_port("output", Port.Direction.output, int)
+    root.add_port("input1", PortDirection.input, int)
+    root.add_port("input2", PortDirection.input, int)
+    root.add_port("output", PortDirection.output, int)
     root.input1.set(1)
     root.input2.set(2)
     root.output.set(3)
@@ -47,25 +44,25 @@ def test_component_instance_data():
         },
     }
 
-    assert component_instance_data(root) == expected_data
+    assert ComponentSerializer.component_instance_data(root) == expected_data
 
 
-def test_component_definition_data():
+def test_component_definition_data() -> None:
     root = Component.new("root")
-    root.add_port("input1", Port.Direction.input, int)
-    root.add_port("input2", Port.Direction.input, int)
-    root.add_port("output", Port.Direction.output, int)
+    root.add_port("input1", PortDirection.input, int)
+    root.add_port("input2", PortDirection.input, int)
+    root.add_port("output", PortDirection.output, int)
 
     child_a = Component.new("child_a")
-    child_a.add_port("input1", Port.Direction.input, int)
-    child_a.add_port("input2", Port.Direction.input, int)
-    child_a.add_port("output", Port.Direction.output, int)
+    child_a.add_port("input1", PortDirection.input, int)
+    child_a.add_port("input2", PortDirection.input, int)
+    child_a.add_port("output", PortDirection.output, int)
     child_a.parent = root
 
     child_b = Component.new("child_b")
-    child_b.add_port("input1", Port.Direction.input, int)
-    child_b.add_port("input2", Port.Direction.input, int)
-    child_b.add_port("output", Port.Direction.output, int)
+    child_b.add_port("input1", PortDirection.input, int)
+    child_b.add_port("input2", PortDirection.input, int)
+    child_b.add_port("output", PortDirection.output, int)
     child_b.parent = root
 
     root.input1.connect(child_a.input1)
@@ -167,31 +164,31 @@ def test_component_definition_data():
         ],
     }
 
-    assert component_definition_data(root) == expected_data
+    assert ComponentSerializer.component_definition_data(root) == expected_data
 
 
-def test_component_as_json():
+def test_component_as_json() -> None:
     root = Component.new("root")
 
     child_a = Component.new("child_a")
-    child_a.add_port("input1", Port.Direction.input, int)
-    child_a.add_port("input2", Port.Direction.input, int)
-    child_a.add_port("output", Port.Direction.output, int)
+    child_a.add_port("input1", PortDirection.input, int)
+    child_a.add_port("input2", PortDirection.input, int)
+    child_a.add_port("output", PortDirection.output, int)
     child_a.parent = root
 
     child_b = Component.new("child_b")
-    child_b.add_port("input1", Port.Direction.input, int)
-    child_b.add_port("input2", Port.Direction.input, int)
-    child_b.add_port("output", Port.Direction.output, int)
+    child_b.add_port("input1", PortDirection.input, int)
+    child_b.add_port("input2", PortDirection.input, int)
+    child_b.add_port("output", PortDirection.output, int)
     child_b.parent = root
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
 
-    component_as_json(root)
+    ComponentSerializer.component_as_json(root)
 
 
-def test_simple_component_from_json():
+def test_simple_component_from_json() -> None:
     component_name = "SimpleComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
@@ -200,10 +197,10 @@ def test_simple_component_from_json():
     with open(component_file, "r") as handle:
         file_content = handle.read()
 
-    assert component_as_json(component) == file_content
+    assert ComponentSerializer.component_as_json(component) == file_content
 
 
-def test_nested_component_from_json():
+def test_nested_component_from_json() -> None:
     component_name = "NestedComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
@@ -213,10 +210,10 @@ def test_nested_component_from_json():
     with open(component_file, "r") as handle:
         file_content = handle.read()
 
-    assert component_as_json(component) == file_content
+    assert ComponentSerializer.component_as_json(component) == file_content
 
 
-def test_referencing_component_from_json():
+def test_referencing_component_from_json() -> None:
     component_name = "ReferencingSimpleComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
@@ -226,10 +223,10 @@ def test_referencing_component_from_json():
     with open(component_file, "r") as handle:
         file_content = handle.read()
 
-    assert component_as_json(component) == file_content
+    assert ComponentSerializer.component_as_json(component) == file_content
 
 
-def test_referencing_nested_component_from_json():
+def test_referencing_nested_component_from_json() -> None:
     component_name = "ReferencingNestedComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
@@ -239,14 +236,14 @@ def test_referencing_nested_component_from_json():
     with open(component_file, "r") as handle:
         file_content = handle.read()
 
-    assert component_as_json(component) == file_content
+    assert ComponentSerializer.component_as_json(component) == file_content
 
 
-def test_serialize_custom_port_type():
+def test_serialize_custom_port_type() -> None:
     root = Component.new("root")
 
     sub_component = Component.new("sub_component")
     sub_component.parent = root
 
-    sub_component.add_port("matrix", Port.Direction.input, Matrix)
-    component_as_json(root)
+    sub_component.add_port("matrix", PortDirection.input, Matrix)
+    ComponentSerializer.component_as_json(root)

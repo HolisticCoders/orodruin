@@ -1,37 +1,39 @@
 # pylint: disable = missing-module-docstring
 # pylint: disable = missing-function-docstring
 # pylint: disable = missing-class-docstring
+from typing import Generator
+
 import pytest
 
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager
-from orodruin.port import Port
+from orodruin.port import PortDirection
 from orodruin.port.types import Matrix
 
 
 @pytest.fixture(autouse=True)
-def clear_registered_components():
+def clear_registered_components() -> Generator:
 
     yield
     GraphManager.clear_registered_components()
 
 
-def test_arm_component():
+def test_arm_component() -> None:
     class ChainFK(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_multi_port("input", Port.Direction.input, Matrix)
-            self.add_multi_port("output", Port.Direction.output, Matrix)
+            self.add_multi_port("input", PortDirection.input, Matrix)
+            self.add_multi_port("output", PortDirection.output, Matrix)
             self.sync_port_sizes(self.input, self.output)
 
     class ChainIK(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_port("base", Port.Direction.input, Matrix)
-            self.add_port("end", Port.Direction.input, Matrix)
+            self.add_port("base", PortDirection.input, Matrix)
+            self.add_port("end", PortDirection.input, Matrix)
             self.add_multi_port(
                 "output",
-                Port.Direction.output,
+                PortDirection.output,
                 Matrix,
                 size=3,
             )
@@ -39,26 +41,26 @@ def test_arm_component():
     class ChainBlender(Component):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
-            self.add_port("blender", Port.Direction.input, float)
-            self.add_multi_port("input_a", Port.Direction.input, Matrix)
-            self.add_multi_port("input_b", Port.Direction.input, Matrix)
-            self.add_multi_port("output", Port.Direction.output, Matrix)
+            self.add_port("blender", PortDirection.input, float)
+            self.add_multi_port("input_a", PortDirection.input, Matrix)
+            self.add_multi_port("input_b", PortDirection.input, Matrix)
+            self.add_multi_port("output", PortDirection.output, Matrix)
 
             self.sync_port_sizes(self.input_a, self.output)
 
     arm = Component.new("arm")
-    arm.add_port("fk_ik_blend", Port.Direction.input, float)
-    arm.add_port("ik_base", Port.Direction.input, Matrix)
-    arm.add_port("ik_end", Port.Direction.input, Matrix)
+    arm.add_port("fk_ik_blend", PortDirection.input, float)
+    arm.add_port("ik_base", PortDirection.input, Matrix)
+    arm.add_port("ik_end", PortDirection.input, Matrix)
     arm.add_multi_port(
         "fk_matrices",
-        Port.Direction.input,
+        PortDirection.input,
         Matrix,
         size=3,
     )
     arm.add_multi_port(
         "output",
-        Port.Direction.output,
+        PortDirection.output,
         Matrix,
         size=3,
     )

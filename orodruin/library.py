@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .component import Component
-from .serialization import component_from_json  # pylint: disable = cyclic-import
+from .serialization import ComponentDeserializer
 
 
 class NoRegisteredLibraryError(Exception):
@@ -59,7 +59,7 @@ class Library:
                 component_path.suffix == ".json"
                 and component_path.stem == component_name
             ):
-                component = component_from_json(
+                component = ComponentDeserializer.component_from_json(
                     component_path,
                     component_type=component_name,
                     library=self,
@@ -131,17 +131,16 @@ class LibraryManager:
     @classmethod
     def _set_libraries_var(cls, libraries: List[Library]) -> None:
         """Set the environment variable with the given libraries."""
-        libraries = [os.fspath(l.path) for l in libraries]
-        libraries_string = ";".join(libraries)
+        libraries_string = ";".join([str(l.path) for l in libraries])
         os.environ[cls.libraries_env_var] = libraries_string
 
     @classmethod
     def get_component(cls, component_name: str, target: str = "orodruin") -> Component:
         """Get the component file from the libraries."""
+
+        namespace = None
         if "::" in component_name:
             namespace, component_name = component_name.split("::")
-        else:
-            namespace = None
 
         libraries = cls.libraries()
         if not libraries:

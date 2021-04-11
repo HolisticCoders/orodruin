@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Generic, List, Optional, Tuple, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 from ..graph_manager import GraphManager
-from .port import Port
+from .port import Port, PortDirection
 from .types import PortType
 
 if TYPE_CHECKING:
@@ -28,7 +37,7 @@ class SinglePort(Generic[T]):
     """
 
     name: str
-    _direction: Port.Direction
+    _direction: PortDirection
     _type: Type[T]
     _component: Component
 
@@ -36,7 +45,7 @@ class SinglePort(Generic[T]):
     _source: Optional[SinglePort[T]] = None
     _targets: List[SinglePort[T]] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self._value is None:
             self._value = self.type()
 
@@ -44,7 +53,7 @@ class SinglePort(Generic[T]):
     def new(
         cls,
         name: str,
-        direction: Port.Direction,
+        direction: PortDirection,
         port_type: Type[T],
         component: Component,
     ) -> SinglePort[T]:
@@ -68,7 +77,7 @@ class SinglePort(Generic[T]):
         return self._type
 
     @property
-    def direction(self) -> Port.Direction:
+    def direction(self) -> PortDirection:
         """Direction of the port."""
         return self._direction
 
@@ -113,37 +122,37 @@ class SinglePort(Generic[T]):
 
         self._value = value
 
-    def connect(self, other: Port, force: bool = False):
+    def connect(self, other: Port[T], force: bool = False) -> None:
         """Connect this port to another port."""
         GraphManager.connect_ports(self, other, force)
 
-    def disconnect(self, other: Port):
+    def disconnect(self, other: Port[T]) -> None:
         """Disconnect this port from the other Port."""
         GraphManager.disconnect_ports(self, other)
 
-    def external_connections(self) -> List[Tuple[Port, Port]]:
+    def external_connections(self) -> Sequence[Tuple[Port[T], Port[T]]]:
         """Returns all the connections external to the port's component."""
         # the source of an input port can only be outside of the component
-        if self.direction is Port.Direction.input:
+        if self.direction is PortDirection.input:
             if self.source:
                 return [(self.source, self)]
 
         # the targets of an input port can only be outside of the component
-        elif self._direction is Port.Direction.output:
+        elif self._direction is PortDirection.output:
             connections = [(self, t) for t in self.targets]
             return connections
 
         return []
 
-    def internal_connections(self) -> List[Tuple[SinglePort, SinglePort]]:
+    def internal_connections(self) -> Sequence[Tuple[Port[T], Port[T]]]:
         """Returns all the connections internal to the port's component."""
         # the targets of an input port can only be inside of the component
-        if self.direction is Port.Direction.input:
+        if self.direction is PortDirection.input:
             connections = [(self, t) for t in self.targets]
             return connections
 
         # the source of an input port can only be inside of the component
-        if self.direction is Port.Direction.output:
+        if self.direction is PortDirection.output:
             if self.source:
                 return [(self.source, self)]
 

@@ -2,25 +2,25 @@
 import pytest
 
 from orodruin.component import Component
-from orodruin.port import MultiPort, Port
+from orodruin.port import MultiPort, PortDirection
 
 
-def test_init_port():
+def test_init_port() -> None:
     component = Component.new("component")
 
-    component.add_multi_port("my_port", Port.Direction.input, int)
+    component.add_multi_port("my_port", PortDirection.input, int)
 
     assert component.my_port.name == "my_port"
 
 
-def test_create_multi_port():
+def test_create_multi_port() -> None:
     component = Component.new("component")
 
     assert len(component.ports) == 0
 
     component.add_multi_port(
         "my_multi_port",
-        Port.Direction.input,
+        PortDirection.input,
         int,
     )
 
@@ -29,11 +29,11 @@ def test_create_multi_port():
     assert len(component.ports) == 1
 
 
-def test_access_sub_port():
+def test_access_sub_port() -> None:
     component = Component.new("component")
     component.add_multi_port(
         "my_multi_port",
-        Port.Direction.input,
+        PortDirection.input,
         int,
         size=1,
     )
@@ -41,18 +41,18 @@ def test_access_sub_port():
     component.my_multi_port[0]
 
 
-def test_access_nonexisting_sub_port():
+def test_access_nonexisting_sub_port() -> None:
     component = Component.new("component")
-    component.add_multi_port("my_multi_port", Port.Direction.input, int)
+    component.add_multi_port("my_multi_port", PortDirection.input, int)
 
     with pytest.raises(IndexError):
         component.my_multi_port[0]
 
 
-def test_sync_ports():
+def test_sync_ports() -> None:
     component = Component.new("component")
-    component.add_multi_port("input", Port.Direction.input, int)
-    component.add_multi_port("output", Port.Direction.input, int)
+    component.add_multi_port("input", PortDirection.input, int)
+    component.add_multi_port("output", PortDirection.input, int)
 
     component.sync_port_sizes(component.input, component.output)
 
