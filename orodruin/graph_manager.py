@@ -1,5 +1,7 @@
 # pylint: disable = protected-access
 """GraphManager handles graph modifications and and ensures a valid state."""
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, List, Optional, TypeVar
 
 if TYPE_CHECKING:
@@ -42,10 +44,10 @@ class ComponentDoesNotExistError(ValueError):
 class GraphManager:
     """GraphManager handles graph modifications and and ensures a valid state."""
 
-    _components: List["Component"] = []
+    _components: List[Component] = []
 
     @classmethod
-    def register_component(cls, component: "Component") -> None:
+    def register_component(cls, component: Component) -> None:
         """Register a new component."""
         if component not in cls._components:
             cls._components.append(component)
@@ -56,12 +58,12 @@ class GraphManager:
         cls._components = []
 
     @classmethod
-    def components(cls) -> List["Component"]:
+    def components(cls) -> List[Component]:
         """All registered Component instances."""
         return cls._components
 
     @classmethod
-    def component_from_path(cls, path: str) -> "Component":
+    def component_from_path(cls, path: str) -> Component:
         """Return an existing Component from the given path."""
         for instance in cls._components:
             if path == str(instance.path):
@@ -69,7 +71,7 @@ class GraphManager:
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
     @staticmethod
-    def port_from_path(component: "Component", port_path: str) -> Optional["PortBase"]:
+    def port_from_path(component: Component, port_path: str) -> Optional[Port]:
         """Get a port from the given path, relative to the component."""
         if port_path.startswith("."):
             port = component.port(port_path.strip("."))
@@ -86,8 +88,8 @@ class GraphManager:
 
     @staticmethod
     def connect_ports(
-        source: "Port",
-        target: "Port",
+        source: Port,
+        target: Port,
         force: bool = False,
     ):
         """
@@ -156,7 +158,7 @@ class GraphManager:
         source._targets.append(target)
 
     @staticmethod
-    def disconnect_ports(source: "Port", target: "Port"):
+    def disconnect_ports(source: Port, target: Port):
         """Disconnect the two given ports."""
         if target not in source.targets:
             return
@@ -164,7 +166,7 @@ class GraphManager:
         target._source = None
 
     @staticmethod
-    def sync_port_sizes(port: "MultiPort"):
+    def sync_port_sizes(port: MultiPort):
         """Sync all the follower ports of the given port."""
         component = port.component
         for synced_port in component._synced_ports.get(port.name, []):

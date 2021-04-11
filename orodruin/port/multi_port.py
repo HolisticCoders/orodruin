@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # pylint: disable = too-many-ancestors
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, List, MutableSequence, Type, TypeVar
@@ -23,7 +25,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
     _direction: Port.Direction
     _type: Type[T]
     size: int
-    _component: "Component"
+    _component: Component
 
     _ports: List[SinglePort[T]] = field(default_factory=list)
 
@@ -37,16 +39,16 @@ class MultiPort(MutableSequence[SinglePort[T]]):
         name: str,
         direction: Port.Direction,
         port_type: Type[T],
-        component: "Component",
+        component: Component,
         size: int,
-    ) -> "MultiPort[T]":
+    ) -> MultiPort[T]:
         """Create a new component."""
         return cls(name, direction, port_type, component, size)
 
     def __getitem__(self, index: int):
         return self._ports[index]
 
-    def __setitem__(self, index: int, value: "SinglePort[T]"):
+    def __setitem__(self, index: int, value: SinglePort[T]):
         self._ports[index] = value
 
     def __delitem__(self, index: int):
@@ -55,7 +57,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
     def __len__(self):
         return len(self._ports)
 
-    def insert(self, index: int, value: "SinglePort[T]"):
+    def insert(self, index: int, value: SinglePort[T]):
         """Insert a new SinglePort into the MultiPort at a specific index."""
         self._ports.insert(index, value)
 
@@ -99,7 +101,7 @@ class MultiPort(MutableSequence[SinglePort[T]]):
         return self._ports
 
     @property
-    def component(self) -> "Component":
+    def component(self) -> Component:
         """The Component this Port is attached on."""
         return self._component
 

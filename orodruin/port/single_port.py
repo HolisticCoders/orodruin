@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Generic, List, Optional, Tuple, Type, TypeVar
@@ -28,11 +30,11 @@ class SinglePort(Generic[T]):
     name: str
     _direction: Port.Direction
     _type: Type[T]
-    _component: "Component"
+    _component: Component
 
     _value: T
-    _source: Optional["SinglePort[T]"] = None
-    _targets: List["SinglePort[T]"] = field(default_factory=list)
+    _source: Optional[SinglePort[T]] = None
+    _targets: List[SinglePort[T]] = field(default_factory=list)
 
     def __post_init__(self):
         if self._value is None:
@@ -44,8 +46,8 @@ class SinglePort(Generic[T]):
         name: str,
         direction: Port.Direction,
         port_type: Type[T],
-        component: "Component",
-    ) -> "SinglePort[T]":
+        component: Component,
+    ) -> SinglePort[T]:
         """Create a new SinglePort."""
 
         if isinstance(port_type, PortType):
@@ -56,7 +58,7 @@ class SinglePort(Generic[T]):
         return cls(name, direction, port_type, component, value)
 
     @property
-    def component(self) -> "Component":
+    def component(self) -> Component:
         """The Component this Port is attached on."""
         return self._component
 
@@ -71,12 +73,12 @@ class SinglePort(Generic[T]):
         return self._direction
 
     @property
-    def source(self) -> Optional["SinglePort[T]"]:
+    def source(self) -> Optional[SinglePort[T]]:
         """List of the Ports connected to this Port."""
         return self._source
 
     @property
-    def targets(self) -> List["SinglePort[T]"]:
+    def targets(self) -> List[SinglePort[T]]:
         """List of the Ports this Port connects to."""
         return self._targets
 
@@ -133,7 +135,7 @@ class SinglePort(Generic[T]):
 
         return []
 
-    def internal_connections(self) -> List[Tuple["SinglePort", "SinglePort"]]:
+    def internal_connections(self) -> List[Tuple[SinglePort, SinglePort]]:
         """Returns all the connections internal to the port's component."""
         # the targets of an input port can only be inside of the component
         if self.direction is Port.Direction.input:
@@ -153,7 +155,7 @@ class SinglePort(Generic[T]):
         path = self._component.path.with_suffix(f".{self.name}")
         return path
 
-    def relative_path(self, relative_to: "Component") -> PurePosixPath:
+    def relative_path(self, relative_to: Component) -> PurePosixPath:
         """Path of the Port relative to Component."""
         if relative_to is self._component:
             path = PurePosixPath(f".{self.name}")

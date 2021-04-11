@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type
 
@@ -18,7 +20,7 @@ class Port(Protocol):
         output = "output"
 
     @property
-    def component(self) -> "Component":
+    def component(self) -> Component:
         """The Component this Port is attached on."""
 
     @property
@@ -26,15 +28,15 @@ class Port(Protocol):
         """Type of the port."""
 
     @property
-    def direction(self) -> "Direction":
+    def direction(self) -> Direction:
         """Direction of the port."""
 
     @property
-    def source(self) -> Optional["Port"]:
+    def source(self) -> Optional[Port]:
         """Returns the Port connected to the input of this Port"""
 
     @property
-    def targets(self) -> List["Port"]:
+    def targets(self) -> List[Port]:
         """Returns the Ports connected to the input of this Port"""
 
     def get(self) -> Any:
@@ -43,14 +45,14 @@ class Port(Protocol):
     def set(self, value: Any) -> None:
         """Return the value of the port."""
 
-    def connect(self, other: "Port", force: bool = False) -> None:
+    def connect(self, other: Port, force: bool = False) -> None:
         """Connect this port to another port."""
 
-    def disconnect(self, other: "Port") -> None:
+    def disconnect(self, other: Port) -> None:
         """Disconnect this port from the other Port."""
 
-    def external_connections(self) -> List[Tuple["Port", "Port"]]:
+    def external_connections(self) -> List[Tuple[Port, Port]]:
         """Returns all the connections external to the port's component."""
 
-    def internal_connections(self) -> List[Tuple["Port", "Port"]]:
+    def internal_connections(self) -> List[Tuple[Port, Port]]:
         """Returns all the connections internal to the port's component."""

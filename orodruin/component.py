@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Dict, List, Optional, Type
@@ -33,7 +35,7 @@ class Component:
 
     name: str
     _type: str
-    library: Optional["Library"] = None
+    library: Optional[Library] = None
     _parent: Optional["Component"] = None
 
     _single_ports: List[SinglePort] = field(default_factory=list)
@@ -47,9 +49,9 @@ class Component:
         cls,
         name: str,
         component_type: Optional[str] = None,
-        library: Optional["Library"] = None,
-        parent: Optional["Component"] = None,
-    ) -> "Component":
+        library: Optional[Library] = None,
+        parent: Optional[Component] = None,
+    ) -> Component:
         """Create a new component."""
 
         if component_type is None:
@@ -80,7 +82,7 @@ class Component:
         return self._parent
 
     @parent.setter
-    def parent(self, other: "Component"):
+    def parent(self, other: Component):
         """Set the parent of the component."""
         if other is self:
             raise ParentToSelfError(f"Cannot parent {self.name} to itself")
@@ -145,6 +147,6 @@ class Component:
 
         return path
 
-    def relative_path(self, relative_to: "Component") -> PurePosixPath:
+    def relative_path(self, relative_to: Component) -> PurePosixPath:
         """Path of the Component relative to another one."""
         return self.path.relative_to(relative_to.path)
