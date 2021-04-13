@@ -68,9 +68,9 @@ def test_arm_component() -> None:
     fk_chain = ChainFK.new("fk_chain")
     ik_chain = ChainIK.new("ik_chain")
     chain_blender = ChainBlender.new("chain_blender")
-    fk_chain.parent = arm
-    ik_chain.parent = arm
-    chain_blender.parent = arm
+    fk_chain.set_parent(arm)
+    ik_chain.set_parent(arm)
+    chain_blender.set_parent(arm)
 
     arm.ik_base.connect(ik_chain.base)
     arm.ik_end.connect(ik_chain.end)

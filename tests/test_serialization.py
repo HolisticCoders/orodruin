@@ -22,7 +22,7 @@ def clear_registered_components() -> Generator:
     GraphManager.clear_registered_components()
 
     for library in LibraryManager.libraries():
-        LibraryManager.unregister_library(library)
+        LibraryManager.unregister_library(library.path)
 
 
 def test_component_instance_data() -> None:
@@ -35,7 +35,7 @@ def test_component_instance_data() -> None:
     root.output.set(3)
 
     expected_data = {
-        "type": f"Internal::{root.type}",
+        "type": f"Internal::{root.type()}",
         "name": "root",
         "ports": {
             "input1": 1,
@@ -57,13 +57,13 @@ def test_component_definition_data() -> None:
     child_a.add_port("input1", PortDirection.input, int)
     child_a.add_port("input2", PortDirection.input, int)
     child_a.add_port("output", PortDirection.output, int)
-    child_a.parent = root
+    child_a.set_parent(root)
 
     child_b = Component.new("child_b")
     child_b.add_port("input1", PortDirection.input, int)
     child_b.add_port("input2", PortDirection.input, int)
     child_b.add_port("output", PortDirection.output, int)
-    child_b.parent = root
+    child_b.set_parent(root)
 
     root.input1.connect(child_a.input1)
     root.input2.connect(child_a.input2)
@@ -73,7 +73,7 @@ def test_component_definition_data() -> None:
 
     expected_data = {
         "definitions": {
-            str(child_a.type): {
+            str(child_a.type()): {
                 "definitions": {},
                 "components": [],
                 "connections": [],
@@ -95,7 +95,7 @@ def test_component_definition_data() -> None:
                     },
                 ],
             },
-            str(child_b.type): {
+            str(child_b.type()): {
                 "definitions": {},
                 "components": [],
                 "connections": [],
@@ -121,7 +121,7 @@ def test_component_definition_data() -> None:
         "components": [
             {
                 "name": "child_a",
-                "type": f"Internal::{child_a.type}",
+                "type": f"Internal::{child_a.type()}",
                 "ports": {
                     "input1": 0,
                     "input2": 0,
@@ -130,7 +130,7 @@ def test_component_definition_data() -> None:
             },
             {
                 "name": "child_b",
-                "type": f"Internal::{child_b.type}",
+                "type": f"Internal::{child_b.type()}",
                 "ports": {
                     "input1": 0,
                     "input2": 0,
@@ -174,13 +174,13 @@ def test_component_as_json() -> None:
     child_a.add_port("input1", PortDirection.input, int)
     child_a.add_port("input2", PortDirection.input, int)
     child_a.add_port("output", PortDirection.output, int)
-    child_a.parent = root
+    child_a.set_parent(root)
 
     child_b = Component.new("child_b")
     child_b.add_port("input1", PortDirection.input, int)
     child_b.add_port("input2", PortDirection.input, int)
     child_b.add_port("output", PortDirection.output, int)
-    child_b.parent = root
+    child_b.set_parent(root)
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
@@ -243,7 +243,7 @@ def test_serialize_custom_port_type() -> None:
     root = Component.new("root")
 
     sub_component = Component.new("sub_component")
-    sub_component.parent = root
+    sub_component.set_parent(root)
 
     sub_component.add_port("matrix", PortDirection.input, Matrix)
     ComponentSerializer.component_as_json(root)

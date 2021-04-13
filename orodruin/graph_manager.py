@@ -66,7 +66,7 @@ class GraphManager:
     def component_from_path(cls, path: str) -> Component:
         """Return an existing Component from the given path."""
         for instance in cls._components:
-            if path == str(instance.path):
+            if path == str(instance.path()):
                 return instance
         raise ComponentDoesNotExistError(f"Component with path {path} does not exist")
 
@@ -78,7 +78,7 @@ class GraphManager:
         else:
             component_name, port_name = port_path.split(".")
             sub_component = next(
-                (c for c in component.components if c.name == component_name), None
+                (c for c in component.components() if c.name() == component_name), None
             )
             if not sub_component:
                 raise ValueError(f"no port {port_path} found relative to {component}")
@@ -102,40 +102,43 @@ class GraphManager:
         """
         if target.component is source.component:
             raise ConnectionOnSameComponenentError(
-                f"{source.name} and {target.name} can't be connected because "
-                f"they both are on the same component '{source.component.name}'"
+                f"{source.name()} and {target.name()} can't be connected because "
+                f"they both are on the same component '{source.component().name()}'"
             )
 
-        if source.type is not target.type:
+        if source.type() is not target.type():
             raise TypeError(
                 "Can't connect two ports of different types. "
-                f"{source.name}<{source.type.__name__}> to "
-                f"{target.name}<{target.type.__name__}>"
+                f"{source.name()}<{source.type().__name__}> to "
+                f"{target.name()}<{target.type().__name__}>"
             )
 
-        same_scope_connection = source.component.parent == target.component.parent
+        same_scope_connection = (
+            source.component().parent() == target.component().parent()
+        )
         connection_with_parent = (
-            source.component.parent == target.component
-            or source.component == target.component.parent
+            source.component().parent() == target.component()
+            or source.component() == target.component().parent()
         )
         if same_scope_connection:
-            if source.direction == target.direction:
+            if source.direction() == target.direction():
                 raise ConnectionToSameDirectionError(
-                    f"port {source.name} and{target.name} "
+                    f"port {source.name()} and{target.name()} "
                     f"are of the same direction. "
                     f"Connection in the same scope can only go from input to output."
                 )
         elif connection_with_parent:
-            if source.direction != target.direction:
+            if source.direction() != target.direction():
                 raise ConnectionToDifferentDirectionError(
-                    f"port {source.name} and{target.name} "
+                    f"port {source.name()} and{target.name()} "
                     f"are of different directions. "
                     f"connection from or to the parent component "
                     "can only be of the same direction."
                 )
         else:
             raise OutOfScopeConnectionError(
-                f"port {source.name} and{target.name} " f"don't exist in the same scope"
+                f"port {source.name()} and{target.name()} "
+                f"don't exist in the same scope"
             )
 
         from .port import (  # pylint: disable = import-outside-toplevel
@@ -144,34 +147,40 @@ class GraphManager:
         )
 
         if isinstance(target, SinglePort):
-            if target.source and not force:
-                raise PortAlreadyConnectedError(
-                    f"port {target.name} is already connected to "
-                    f"{target.source.name}, "
-                    "use `force=True` to connect regardless."
-                )
+            target_source = target.source()
+            if target_source:
+                if force:
+                    GraphManager.disconnect_ports(target_source, target)
+                else:
+                    raise PortAlreadyConnectedError(
+                        f"port {target.name()} is already connected to "
+                        f"{target_source.name()}, "
+                        "use `force=True` to connect regardless."
+                    )
 
-            if target.source and force:
-                GraphManager.disconnect_ports(target.source, target)
         if isinstance(target, MultiPort):
             target.add_port()
             target = target[-1]
 
-        target._source = source
-        source._targets.append(target)
+        # _source and _targets are purposefully private to not be exposed to the users
+        # but we need to access them here to ensure the validity of the connection.
+        target._source = source  # type: ignore
+        source._targets.append(target)  # type: ignore
 
     @staticmethod
     def disconnect_ports(source: Port, target: Port) -> None:
         """Disconnect the two given ports."""
-        if target not in source.targets:
+        if target not in source.targets():
             return
 
-        source._targets.remove(target)
-        target._source = None
+        # _source and _targets are purposefully private to not be exposed to the users
+        # but we need to access them here to ensure the validity of the connection.
+        source._targets.remove(target)  # type: ignore
+        target._source = None  # type: ignore
 
     @staticmethod
     def sync_port_sizes(port: MultiPort) -> None:
         """Sync all the follower ports of the given port."""
-        component = port.component
-        for synced_port in component._synced_ports.get(port.name, []):
+        component = port.component()
+        for synced_port in component._synced_ports.get(port.name(), []):
             synced_port.add_port()

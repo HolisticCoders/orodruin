@@ -33,13 +33,12 @@ class Component:
     and can contain other Components as a subgraph
     """
 
-    name: str
+    _name: str
     _type: str
     library: Optional[Library] = None
     _parent: Optional[Component] = None
 
-    _single_ports: List[SinglePort] = field(default_factory=list)
-    _multi_ports: List[MultiPort] = field(default_factory=list)
+    _ports: List[Port] = field(default_factory=list)
     _synced_ports: Dict[str, List[MultiPort]] = field(default_factory=dict)
 
     _components: List[Component] = field(default_factory=list)
@@ -61,44 +60,39 @@ class Component:
         GraphManager.register_component(component)
         return component
 
-    @property
     def type(self) -> str:
         """Type of the Component."""
         return self._type
 
-    @property
     def ports(self) -> Sequence[Port]:
         """List of the Component's Ports."""
-        return self._single_ports + self._multi_ports  # type: ignore
+        return self._ports
 
-    @property
     def components(self) -> List[Component]:
         """Sub-components of the component."""
         return self._components
 
-    @property
     def parent(self) -> Optional[Component]:
         """Parent of the component."""
         return self._parent
 
-    @parent.setter
-    def parent(self, other: Component) -> None:
+    def set_parent(self, other: Component) -> None:
         """Set the parent of the component."""
         if other is self:
             raise ParentToSelfError(f"Cannot parent {self.name} to itself")
 
         self._parent = other
-        if self not in other.components:
+        if self not in other.components():
             # TODO: refactor private member access
             other._components.append(self)  # pylint: disable= protected-access
 
     def __getattr__(self, name: str) -> Port:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
-        for port in self.ports:
-            if port.name == name:
+        for port in self.ports():
+            if port.name() == name:
                 return port
 
-        raise NameError(f"Component {self.name} has no port named {name}")
+        raise NameError(f"Component {self.name()} has no port named {name}")
 
     def port(self, name: str) -> Port:
         """Get a Port of this node from the its name."""
@@ -113,7 +107,7 @@ class Component:
     ) -> None:
         """Add a `SinglePort` to this Component."""
         port = SinglePort.new(name, direction, port_type, self)
-        self._single_ports.append(port)
+        self._ports.append(port)
 
     def add_multi_port(
         self,
@@ -124,29 +118,37 @@ class Component:
     ) -> None:
         """Add a `PortCollection` to this Component."""
         port = MultiPort.new(name, direction, port_type, self, size)
-        self._multi_ports.append(port)
+        self._ports.append(port)
 
     def sync_port_sizes(self, master: MultiPort, slave: MultiPort) -> None:
         """Register Ports that needs their sizes synced.
 
         The follower port will be synced with the main's.
         """
-        slaves = self._synced_ports.get(master.name, [])
+        slaves = self._synced_ports.get(master.name(), [])
 
         if slave not in slaves:
             slaves.append(slave)
-            self._synced_ports[master.name] = slaves
+            self._synced_ports[master.name()] = slaves
 
-    @property
+    def name(self) -> str:
+        """Name of the Component."""
+        return self._name
+
+    def set_name(self, name: str) -> None:
+        """Set the name of the Component."""
+        self._name = name
+
     def path(self) -> PurePosixPath:
         """Absolute Path of the Component."""
-        if not self.parent:
-            path = PurePosixPath(f"/{self.name}")
+        parent = self.parent()
+        if parent:
+            path = parent.path() / self.name()
         else:
-            path = self.parent.path.joinpath(f"{self.name}")
+            path = PurePosixPath(f"/{self.name()}")
 
         return path
 
     def relative_path(self, relative_to: Component) -> PurePosixPath:
         """Path of the Component relative to another one."""
-        return self.path.relative_to(relative_to.path)
+        return self.path().relative_to(relative_to.path())

@@ -2,10 +2,21 @@ from __future__ import annotations
 
 # pylint: disable = too-many-ancestors
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Generic, List, Optional, Type, TypeVar, Union
+from pathlib import PurePosixPath
+from typing import (
+    TYPE_CHECKING,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from ..graph_manager import GraphManager
-from .port import PortDirection
+from .port import Port, PortDirection
 from .single_port import SinglePort
 
 if TYPE_CHECKING:
@@ -65,52 +76,35 @@ class MultiPort(Generic[T]):
         """Add a Port to this PortCollection."""
         index = len(self._ports)
         port = SinglePort[T].new(
-            f"{self.name}[{index}]",
-            self.direction,
-            self.type,
+            f"{self._name}[{index}]",
+            self._direction,
+            self._type,
             self._component,
         )
         self._ports.append(port)
 
         GraphManager.sync_port_sizes(self)
 
-    @property
-    def name(self) -> str:
-        """Name of the Port."""
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-        for i, port in enumerate(self.ports):
-            port.name = f"{self.name}[{i}]"
-
-    @property
     def ports(self) -> List[SinglePort[T]]:
         """The SinglePorts of this MultiPort."""
         return self._ports
 
-    @property
     def component(self) -> Component:
         """The Component this Port is attached on."""
         return self._component
 
-    @property
     def type(self) -> Type[T]:
         """Type of the port."""
         return self._type
 
-    @property
     def direction(self) -> PortDirection:
         """Direction of the port."""
         return self._direction
 
-    @property
     def source(self) -> Optional[SinglePort[T]]:
         """Returns the Port connected to the input of this Port"""
         raise NotImplementedError
 
-    @property
     def targets(self) -> List[SinglePort[T]]:
         """Returns the Ports connected to the input of this Port"""
         raise NotImplementedError
@@ -119,10 +113,46 @@ class MultiPort(Generic[T]):
         """Get the value of the all the SinglePort."""
         raise NotImplementedError
 
-    def set(self, _: List[T]) -> None:
+    def set(self, value: T) -> None:
         """Raises NotImplementedError."""
-        # TODO: implement this.
-        # This should make sure the length of the MultiPort is compatible with
-        # the length of the list.
-
         raise NotImplementedError
+
+    def connect(self, other: Port[T], force: bool = False) -> None:
+        """Connect this port to another port."""
+        raise NotImplementedError
+
+    def disconnect(self, other: Port[T]) -> None:
+        """Disconnect this port from the other Port."""
+        raise NotImplementedError
+
+    def external_connections(self) -> Sequence[Tuple[Port[T], Port[T]]]:
+        """Returns all the connections external to the port's component."""
+        raise NotImplementedError
+
+    def internal_connections(self) -> Sequence[Tuple[Port[T], Port[T]]]:
+        """Returns all the connections internal to the port's component."""
+        raise NotImplementedError
+
+    def name(self) -> str:
+        """Name of the Port."""
+        return self._name
+
+    def set_name(self, name: str) -> None:
+        """Set the name of the Port."""
+        self._name = name
+        for i, port in enumerate(self.ports()):
+            port.set_name(f"{self._name}[{i}]")
+
+    def path(self) -> PurePosixPath:
+        """The Path of this Port, absolute or relative."""
+        path = self._component.path().with_suffix(f".{self.name()}")
+        return path
+
+    def relative_path(self, relative_to: Component) -> PurePosixPath:
+        """Path of the Port relative to Component."""
+        if relative_to is self._component:
+            path = PurePosixPath(f".{self.name}")
+        else:
+            path = self.path().relative_to(relative_to.path())
+
+        return path

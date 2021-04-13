@@ -2,7 +2,7 @@
 import pytest
 
 from orodruin.component import Component
-from orodruin.port import MultiPort, PortDirection
+from orodruin.port import MultiPort, Port, PortDirection
 
 
 def test_init_port() -> None:
@@ -10,13 +10,17 @@ def test_init_port() -> None:
 
     component.add_multi_port("my_port", PortDirection.input, int)
 
-    assert component.my_port.name == "my_port"
+    assert component.my_port.name() == "my_port"
+
+
+def test_implements_port() -> None:
+    assert issubclass(MultiPort, Port)
 
 
 def test_create_multi_port() -> None:
     component = Component.new("component")
 
-    assert len(component.ports) == 0
+    assert len(component.ports()) == 0
 
     component.add_multi_port(
         "my_multi_port",
@@ -26,7 +30,7 @@ def test_create_multi_port() -> None:
 
     assert isinstance(component.my_multi_port, MultiPort)
 
-    assert len(component.ports) == 1
+    assert len(component.ports()) == 1
 
 
 def test_access_sub_port() -> None:
@@ -58,4 +62,4 @@ def test_sync_ports() -> None:
 
     component.input.add_port()
 
-    assert len(component.output.ports) == 1
+    assert len(component.output.ports()) == 1

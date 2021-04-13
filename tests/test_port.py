@@ -5,6 +5,7 @@ import pytest
 
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager, PortAlreadyConnectedError
+from orodruin.pathed_object import PathedObject
 from orodruin.port import Port, PortDirection, SinglePort
 
 
@@ -15,27 +16,28 @@ def clear_registered_components() -> Generator:
     GraphManager.clear_registered_components()
 
 
-def test_singleport_implements_port() -> None:
-    component = Component.new("component")
-    port = SinglePort("port", PortDirection.input, int, component, 0)
+def test_port_issubclass_pathedobject() -> None:
+    assert issubclass(Port, PathedObject)
 
-    assert isinstance(port, Port)
+
+def test_implements_port() -> None:
+    assert issubclass(SinglePort, Port)
 
 
 def test_init_port() -> None:
     component = Component.new("component")
     port = SinglePort("port", PortDirection.input, int, component, 0)
-    assert port.name == "port"
+    assert port.name() == "port"
 
 
 def test_set_port_name() -> None:
     component = Component.new("component")
     component.add_port("my_port", PortDirection.input, int)
     port = component.port("my_port")
-    assert port.name == "my_port"
+    assert port.name() == "my_port"
 
-    port.name = "other_name"
-    assert port.name == "other_name"
+    port.set_name("other_name")
+    assert port.name() == "other_name"
 
 
 def test_connect_ports() -> None:
@@ -44,15 +46,15 @@ def test_connect_ports() -> None:
     component_a.add_port("port_a", PortDirection.output, int)
     component_b.add_port("port_b", PortDirection.input, int)
 
-    assert len(component_a.port_a.targets) == 0
-    assert component_b.port_b.source is None
+    assert len(component_a.port_a.targets()) == 0
+    assert component_b.port_b.source() is None
 
     component_a.port_a.connect(component_b.port_b)
 
-    assert len(component_a.port_a.targets) == 1
+    assert len(component_a.port_a.targets()) == 1
 
-    assert component_a.port_a.targets[0] is component_b.port_b
-    assert component_b.port_b.source is component_a.port_a
+    assert component_a.port_a.targets()[0] is component_b.port_b
+    assert component_b.port_b.source() is component_a.port_a
 
 
 def test_connect_already_connected_ports() -> None:

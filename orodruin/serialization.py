@@ -66,12 +66,12 @@ class ComponentSerializer:
         if library is None:
             library_name = "Internal"
         else:
-            library_name = library.name
+            library_name = library.name()
 
         data = {
-            "type": f"{library_name}::{component.type}",
-            "name": component.name,
-            "ports": {p.name: p.get() for p in component.ports},
+            "type": f"{library_name}::{component.type()}",
+            "name": component.name(),
+            "ports": {p.name(): p.get() for p in component.ports()},
         }
         return data
 
@@ -79,9 +79,9 @@ class ComponentSerializer:
     def _port_definition_data(port: Port) -> Dict[str, Any]:
         """Returns a dict representing the given Port definition."""
         data = {
-            "name": port.name,
-            "direction": port.direction.name,
-            "type": port.type.__name__,
+            "name": port.name(),
+            "direction": port.direction().name,
+            "type": port.type().__name__,
         }
         return data
 
@@ -89,8 +89,8 @@ class ComponentSerializer:
     def _sub_component_definitions(component: Component) -> Dict:
         definitions_data = {}
 
-        for sub_component in component.components:
-            sub_component_type = sub_component.type
+        for sub_component in component.components():
+            sub_component_type = sub_component.type()
 
             if sub_component.library is None:
                 if sub_component_type not in definitions_data:
@@ -105,7 +105,7 @@ class ComponentSerializer:
     def _sub_component_instances(component: Component) -> List:
         components_data = []
 
-        for sub_component in component.components:
+        for sub_component in component.components():
             instance_data = ComponentSerializer.component_instance_data(sub_component)
             components_data.append(instance_data)
 
@@ -115,7 +115,7 @@ class ComponentSerializer:
     def _component_ports(component: Component) -> List[Dict[str, Any]]:
         ports_data = []
 
-        for port in component.ports:
+        for port in component.ports():
             ports_data.append(ComponentSerializer._port_definition_data(port))
 
         return ports_data
@@ -126,11 +126,9 @@ class ComponentSerializer:
     ) -> List[Tuple[PurePosixPath, PurePosixPath]]:
         connections_data = []
 
-        for sub_component in component.components:
-            for port in sub_component.ports:
-                for connection in port.external_connections():
-                    source = connection[0]
-                    target = connection[1]
+        for sub_component in component.components():
+            for port in sub_component.ports():
+                for source, target in port.external_connections():
                     if source and target:
                         connection_paths = (
                             source.relative_path(relative_to=component),
@@ -235,8 +233,8 @@ class ComponentDeserializer:
 
                 sub_component = LibraryManager.get_component(sub_component_type)
 
-            sub_component.name = sub_component_name
-            sub_component.parent = component
+            sub_component.set_name(sub_component_name)
+            sub_component.set_parent(component)
 
             for port_name, port_value in sub_component_data["ports"].items():
                 try:

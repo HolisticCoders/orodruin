@@ -35,7 +35,6 @@ class Library:
 
     path: Path
 
-    @property
     def name(self) -> str:
         """Name of the Library."""
         return self.path.name
@@ -64,7 +63,7 @@ class Library:
                     component_type=component_name,
                     library=self,
                 )
-                component.name = component_name
+                component.set_name(component_name)
                 return component
 
         raise ComponentNotFoundError(
@@ -168,7 +167,7 @@ class LibraryManager:
     def get_library(cls, name: str) -> Optional[Library]:
         """Get a Library instance from a name."""
         for library in cls.libraries():
-            if library.name == name:
+            if library.name() == name:
                 return library
 
         return None
