@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Test Orodruin
 
 on:
   push:
@@ -11,9 +11,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.7
@@ -24,9 +22,11 @@ jobs:
       run: |
         pip install poetry
         poetry install
-    - name: Check formatting with black
-      run: |
-        poetry run black --check .
+    - name: iSort Check
+      run: poetry run isort . --check-only
+    - name: Black Check
+      run: poetry run black --check .
+    - name: Pylint Check
+      run:  poetry run pylint orodruin tests
     - name: Test with pytest
-      run: |
-        poetry run pytest
+      run:  poetry run pytest
