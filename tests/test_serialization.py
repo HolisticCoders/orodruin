@@ -14,7 +14,7 @@ from orodruin.serialization import ComponentSerializer
 
 @pytest.fixture(autouse=True)
 def clear_registered_components() -> Generator:
-    library_path = (Path(__file__) / ".." / "TestLibrary").resolve()
+    library_path = Path(__file__).parent / "TestLibrary"
     LibraryManager.register_library(library_path)
 
     yield
@@ -192,7 +192,7 @@ def test_simple_component_from_json() -> None:
     component_name = "SimpleComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
-        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+        Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
     with component_file.open("r") as handle:
         file_content = handle.read()
@@ -204,7 +204,7 @@ def test_nested_component_from_json() -> None:
     component_name = "NestedComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
-        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+        Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
     with component_file.open("r") as handle:
@@ -217,7 +217,7 @@ def test_referencing_component_from_json() -> None:
     component_name = "ReferencingSimpleComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
-        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+        Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
     with component_file.open("r") as handle:
@@ -230,7 +230,7 @@ def test_referencing_nested_component_from_json() -> None:
     component_name = "ReferencingNestedComponent"
     component = LibraryManager.get_component(component_name)
     component_file = (
-        Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
+        Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
     with component_file.open("r") as handle:
