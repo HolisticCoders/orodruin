@@ -21,7 +21,9 @@ jobs:
       with:
         python-version: 3.7
     - name: Poetry Install
-      uses: knowsuchagency/poetry-install@v2
+      run: |
+        pip install poetry
+        poetry install
     - name: Test with pytest
       run: |
         pytest
