@@ -194,7 +194,7 @@ def test_simple_component_from_json() -> None:
     component_file = (
         Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
-    with open(component_file, "r") as handle:
+    with component_file.open("r") as handle:
         file_content = handle.read()
 
     assert ComponentSerializer.component_as_json(component) == file_content
@@ -207,7 +207,7 @@ def test_nested_component_from_json() -> None:
         Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
-    with open(component_file, "r") as handle:
+    with component_file.open("r") as handle:
         file_content = handle.read()
 
     assert ComponentSerializer.component_as_json(component) == file_content
@@ -220,7 +220,7 @@ def test_referencing_component_from_json() -> None:
         Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
-    with open(component_file, "r") as handle:
+    with component_file.open("r") as handle:
         file_content = handle.read()
 
     assert ComponentSerializer.component_as_json(component) == file_content
@@ -233,7 +233,7 @@ def test_referencing_nested_component_from_json() -> None:
         Path(__file__) / ".." / "TestLibrary" / "orodruin" / f"{component_name}.json"
     )
 
-    with open(component_file, "r") as handle:
+    with component_file.open("r") as handle:
         file_content = handle.read()
 
     assert ComponentSerializer.component_as_json(component) == file_content
