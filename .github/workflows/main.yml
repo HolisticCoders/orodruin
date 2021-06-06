@@ -22,11 +22,13 @@ jobs:
       run: |
         pip install poetry
         poetry install
-    - name: iSort Check
+    - name: isort Check
       run: poetry run isort . --check-only
     - name: Black Check
       run: poetry run black --check .
     - name: Pylint Check
       run:  poetry run pylint orodruin tests
+    - name: Mypy Check
+      run:  poetry run mypy .
     - name: Test with pytest
       run:  poetry run pytest
