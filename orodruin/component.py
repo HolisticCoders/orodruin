@@ -5,6 +5,8 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type
 from uuid import uuid4
 
+from orodruin.signal import Signal
+
 from .graph_manager import GraphManager
 from .port import MultiPort, Port, PortDirection, SinglePort
 
@@ -42,6 +44,11 @@ class Component:
     _synced_ports: Dict[str, List[MultiPort]] = field(default_factory=dict)
 
     _components: List[Component] = field(default_factory=list)
+
+    # Signals
+    name_changed: Signal = field(default_factory=Signal)
+    component_added: Signal = field(default_factory=Signal)
+    port_added: Signal = field(default_factory=Signal)
 
     @classmethod
     def new(
@@ -82,9 +89,13 @@ class Component:
             raise ParentToSelfError(f"Cannot parent {self.name} to itself")
 
         self._parent = other
-        if self not in other.components():
-            # TODO: refactor private member access
-            other._components.append(self)  # pylint: disable= protected-access
+        other.add_child(self)
+
+    def add_child(self, child: Component) -> None:
+        """Parent the `component` under this component."""
+        if child not in self._components:
+            self._components.append(child)
+        self.component_added.emit(child)
 
     def __getattr__(self, name: str) -> Port:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
@@ -108,6 +119,7 @@ class Component:
         """Add a `SinglePort` to this Component."""
         port = SinglePort.new(name, direction, port_type, self)
         self._ports.append(port)
+        self.port_added.emit(port, len(self._ports))
 
     def add_multi_port(
         self,
@@ -138,6 +150,7 @@ class Component:
     def set_name(self, name: str) -> None:
         """Set the name of the Component."""
         self._name = name
+        self.name_changed.emit(name)
 
     def path(self) -> PurePosixPath:
         """Absolute Path of the Component."""
