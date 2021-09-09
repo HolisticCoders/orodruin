@@ -154,7 +154,7 @@ class ComponentDeserializer:
         parent: Optional[Component] = None,
     ) -> "Component":
         """Create a component from its json representation."""
-        with open(file_path, "r") as handle:
+        with open(file_path, "r", encoding="utf-8") as handle:
             data = json.loads(handle.read())
 
         return ComponentDeserializer.component_from_data(

@@ -47,6 +47,7 @@ class Library:
         return None
 
     def targets(self) -> List[Path]:
+        """Return all the targets of this Library"""
         return list(self.path.iterdir())
 
     def get_component(self, component_name: str, target: str = "orodruin") -> Component:
@@ -74,6 +75,7 @@ class Library:
         )
 
     def components(self, target: str = "orodruin") -> List[Component]:
+        """Return all the components of this library for the given target"""
         target_path = self.target_path(target)
 
         if not target_path:
