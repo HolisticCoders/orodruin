@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import (
     TYPE_CHECKING,
+    Any,
     Generic,
     List,
     Optional,
@@ -55,7 +56,7 @@ class SinglePort(Generic[T]):
     ) -> SinglePort[T]:
         """Create a new SinglePort."""
 
-        value: T
+        value: Any
         if issubclass(port_type, PortType):
             value = port_type.new()
         else:

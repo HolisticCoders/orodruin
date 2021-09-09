@@ -12,7 +12,7 @@ from orodruin.library import LibraryManager
 def unregister_libraries() -> Generator:
     yield
     for library in LibraryManager.libraries():
-        LibraryManager.unregister_library(library)
+        LibraryManager.unregister_library(library.path)
 
 
 def test_register_library() -> None:

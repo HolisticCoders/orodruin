@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Callable, List
+from typing import Any, Callable, Dict, List
 
 
 @dataclass
@@ -8,17 +8,17 @@ class Signal:
 
     _callbacks: List[Callable] = field(default_factory=list)
 
-    def subscribe(self, callback: Callable):
+    def subscribe(self, callback: Callable) -> None:
         """Add a new callback to be called when the signal is emited."""
         if callback not in self._callbacks:
             self._callbacks.append(callback)
 
-    def unsubscribe(self, callback: Callable):
+    def unsubscribe(self, callback: Callable) -> None:
         """Remove the callbacks from the registered callbacks."""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def emit(self, *args, **kwargs) -> None:
+    def emit(self, *args: Any, **kwargs: Any) -> None:
         """
         Emit the signal.
 
