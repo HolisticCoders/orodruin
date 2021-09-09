@@ -46,6 +46,9 @@ class Library:
                 return target
         return None
 
+    def targets(self) -> List[Path]:
+        return list(self.path.iterdir())
+
     def get_component(self, component_name: str, target: str = "orodruin") -> Component:
         """Return an Instantiated Component from a given name and target."""
         target_path = self.target_path(target)
@@ -69,6 +72,26 @@ class Library:
         raise ComponentNotFoundError(
             f"No component named {component_name} found in any registered libraries"
         )
+
+    def components(self, target: str = "orodruin") -> List[Component]:
+        target_path = self.target_path(target)
+
+        if not target_path:
+            raise TargetDoesNotExistError(f"Library {self.name} has no target {target}")
+
+        components: List[Component] = []
+        for component_path in target_path.iterdir():
+            if component_path.suffix == ".json":
+                component = ComponentDeserializer.component_from_json(
+                    component_path,
+                    component_type=component_path.name,
+                    library=self,
+                )
+                component.set_name(component_path.name)
+
+                components.append(component)
+
+        return components
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, str):
