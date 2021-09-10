@@ -2,11 +2,14 @@
 """GraphManager handles graph modifications and and ensures a valid state."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, TypeVar
+from dataclasses import field
+from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar
+
+from orodruin.signal import Signal
 
 if TYPE_CHECKING:
     from .component import Component  # pylint: disable = cyclic-import
-    from .port import MultiPort, Port  # pylint: disable = cyclic-import
+    from .port import Port  # pylint: disable = cyclic-import
 
 T = TypeVar("T")  # pylint: disable = invalid-name
 
@@ -141,26 +144,16 @@ class GraphManager:
                 f"don't exist in the same scope"
             )
 
-        from .port import (  # pylint: disable = import-outside-toplevel
-            MultiPort,
-            SinglePort,
-        )
-
-        if isinstance(target, SinglePort):
-            target_source = target.source()
-            if target_source:
-                if force:
-                    GraphManager.disconnect_ports(target_source, target)
-                else:
-                    raise PortAlreadyConnectedError(
-                        f"port {target.name()} is already connected to "
-                        f"{target_source.name()}, "
-                        "use `force=True` to connect regardless."
-                    )
-
-        if isinstance(target, MultiPort):
-            target.add_port()
-            target = target[-1]
+        target_source = target.source()
+        if target_source:
+            if force:
+                GraphManager.disconnect_ports(target_source, target)
+            else:
+                raise PortAlreadyConnectedError(
+                    f"port {target.name()} is already connected to "
+                    f"{target_source.name()}, "
+                    "use `force=True` to connect regardless."
+                )
 
         # _source and _targets are purposefully private to not be exposed to the users
         # but we need to access them here to ensure the validity of the connection.
@@ -177,10 +170,3 @@ class GraphManager:
         # but we need to access them here to ensure the validity of the connection.
         source._targets.remove(target)  # type: ignore
         target._source = None  # type: ignore
-
-    @staticmethod
-    def sync_port_sizes(port: MultiPort) -> None:
-        """Sync all the follower ports of the given port."""
-        component = port.component()
-        for synced_port in component._synced_ports.get(port.name(), []):
-            synced_port.add_port()

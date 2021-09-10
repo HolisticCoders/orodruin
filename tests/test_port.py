@@ -6,7 +6,7 @@ import pytest
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager, PortAlreadyConnectedError
 from orodruin.pathed_object import PathedObject
-from orodruin.port import Port, PortDirection, SinglePort
+from orodruin.port import Port, PortDirection, Port
 
 
 @pytest.fixture(autouse=True)
@@ -21,12 +21,12 @@ def test_port_issubclass_pathedobject() -> None:
 
 
 def test_implements_port() -> None:
-    assert issubclass(SinglePort, Port)
+    assert issubclass(Port, Port)
 
 
 def test_init_port() -> None:
     component = Component.new("component")
-    port = SinglePort("port", PortDirection.input, int, component, 0)
+    port = Port("port", PortDirection.input, int, component, 0)
     assert port.name() == "port"
 
 

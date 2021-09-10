@@ -7,7 +7,7 @@ import pytest
 from orodruin.component import Component, ParentToSelfError
 from orodruin.graph_manager import GraphManager
 from orodruin.pathed_object import PathedObject
-from orodruin.port import PortDirection, SinglePort
+from orodruin.port import PortDirection, Port
 
 
 @pytest.fixture(autouse=True)
@@ -76,7 +76,7 @@ def test_path_nested_component_relative() -> None:
 def test_access_port() -> None:
     component = Component.new("component")
     component.add_port("input1", PortDirection.input, int)
-    assert isinstance(component.input1, SinglePort)
+    assert isinstance(component.input1, Port)
 
 
 def test_access_innexisting_port() -> None:

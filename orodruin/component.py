@@ -8,7 +8,7 @@ from uuid import uuid4
 from orodruin.signal import Signal
 
 from .graph_manager import GraphManager
-from .port import MultiPort, Port, PortDirection, SinglePort
+from .port import Port, PortDirection
 
 if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
@@ -41,7 +41,6 @@ class Component:
     _parent: Optional[Component] = None
 
     _ports: List[Port] = field(default_factory=list)
-    _synced_ports: Dict[str, List[MultiPort]] = field(default_factory=dict)
 
     _components: List[Component] = field(default_factory=list)
 
@@ -116,32 +115,10 @@ class Component:
         direction: PortDirection,
         port_type: Type,
     ) -> None:
-        """Add a `SinglePort` to this Component."""
-        port = SinglePort.new(name, direction, port_type, self)
+        """Add a `Port` to this Component."""
+        port = Port.new(name, direction, port_type, self)
         self._ports.append(port)
         self.port_added.emit(port, len(self._ports))
-
-    def add_multi_port(
-        self,
-        name: str,
-        direction: PortDirection,
-        port_type: Type,
-        size: int = 0,
-    ) -> None:
-        """Add a `PortCollection` to this Component."""
-        port = MultiPort.new(name, direction, port_type, self, size)
-        self._ports.append(port)
-
-    def sync_port_sizes(self, master: MultiPort, slave: MultiPort) -> None:
-        """Register Ports that needs their sizes synced.
-
-        The follower port will be synced with the main's.
-        """
-        slaves = self._synced_ports.get(master.name(), [])
-
-        if slave not in slaves:
-            slaves.append(slave)
-            self._synced_ports[master.name()] = slaves
 
     def name(self) -> str:
         """Name of the Component."""
