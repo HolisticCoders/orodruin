@@ -6,7 +6,7 @@ import pytest
 from orodruin.component import Component
 from orodruin.graph_manager import GraphManager, PortAlreadyConnectedError
 from orodruin.pathed_object import PathedObject
-from orodruin.port import Port, PortDirection, Port
+from orodruin.port import Port, PortDirection
 
 
 @pytest.fixture(autouse=True)
@@ -25,14 +25,14 @@ def test_implements_port() -> None:
 
 
 def test_init_port() -> None:
-    component = Component.new("component")
+    component = Component("component")
     port = Port("port", PortDirection.input, int, component, 0)
     assert port.name() == "port"
 
 
 def test_set_port_name() -> None:
-    component = Component.new("component")
-    component.add_port("my_port", PortDirection.input, int)
+    component = Component("component")
+    component.register_port("my_port", PortDirection.input, int)
     port = component.port("my_port")
     assert port.name() == "my_port"
 
@@ -41,10 +41,10 @@ def test_set_port_name() -> None:
 
 
 def test_connect_ports() -> None:
-    component_a = Component.new("component_a")
-    component_b = Component.new("component_b")
-    component_a.add_port("port_a", PortDirection.output, int)
-    component_b.add_port("port_b", PortDirection.input, int)
+    component_a = Component("component_a")
+    component_b = Component("component_b")
+    component_a.register_port("port_a", PortDirection.output, int)
+    component_b.register_port("port_b", PortDirection.input, int)
 
     assert len(component_a.port_a.targets()) == 0
     assert component_b.port_b.source() is None
@@ -58,10 +58,10 @@ def test_connect_ports() -> None:
 
 
 def test_connect_already_connected_ports() -> None:
-    component_a = Component.new("component_a")
-    component_b = Component.new("component_b")
-    component_a.add_port("port_a", PortDirection.output, int)
-    component_b.add_port("port_b", PortDirection.input, int)
+    component_a = Component("component_a")
+    component_b = Component("component_b")
+    component_a.register_port("port_a", PortDirection.output, int)
+    component_b.register_port("port_b", PortDirection.input, int)
 
     component_a.port_a.connect(component_b.port_b)
     with pytest.raises(PortAlreadyConnectedError):
@@ -69,47 +69,47 @@ def test_connect_already_connected_ports() -> None:
 
 
 def test_disconnect_ports() -> None:
-    component_a = Component.new("component_a")
-    component_b = Component.new("component_b")
-    component_a.add_port("port_a", PortDirection.output, int)
-    component_b.add_port("port_b", PortDirection.input, int)
+    component_a = Component("component_a")
+    component_b = Component("component_b")
+    component_a.register_port("port_a", PortDirection.output, int)
+    component_b.register_port("port_b", PortDirection.input, int)
 
     component_a.port_a.connect(component_b.port_b)
     component_a.port_a.disconnect(component_b.port_b)
 
 
 def test_connect_different_type_ports() -> None:
-    component_a = Component.new("component_a")
-    component_b = Component.new("component_b")
-    component_a.add_port("output", PortDirection.output, bool)
-    component_b.add_port("input", PortDirection.input, int)
+    component_a = Component("component_a")
+    component_b = Component("component_b")
+    component_a.register_port("output", PortDirection.output, bool)
+    component_b.register_port("input", PortDirection.input, int)
 
     with pytest.raises(TypeError):
         component_a.output.connect(component_b.input)
 
 
 def test_set_port_value() -> None:
-    component = Component.new("component")
-    component.add_port("my_port", PortDirection.input, int)
+    component = Component("component")
+    component.register_port("my_port", PortDirection.input, int)
 
     component.my_port.set(1)
     assert component.my_port.get() == 1
 
 
 def test_set_port_wrong_value_type() -> None:
-    component = Component.new("component")
-    component.add_port("my_port", PortDirection.input, str)
+    component = Component("component")
+    component.register_port("my_port", PortDirection.input, str)
 
     with pytest.raises(TypeError):
         component.my_port.set(1)
 
 
 def test_get_connected_port_value() -> None:
-    component_a = Component.new("component")
-    component_a.add_port("output", PortDirection.output, int)
+    component_a = Component("component")
+    component_a.register_port("output", PortDirection.output, int)
 
-    component_b = Component.new("component")
-    component_b.add_port("input", PortDirection.input, int)
+    component_b = Component("component")
+    component_b.register_port("input", PortDirection.input, int)
 
     component_a.output.connect(component_b.input)
 

@@ -173,11 +173,11 @@ class ComponentDeserializer:
     ) -> Component:
         """Create a component from its serialized data."""
 
-        component = Component.new(
+        component = Component(
             "root",
             component_type=component_type,
             library=library,
-            parent=parent,
+            parent_graph=parent,
         )
 
         ComponentDeserializer._create_ports(component, component_data["ports"])
@@ -207,7 +207,7 @@ class ComponentDeserializer:
                     "orodruin port type"
                 ) from error
 
-            component.add_port(name, direction, port_type)
+            component.register_port(name, direction, port_type)
 
     @staticmethod
     def _create_subcomponents(
@@ -234,7 +234,7 @@ class ComponentDeserializer:
                 sub_component = LibraryManager.get_component(sub_component_type)
 
             sub_component.set_name(sub_component_name)
-            sub_component.set_parent(component)
+            sub_component.set_parent_graph(component)
 
             for port_name, port_value in sub_component_data["ports"].items():
                 try:

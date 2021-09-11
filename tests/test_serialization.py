@@ -26,10 +26,10 @@ def clear_registered_components() -> Generator:
 
 
 def test_component_instance_data() -> None:
-    root = Component.new("root")
-    root.add_port("input1", PortDirection.input, int)
-    root.add_port("input2", PortDirection.input, int)
-    root.add_port("output", PortDirection.output, int)
+    root = Component("root")
+    root.register_port("input1", PortDirection.input, int)
+    root.register_port("input2", PortDirection.input, int)
+    root.register_port("output", PortDirection.output, int)
     root.input1.set(1)
     root.input2.set(2)
     root.output.set(3)
@@ -48,22 +48,22 @@ def test_component_instance_data() -> None:
 
 
 def test_component_definition_data() -> None:
-    root = Component.new("root")
-    root.add_port("input1", PortDirection.input, int)
-    root.add_port("input2", PortDirection.input, int)
-    root.add_port("output", PortDirection.output, int)
+    root = Component("root")
+    root.register_port("input1", PortDirection.input, int)
+    root.register_port("input2", PortDirection.input, int)
+    root.register_port("output", PortDirection.output, int)
 
-    child_a = Component.new("child_a")
-    child_a.add_port("input1", PortDirection.input, int)
-    child_a.add_port("input2", PortDirection.input, int)
-    child_a.add_port("output", PortDirection.output, int)
-    child_a.set_parent(root)
+    child_a = Component("child_a")
+    child_a.register_port("input1", PortDirection.input, int)
+    child_a.register_port("input2", PortDirection.input, int)
+    child_a.register_port("output", PortDirection.output, int)
+    child_a.set_parent_graph(root)
 
-    child_b = Component.new("child_b")
-    child_b.add_port("input1", PortDirection.input, int)
-    child_b.add_port("input2", PortDirection.input, int)
-    child_b.add_port("output", PortDirection.output, int)
-    child_b.set_parent(root)
+    child_b = Component("child_b")
+    child_b.register_port("input1", PortDirection.input, int)
+    child_b.register_port("input2", PortDirection.input, int)
+    child_b.register_port("output", PortDirection.output, int)
+    child_b.set_parent_graph(root)
 
     root.input1.connect(child_a.input1)
     root.input2.connect(child_a.input2)
@@ -168,19 +168,19 @@ def test_component_definition_data() -> None:
 
 
 def test_component_as_json() -> None:
-    root = Component.new("root")
+    root = Component("root")
 
-    child_a = Component.new("child_a")
-    child_a.add_port("input1", PortDirection.input, int)
-    child_a.add_port("input2", PortDirection.input, int)
-    child_a.add_port("output", PortDirection.output, int)
-    child_a.set_parent(root)
+    child_a = Component("child_a")
+    child_a.register_port("input1", PortDirection.input, int)
+    child_a.register_port("input2", PortDirection.input, int)
+    child_a.register_port("output", PortDirection.output, int)
+    child_a.set_parent_graph(root)
 
-    child_b = Component.new("child_b")
-    child_b.add_port("input1", PortDirection.input, int)
-    child_b.add_port("input2", PortDirection.input, int)
-    child_b.add_port("output", PortDirection.output, int)
-    child_b.set_parent(root)
+    child_b = Component("child_b")
+    child_b.register_port("input1", PortDirection.input, int)
+    child_b.register_port("input2", PortDirection.input, int)
+    child_b.register_port("output", PortDirection.output, int)
+    child_b.set_parent_graph(root)
 
     child_a.output.connect(child_b.input1)
     child_a.output.connect(child_b.input2)
@@ -240,10 +240,10 @@ def test_referencing_nested_component_from_json() -> None:
 
 
 def test_serialize_custom_port_type() -> None:
-    root = Component.new("root")
+    root = Component("root")
 
-    sub_component = Component.new("sub_component")
-    sub_component.set_parent(root)
+    sub_component = Component("sub_component")
+    sub_component.set_parent_graph(root)
 
-    sub_component.add_port("matrix", PortDirection.input, Matrix)
+    sub_component.register_port("matrix", PortDirection.input, Matrix)
     ComponentSerializer.component_as_json(root)

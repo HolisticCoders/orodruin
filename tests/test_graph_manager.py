@@ -17,13 +17,13 @@ def clear_registered_components() -> Generator:
 def test_register_component() -> None:
     assert len(GraphManager.components()) == 0
 
-    Component.new("component")
+    Component("component")
 
     assert len(GraphManager.components()) == 1
 
 
 def test_get_component_from_path() -> None:
-    root_component = Component.new("root")
+    root_component = Component("root")
     same_component = GraphManager.component_from_path("/root")
 
     assert root_component is same_component
