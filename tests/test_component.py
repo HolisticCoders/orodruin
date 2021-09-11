@@ -1,20 +1,12 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 from pathlib import PurePosixPath
-from typing import Generator
+from typing import Callable
 
 import pytest
 
 from orodruin.component import Component, ParentToSelfError
-from orodruin.graph_manager import GraphManager
 from orodruin.pathed_object import PathedObject
 from orodruin.port import Port, PortDirection
-
-
-@pytest.fixture(autouse=True)
-def clear_registered_components() -> Generator:
-
-    yield
-    GraphManager.clear_registered_components()
 
 
 def test_implements_pathedobject() -> None:
@@ -32,9 +24,13 @@ def test_add_ports() -> None:
 
     assert len(component.ports()) == 0
 
-    component.register_port("input1", PortDirection.input, int)
-    component.register_port("input2", PortDirection.input, int)
-    component.register_port("output", PortDirection.output, int)
+    input1 = Port("input1", PortDirection.input, int, component)
+    input2 = Port("input2", PortDirection.input, int, component)
+    output = Port("output", PortDirection.input, int, component)
+
+    component.register_port(input1)
+    component.register_port(input2)
+    component.register_port(output)
 
     assert len(component.ports()) == 3
 
@@ -56,8 +52,8 @@ def test_path_nested_component() -> None:
     child_a = Component("child_a")
     child_b = Component("child_b")
 
-    child_a.set_parent_graph(root_component)
-    child_b.set_parent_graph(child_a)
+    child_a.set_parent_graph(root_component.graph())
+    child_b.set_parent_graph(child_a.graph())
 
     assert child_b.path() == PurePosixPath("/root/child_a/child_b")
 
@@ -67,15 +63,15 @@ def test_path_nested_component_relative() -> None:
     child_a = Component("child_a")
     child_b = Component("child_b")
 
-    child_a.set_parent_graph(root_component)
-    child_b.set_parent_graph(child_a)
+    child_a.set_parent_graph(root_component.graph())
+    child_b.set_parent_graph(child_a.graph())
 
     assert child_b.relative_path(relative_to=child_a) == PurePosixPath("child_b")
 
 
-def test_access_port() -> None:
+def test_access_port(create_port: Callable[..., Port]) -> None:
     component = Component("component")
-    component.register_port("input1", PortDirection.input, int)
+    create_port(component, "input1")
     assert isinstance(component.input1, Port)
 
 
@@ -83,30 +79,3 @@ def test_access_innexisting_port() -> None:
     component = Component("component")
     with pytest.raises(NameError):
         component.this_is_not_a_port  # pylint: disable = pointless-statement
-
-
-def test_parent_component() -> None:
-    parent = Component("parent")
-    child = Component("child")
-
-    child.set_parent_graph(parent)
-
-    assert child.parent_graph() is parent
-    assert child in parent.components()
-
-
-def test_parent_component_twice() -> None:
-    parent = Component("parent")
-    child = Component("child")
-
-    child.set_parent_graph(parent)
-    child.set_parent_graph(parent)
-
-    assert parent.components().count(child) == 1
-
-
-def test_parent_to_self() -> None:
-    component = Component("component")
-
-    with pytest.raises(ParentToSelfError):
-        component.set_parent_graph(component)

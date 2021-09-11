@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 from uuid import UUID
 
-from .component import Component
 from .connection import Connection
 from .port import Port
 from .signal import Signal
+
+if TYPE_CHECKING:
+    from .component import Component
 
 
 @dataclass
@@ -15,10 +19,11 @@ class Graph:
     A graph organizes components, ports, and connections between them.
     """
 
+    _parent_component: Component
+
     _components: Dict[UUID, Component] = field(default_factory=dict)
     _ports: Dict[UUID, Port] = field(default_factory=dict)
     _connections: Dict[UUID, Connection] = field(default_factory=dict)
-    _parent_component: Optional[Component] = None
 
     # Signals
     component_registered: Signal[Component] = field(default_factory=Signal)
@@ -40,7 +45,7 @@ class Graph:
         """Return the connections registered to this graph, mapped by UUID."""
         return self._connections
 
-    def parent_component(self) -> Optional[Component]:
+    def parent_component(self) -> Component:
         """Return this graph parent component."""
         return self._parent_component
 

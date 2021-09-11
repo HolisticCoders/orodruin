@@ -58,6 +58,23 @@ class ConnectPorts(Command):
             PortAlreadyConnectedError: when connecting to an already connected port
                 and the force argument is False
         """
+        if not (
+            self._graph
+            in [
+                self._source.component().graph(),
+                self._source.component().parent_graph(),
+            ]
+            and self._graph
+            in [
+                self._target.component().graph(),
+                self._target.component().parent_graph(),
+            ]
+        ):
+            raise OutOfScopeConnectionError(
+                f"port {self._source.name()} and{self._target.name()} "
+                f"don't exist in the same scope"
+            )
+
         if self._target.component() is self._source.component():
             raise ConnectionOnSameComponentError(
                 f"{self._source.name()} and {self._target.name()} "
@@ -73,12 +90,16 @@ class ConnectPorts(Command):
             )
 
         same_scope_connection = (
-            self._source.component().parent_graph()
-            == self._target.component().parent_graph()
+            self._source.component().parent_graph() is not None
+            and self._target.component().parent_graph() is not None
+            and (
+                self._source.component().parent_graph()
+                == self._target.component().parent_graph()
+            )
         )
         connection_with_parent = (
-            self._source.component().parent_graph() == self._target.component()
-            or self._source.component() == self._target.component().parent_graph()
+            self._source.component().parent_component() == self._target.component()
+            or self._source.component() == self._target.component().parent_component()
         )
         if same_scope_connection:
             if self._source.direction() == self._target.direction():
@@ -95,11 +116,6 @@ class ConnectPorts(Command):
                     f"connection from or to the parent component "
                     "can only be of the same direction."
                 )
-        else:
-            raise OutOfScopeConnectionError(
-                f"port {self._source.name()} and{self._target.name()} "
-                f"don't exist in the same scope"
-            )
 
         self._deleted_connection = find_connection(
             self._graph, self._source, self._target

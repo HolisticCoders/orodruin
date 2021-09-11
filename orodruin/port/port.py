@@ -3,10 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
+from typing import TYPE_CHECKING, Generic, Type, TypeVar
 from uuid import UUID, uuid4
-
-from .types import PortType
 
 if TYPE_CHECKING:
     from ..component import Component  # pylint: disable = cyclic-import
@@ -35,27 +33,12 @@ class Port(Generic[T]):
     _type: Type[T]
     _component: Component
 
-    _value: T
+    _value: T = field(init=False)
 
     _uuid: UUID = field(default_factory=uuid4)
 
-    @classmethod
-    def new(
-        cls,
-        name: str,
-        direction: PortDirection,
-        port_type: Type[T],
-        component: Component,
-    ) -> Port[T]:
-        """Create a new Port."""
-
-        value: Any
-        if issubclass(port_type, PortType):
-            value = port_type.new()
-        else:
-            value = port_type()
-
-        return cls(name, direction, port_type, component, value)
+    def __post_init__(self) -> None:
+        self._value = self._type()
 
     def component(self) -> Component:
         """The Component this Port is attached on."""
@@ -105,6 +88,8 @@ class Port(Generic[T]):
 
     def path(self) -> PurePosixPath:
         """The Path of this Port, absolute or relative."""
+        if not self._component:
+            return PurePosixPath(self.name())
         path = self._component.path().with_suffix(f".{self.name()}")
         return path
 

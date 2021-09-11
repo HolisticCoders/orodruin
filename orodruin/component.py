@@ -5,10 +5,9 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Dict, Optional
 from uuid import UUID, uuid4
 
-from orodruin.signal import Signal
-
 from .graph import Graph
 from .port import Port
+from .signal import Signal
 
 if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
@@ -40,7 +39,7 @@ class Component:
 
     _library: Optional[Library] = None
     _parent_graph: Optional[Graph] = None
-    _child_graph: Optional[Graph] = field(default_factory=Graph)
+    _graph: Graph = field(init=False)
 
     _ports: Dict[UUID, Port] = field(default_factory=dict)
 
@@ -50,6 +49,9 @@ class Component:
     name_changed: Signal[str] = field(default_factory=Signal)
     port_registered: Signal[Port] = field(default_factory=Signal)
     port_unregistered: Signal[Port] = field(default_factory=Signal)
+
+    def __post_init__(self) -> None:
+        self._graph = Graph(self)
 
     def type(self) -> str:
         """Type of the Component."""
@@ -79,9 +81,15 @@ class Component:
         """Set the parent graph of the component."""
         self._parent_graph = graph
 
-    def child_graph(self) -> Optional[Graph]:
-        """Child graph of the component."""
-        return self._child_graph
+    def graph(self) -> Graph:
+        """Graph containing child components."""
+        return self._graph
+
+    def parent_component(self) -> Optional[Component]:
+        """Parent component."""
+        if not self._parent_graph:
+            return None
+        return self._parent_graph.parent_component()
 
     def __getattr__(self, name: str) -> Port:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
@@ -117,7 +125,7 @@ class Component:
 
     def path(self) -> PurePosixPath:
         """Absolute Path of the Component."""
-        parent = self.parent_graph()
+        parent = self.parent_component()
         if parent:
             path = parent.path() / self.name()
         else:
