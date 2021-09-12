@@ -1,191 +1,192 @@
-# # pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
-# from pathlib import Path, PurePosixPath
-# from typing import Generator
+# pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
+from pathlib import Path, PurePosixPath
+from typing import Generator
 
-# import pytest
+import pytest
 
-# from orodruin.component import Component
-# from orodruin.graph_manager import GraphManager
-# from orodruin.library import LibraryManager
-# from orodruin.port import PortDirection
-# from orodruin.port.types import Matrix
-# from orodruin.serialization import ComponentSerializer
-
-
-# @pytest.fixture(autouse=True)
-# def clear_registered_components() -> Generator:
-#     library_path = Path(__file__).parent / "TestLibrary"
-#     LibraryManager.register_library(library_path)
-
-#     yield
-
-#     GraphManager.clear_registered_components()
-
-#     for library in LibraryManager.libraries():
-#         LibraryManager.unregister_library(library.path)
+from orodruin.command import ConnectPorts, CreateComponent, CreatePort
+from orodruin.component import Component
+from orodruin.library import LibraryManager
+from orodruin.port import PortDirection
+from orodruin.port.types import Matrix
+from orodruin.serialization import ComponentSerializer
 
 
-# def test_component_instance_data() -> None:
-#     root = Component("root")
-#     root.register_port("input1", PortDirection.input, int)
-#     root.register_port("input2", PortDirection.input, int)
-#     root.register_port("output", PortDirection.output, int)
-#     root.input1.set(1)
-#     root.input2.set(2)
-#     root.output.set(3)
+@pytest.fixture(autouse=True)
+def clear_registered_components() -> Generator:
+    library_path = Path(__file__).parent / "TestLibrary"
+    LibraryManager.register_library(library_path)
 
-#     expected_data = {
-#         "type": f"Internal::{root.type()}",
-#         "name": "root",
-#         "ports": {
-#             "input1": 1,
-#             "input2": 2,
-#             "output": 3,
-#         },
-#     }
+    yield
 
-#     assert ComponentSerializer.component_instance_data(root) == expected_data
+    for library in LibraryManager.libraries():
+        LibraryManager.unregister_library(library.path)
 
 
-# def test_component_definition_data() -> None:
-#     root = Component("root")
-#     root.register_port("input1", PortDirection.input, int)
-#     root.register_port("input2", PortDirection.input, int)
-#     root.register_port("output", PortDirection.output, int)
+def test_component_instance_data(root: Component) -> None:
+    component = CreateComponent(root.graph(), "multiply").do()
+    CreatePort(root.graph(), component, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), component, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), component, "output", PortDirection.output, int).do()
 
-#     child_a = Component("child_a")
-#     child_a.register_port("input1", PortDirection.input, int)
-#     child_a.register_port("input2", PortDirection.input, int)
-#     child_a.register_port("output", PortDirection.output, int)
-#     child_a.set_parent_graph(root)
+    component.input1.set(2)
+    component.input2.set(2)
+    component.output.set(4)
 
-#     child_b = Component("child_b")
-#     child_b.register_port("input1", PortDirection.input, int)
-#     child_b.register_port("input2", PortDirection.input, int)
-#     child_b.register_port("output", PortDirection.output, int)
-#     child_b.set_parent_graph(root)
+    expected_data = {
+        "type": f"Internal::{component.type()}",
+        "name": "multiply",
+        "ports": {
+            "input1": 2,
+            "input2": 2,
+            "output": 4,
+        },
+    }
 
-#     root.input1.connect(child_a.input1)
-#     root.input2.connect(child_a.input2)
-#     child_a.output.connect(child_b.input1)
-#     child_a.output.connect(child_b.input2)
-#     child_b.output.connect(root.output)
-
-#     expected_data = {
-#         "definitions": {
-#             str(child_a.type()): {
-#                 "definitions": {},
-#                 "components": [],
-#                 "connections": [],
-#                 "ports": [
-#                     {
-#                         "name": "input1",
-#                         "direction": "input",
-#                         "type": "int",
-#                     },
-#                     {
-#                         "name": "input2",
-#                         "direction": "input",
-#                         "type": "int",
-#                     },
-#                     {
-#                         "name": "output",
-#                         "direction": "output",
-#                         "type": "int",
-#                     },
-#                 ],
-#             },
-#             str(child_b.type()): {
-#                 "definitions": {},
-#                 "components": [],
-#                 "connections": [],
-#                 "ports": [
-#                     {
-#                         "name": "input1",
-#                         "direction": "input",
-#                         "type": "int",
-#                     },
-#                     {
-#                         "name": "input2",
-#                         "direction": "input",
-#                         "type": "int",
-#                     },
-#                     {
-#                         "name": "output",
-#                         "direction": "output",
-#                         "type": "int",
-#                     },
-#                 ],
-#             },
-#         },
-#         "components": [
-#             {
-#                 "name": "child_a",
-#                 "type": f"Internal::{child_a.type()}",
-#                 "ports": {
-#                     "input1": 0,
-#                     "input2": 0,
-#                     "output": 0,
-#                 },
-#             },
-#             {
-#                 "name": "child_b",
-#                 "type": f"Internal::{child_b.type()}",
-#                 "ports": {
-#                     "input1": 0,
-#                     "input2": 0,
-#                     "output": 0,
-#                 },
-#             },
-#         ],
-#         "ports": [
-#             {
-#                 "name": "input1",
-#                 "direction": "input",
-#                 "type": "int",
-#             },
-#             {
-#                 "name": "input2",
-#                 "direction": "input",
-#                 "type": "int",
-#             },
-#             {
-#                 "name": "output",
-#                 "direction": "output",
-#                 "type": "int",
-#             },
-#         ],
-#         "connections": [
-#             (PurePosixPath(".input1"), PurePosixPath("child_a.input1")),
-#             (PurePosixPath(".input2"), PurePosixPath("child_a.input2")),
-#             (PurePosixPath("child_a.output"), PurePosixPath("child_b.input1")),
-#             (PurePosixPath("child_a.output"), PurePosixPath("child_b.input2")),
-#             (PurePosixPath("child_b.output"), PurePosixPath(".output")),
-#         ],
-#     }
-
-#     assert ComponentSerializer.component_definition_data(root) == expected_data
+    assert ComponentSerializer.component_instance_data(component) == expected_data
 
 
-# def test_component_as_json() -> None:
-#     root = Component("root")
+def test_component_definition_data(root: Component) -> None:
+    parent = CreateComponent(root.graph(), "parent").do()
+    CreatePort(root.graph(), parent, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), parent, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), parent, "output", PortDirection.output, int).do()
 
-#     child_a = Component("child_a")
-#     child_a.register_port("input1", PortDirection.input, int)
-#     child_a.register_port("input2", PortDirection.input, int)
-#     child_a.register_port("output", PortDirection.output, int)
-#     child_a.set_parent_graph(root)
+    child_a = CreateComponent(parent.graph(), "child_a").do()
+    CreatePort(root.graph(), child_a, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_a, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_a, "output", PortDirection.output, int).do()
 
-#     child_b = Component("child_b")
-#     child_b.register_port("input1", PortDirection.input, int)
-#     child_b.register_port("input2", PortDirection.input, int)
-#     child_b.register_port("output", PortDirection.output, int)
-#     child_b.set_parent_graph(root)
+    child_b = CreateComponent(parent.graph(), "child_b").do()
+    CreatePort(root.graph(), child_b, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_b, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_b, "output", PortDirection.output, int).do()
 
-#     child_a.output.connect(child_b.input1)
-#     child_a.output.connect(child_b.input2)
+    ConnectPorts(parent.graph(), parent.input1, child_a.input1).do()
+    ConnectPorts(parent.graph(), parent.input2, child_a.input2).do()
+    ConnectPorts(parent.graph(), child_a.output, child_b.input1).do()
+    ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
+    ConnectPorts(parent.graph(), child_b.output, parent.output).do()
 
-#     ComponentSerializer.component_as_json(root)
+    expected_data = {
+        "definitions": {
+            str(child_a.type()): {
+                "definitions": {},
+                "components": [],
+                "connections": [],
+                "ports": [
+                    {
+                        "name": "input1",
+                        "direction": "input",
+                        "type": "int",
+                    },
+                    {
+                        "name": "input2",
+                        "direction": "input",
+                        "type": "int",
+                    },
+                    {
+                        "name": "output",
+                        "direction": "output",
+                        "type": "int",
+                    },
+                ],
+            },
+            str(child_b.type()): {
+                "definitions": {},
+                "components": [],
+                "connections": [],
+                "ports": [
+                    {
+                        "name": "input1",
+                        "direction": "input",
+                        "type": "int",
+                    },
+                    {
+                        "name": "input2",
+                        "direction": "input",
+                        "type": "int",
+                    },
+                    {
+                        "name": "output",
+                        "direction": "output",
+                        "type": "int",
+                    },
+                ],
+            },
+        },
+        "components": [
+            {
+                "name": "child_a",
+                "type": f"Internal::{child_a.type()}",
+                "ports": {
+                    "input1": 0,
+                    "input2": 0,
+                    "output": 0,
+                },
+            },
+            {
+                "name": "child_b",
+                "type": f"Internal::{child_b.type()}",
+                "ports": {
+                    "input1": 0,
+                    "input2": 0,
+                    "output": 0,
+                },
+            },
+        ],
+        "ports": [
+            {
+                "name": "input1",
+                "direction": "input",
+                "type": "int",
+            },
+            {
+                "name": "input2",
+                "direction": "input",
+                "type": "int",
+            },
+            {
+                "name": "output",
+                "direction": "output",
+                "type": "int",
+            },
+        ],
+        "connections": [
+            (".input1", "child_a.input1"),
+            (".input2", "child_a.input2"),
+            ("child_a.output", "child_b.input1"),
+            ("child_a.output", "child_b.input2"),
+            ("child_b.output", ".output"),
+        ],
+    }
+
+    assert ComponentSerializer.component_definition_data(parent) == expected_data
+
+
+def test_component_as_json(root: Component) -> None:
+    parent = CreateComponent(root.graph(), "parent").do()
+    CreatePort(root.graph(), parent, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), parent, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), parent, "output", PortDirection.output, int).do()
+
+    child_a = CreateComponent(parent.graph(), "child_a").do()
+    CreatePort(root.graph(), child_a, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_a, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_a, "output", PortDirection.output, int).do()
+
+    child_b = CreateComponent(parent.graph(), "child_b").do()
+    CreatePort(root.graph(), child_b, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_b, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), child_b, "output", PortDirection.output, int).do()
+
+    ConnectPorts(parent.graph(), parent.input1, child_a.input1).do()
+    ConnectPorts(parent.graph(), parent.input2, child_a.input2).do()
+    ConnectPorts(parent.graph(), child_a.output, child_b.input1).do()
+    ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
+    ConnectPorts(parent.graph(), child_b.output, parent.output).do()
+
+    ComponentSerializer.component_as_json(parent)
 
 
 # def test_simple_component_from_json() -> None:
