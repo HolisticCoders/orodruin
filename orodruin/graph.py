@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 from uuid import UUID
 
 from .connection import Connection
@@ -33,17 +33,17 @@ class Graph:
     connection_registered: Signal[Connection] = field(default_factory=Signal)
     connection_unregistered: Signal[Connection] = field(default_factory=Signal)
 
-    def components(self) -> Dict[UUID, Component]:
-        """Return the components registered to this graph, mapped by UUID."""
-        return self._components
+    def components(self) -> List[Component]:
+        """Return the components registered to this graph."""
+        return list(self._components.values())
 
-    def ports(self) -> Dict[UUID, Port]:
-        """Return the ports registered to this graph, mapped by UUID."""
-        return self._ports
+    def ports(self) -> List[Port]:
+        """Return the ports registered to this graph."""
+        return list(self._ports.values())
 
-    def connections(self) -> Dict[UUID, Connection]:
-        """Return the connections registered to this graph, mapped by UUID."""
-        return self._connections
+    def connections(self) -> List[Connection]:
+        """Return the connections registered to this graph."""
+        return list(self._connections.values())
 
     def parent_component(self) -> Component:
         """Return this graph parent component."""

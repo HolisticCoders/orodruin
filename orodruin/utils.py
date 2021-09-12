@@ -12,7 +12,7 @@ class ComponentDoesNotExistError(ValueError):
 
 def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connection]:
     """Find the connection between two ports of a graph."""
-    for connection in graph.connections().values():
+    for connection in graph.connections():
         if connection.source() != source:
             continue
         elif connection.target() != target:

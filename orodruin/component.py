@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from .graph import Graph
@@ -57,9 +57,9 @@ class Component:
         """Type of the Component."""
         return self._type
 
-    def ports(self) -> Dict[UUID, Port]:
+    def ports(self) -> List[Port]:
         """List of the Component's Ports."""
-        return self._ports
+        return list(self._ports.values())
 
     def uuid(self) -> UUID:
         """UUID of this component."""
@@ -93,7 +93,7 @@ class Component:
 
     def __getattr__(self, name: str) -> Port:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
-        for port in self.ports().values():
+        for port in self.ports():
             if port.name() == name:
                 return port
 
