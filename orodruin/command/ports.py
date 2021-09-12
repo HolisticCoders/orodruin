@@ -20,7 +20,7 @@ class CreatePort(Command):
 
     _created_port: Port = field(init=False)
 
-    def do(self) -> None:
+    def do(self) -> Port:
         port = Port(
             _name=self._name,
             _direction=self._direction,
@@ -31,16 +31,18 @@ class CreatePort(Command):
         self._graph.register_port(port)
         self._component.register_port(port)
         self._created_port = port
+        return self._created_port
 
     def undo(self) -> None:
         # TODO: Delete all the connectionts from/to this Port
         self._graph.unregister_port(self._created_port.uuid())
         self._component.unregister_port(self._created_port.uuid())
 
-    def redo(self) -> None:
+    def redo(self) -> Port:
         # TODO: Recreate all the connections from/to this Port
         self._graph.register_port(self._created_port)
         self._component.register_port(self._created_port)
+        return self._created_port
 
 
 @dataclass
@@ -58,7 +60,8 @@ class DeletePort(Command):
         self._owner_component = self._deleted_port.component()
         self._owner_component.unregister_port(self._port_id)
 
-    def undo(self) -> None:
+    def undo(self) -> Port:
         # TODO: Recreate all the connections from/to this component
         self._graph.register_port(self._deleted_port)
         self._owner_component.register_port(self._deleted_port)
+        return self._deleted_port

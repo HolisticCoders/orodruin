@@ -41,23 +41,21 @@ def test_delete_port_init(root: Component) -> None:
     component = Component("my_component", _parent_graph=root.graph())
     root.graph().register_component(component)
 
-    CreatePort(root.graph(), component, "my_port", PortDirection.input, int).do()
-    port_id = list(root.graph().ports().keys())[0]
+    port = CreatePort(root.graph(), component, "my_port", PortDirection.input, int).do()
 
-    DeletePort(root.graph(), port_id)
+    DeletePort(root.graph(), port.uuid())
 
 
 def test_delete_port_do_undo_redo(root: Component) -> None:
     component = Component("my_component", _parent_graph=root.graph())
     root.graph().register_component(component)
 
-    CreatePort(root.graph(), component, "my_port", PortDirection.input, int).do()
-    port_id = list(root.graph().ports().keys())[0]
+    port = CreatePort(root.graph(), component, "my_port", PortDirection.input, int).do()
 
     assert root.graph().ports()
     assert component.ports()
 
-    command = DeletePort(root.graph(), port_id)
+    command = DeletePort(root.graph(), port.uuid())
     command.do()
 
     assert not root.graph().ports()

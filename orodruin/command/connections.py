@@ -41,7 +41,7 @@ class ConnectPorts(Command):
     _deleted_connection: Optional[Connection] = None
     _created_connection: Optional[Connection] = None
 
-    def do(self) -> None:
+    def do(self) -> Connection:
         """Connect the source port to the target port.
 
         Raises:
@@ -133,6 +133,8 @@ class ConnectPorts(Command):
         self._created_connection = Connection(self._source, self._target)
         self._graph.register_connection(self._created_connection)
 
+        return self._created_connection
+
     def undo(self) -> None:
         if self._created_connection:
             self._graph.unregister_connection(self._created_connection.uuid())
@@ -144,3 +146,5 @@ class ConnectPorts(Command):
             self._graph.unregister_connection(self._deleted_connection.uuid())
         if self._created_connection:
             self._graph.register_connection(self._created_connection)
+
+        return self._created_connection
