@@ -2,25 +2,41 @@ import json
 from dataclasses import dataclass, field
 from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from orodruin.library import Library
+from orodruin.library import Library, LibraryManager, LibraryNotFoundError
 
-from ..component import Component
-from ..port import Port
-from .command import Command
+from ...component import Component
+from ...port import Port
+from ..command import Command
 
 
 @dataclass
 class ExportComponent(Command):
+
     component: Component
-    library: Union[str, PathLike, Library]
-    path: Union[str, PathLike]
+    library_name: str
+    target_name: str = "orodruin"
+    component_name: Optional[str] = None
+
+    exported_path: Path = field(init=False)
 
     def do(self) -> None:
-        self.path = Path(self.path)
+        library = LibraryManager.find_library(self.library_name)
 
-        with self.path.open("w") as f:
+        if not library:
+            raise LibraryNotFoundError(
+                f"Found no registered library called {self.library_name}"
+            )
+
+        if not self.component_name:
+            self.component_name = self.component.name()
+
+        self.exported_path = (
+            library.path() / self.target_name / f"{self.component_name}.json"
+        )
+
+        with self.exported_path.open("w") as f:
             serialized_component = self._component_as_json()
             f.write(serialized_component)
 

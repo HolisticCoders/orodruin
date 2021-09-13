@@ -146,5 +146,3 @@ class ConnectPorts(Command):
             self._graph.unregister_connection(self._deleted_connection.uuid())
         if self._created_connection:
             self._graph.register_connection(self._created_connection)
-
-        return self._created_connection

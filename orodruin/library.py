@@ -22,6 +22,10 @@ class TargetDoesNotExistError(Exception):
     """Target does not exist in library"""
 
 
+class LibraryNotFoundError(Exception):
+    """Library not found."""
+
+
 @dataclass
 class Library:
     """Orodruin Library Class.
@@ -33,22 +37,25 @@ class Library:
     Any DCC Specific Component should be defined in the appropriate target folder.
     """
 
-    path: Path
+    _path: Path
 
     def name(self) -> str:
         """Name of the Library."""
-        return self.path.name
+        return self._path.name
+
+    def path(self) -> Path:
+        return self._path
 
     def target_path(self, target_name: str) -> Optional[Path]:
         """Return the full path of a target from its name."""
-        for target in self.path.iterdir():
+        for target in self._path.iterdir():
             if target.name == target_name:
                 return target
         return None
 
     def targets(self) -> List[Path]:
         """Return all the targets of this Library"""
-        return list(self.path.iterdir())
+        return list(self._path.iterdir())
 
     def find_component(
         self,
@@ -116,14 +123,14 @@ class LibraryManager:
     @classmethod
     def unregister_library(cls, path: Path) -> None:
         """Unregister the given library."""
-        libraries = [l for l in cls.libraries() if l.path != path]
+        libraries = [l for l in cls.libraries() if l._path != path]
 
         cls._set_libraries_var(libraries)
 
     @classmethod
     def _set_libraries_var(cls, libraries: List[Library]) -> None:
         """Set the environment variable with the given libraries."""
-        libraries_string = ";".join([str(l.path) for l in libraries])
+        libraries_string = ";".join([str(l._path) for l in libraries])
         os.environ[cls.libraries_env_var] = libraries_string
 
     @classmethod

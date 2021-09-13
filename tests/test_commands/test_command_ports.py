@@ -1,7 +1,7 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 
 from orodruin import Component
-from orodruin.command.ports import CreatePort, DeletePort
+from orodruin.commands import CreatePort, DeletePort
 from orodruin.port.port import PortDirection
 
 

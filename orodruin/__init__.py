@@ -1,5 +1,5 @@
 """A Python rigging graph library."""
-from .command import Command
+from .commands import Command
 from .component import Component
 from .connection import Connection
 from .graph import Graph

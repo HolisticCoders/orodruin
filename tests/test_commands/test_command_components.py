@@ -3,8 +3,8 @@ from typing import Callable
 
 import pytest
 
-from orodruin import Component, Port, PortDirection
-from orodruin.command.components import CreateComponent, DeleteComponent
+from orodruin import Component
+from orodruin.commands import CreateComponent, DeleteComponent
 
 
 def test_create_component_init(root: Component) -> None:

@@ -4,8 +4,7 @@ from typing import Generator
 
 import pytest
 
-from orodruin.command import ConnectPorts, CreateComponent, CreatePort
-from orodruin.command.serialization import ExportComponent
+from orodruin.commands import ConnectPorts, CreateComponent, CreatePort, ExportComponent
 from orodruin.component import Component
 from orodruin.library import LibraryManager
 from orodruin.port import PortDirection
@@ -20,7 +19,7 @@ def clear_registered_components() -> Generator:
     yield
 
     for library in LibraryManager.libraries():
-        LibraryManager.unregister_library(library.path)
+        LibraryManager.unregister_library(library._path)
 
 
 def test_component_instance_data(root: Component) -> None:
@@ -33,7 +32,7 @@ def test_component_instance_data(root: Component) -> None:
     component.input2.set(2)
     component.output.set(4)
 
-    command = ExportComponent(component, ".")
+    command = ExportComponent(component, "DummyName")
 
     expected_data = {
         "type": f"Internal::{component.type()}",
@@ -70,7 +69,7 @@ def test_component_definition_data(root: Component) -> None:
     ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
     ConnectPorts(parent.graph(), child_b.output, parent.output).do()
 
-    command = ExportComponent(parent, ".")
+    command = ExportComponent(parent, "DummyName")
 
     expected_data = {
         "definitions": {
@@ -190,7 +189,7 @@ def test_component_as_json(root: Component) -> None:
     ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
     ConnectPorts(parent.graph(), child_b.output, parent.output).do()
 
-    command = ExportComponent(parent, ".")
+    command = ExportComponent(parent, "DummyName")
     command._component_as_json()
 
 
@@ -204,7 +203,7 @@ def test_export_component(root: Component) -> None:
     component.input2.set(2)
     component.output.set(4)
 
-    command = ExportComponent(component, ".")
+    command = ExportComponent(component, "DummyName")
 
     expected_data = {
         "type": f"Internal::{component.type()}",
