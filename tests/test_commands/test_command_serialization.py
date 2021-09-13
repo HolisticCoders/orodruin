@@ -5,16 +5,16 @@ from typing import Generator
 import pytest
 
 from orodruin.command import ConnectPorts, CreateComponent, CreatePort
+from orodruin.command.serialization import ExportComponent
 from orodruin.component import Component
 from orodruin.library import LibraryManager
 from orodruin.port import PortDirection
 from orodruin.port.types import Matrix
-from orodruin.serialization import ComponentSerializer
 
 
 @pytest.fixture(autouse=True)
 def clear_registered_components() -> Generator:
-    library_path = Path(__file__).parent / "TestLibrary"
+    library_path = Path(__file__).parent.parent / "TestLibrary"
     LibraryManager.register_library(library_path)
 
     yield
@@ -33,6 +33,8 @@ def test_component_instance_data(root: Component) -> None:
     component.input2.set(2)
     component.output.set(4)
 
+    command = ExportComponent(component, ".")
+
     expected_data = {
         "type": f"Internal::{component.type()}",
         "name": "multiply",
@@ -43,7 +45,7 @@ def test_component_instance_data(root: Component) -> None:
         },
     }
 
-    assert ComponentSerializer.component_instance_data(component) == expected_data
+    assert command._component_instance_data(component) == expected_data
 
 
 def test_component_definition_data(root: Component) -> None:
@@ -67,6 +69,8 @@ def test_component_definition_data(root: Component) -> None:
     ConnectPorts(parent.graph(), child_a.output, child_b.input1).do()
     ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
     ConnectPorts(parent.graph(), child_b.output, parent.output).do()
+
+    command = ExportComponent(parent, ".")
 
     expected_data = {
         "definitions": {
@@ -161,7 +165,7 @@ def test_component_definition_data(root: Component) -> None:
         ],
     }
 
-    assert ComponentSerializer.component_definition_data(parent) == expected_data
+    assert command._component_definition_data(parent) == expected_data
 
 
 def test_component_as_json(root: Component) -> None:
@@ -186,7 +190,33 @@ def test_component_as_json(root: Component) -> None:
     ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
     ConnectPorts(parent.graph(), child_b.output, parent.output).do()
 
-    ComponentSerializer.component_as_json(parent)
+    command = ExportComponent(parent, ".")
+    command._component_as_json()
+
+
+def test_export_component(root: Component) -> None:
+    component = CreateComponent(root.graph(), "multiply").do()
+    CreatePort(root.graph(), component, "input1", PortDirection.input, int).do()
+    CreatePort(root.graph(), component, "input2", PortDirection.input, int).do()
+    CreatePort(root.graph(), component, "output", PortDirection.output, int).do()
+
+    component.input1.set(2)
+    component.input2.set(2)
+    component.output.set(4)
+
+    command = ExportComponent(component, ".")
+
+    expected_data = {
+        "type": f"Internal::{component.type()}",
+        "name": "multiply",
+        "ports": {
+            "input1": 2,
+            "input2": 2,
+            "output": 4,
+        },
+    }
+
+    assert command._component_instance_data(component) == expected_data
 
 
 # def test_simple_component_from_json() -> None:
