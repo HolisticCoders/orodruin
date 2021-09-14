@@ -22,8 +22,8 @@ class TargetDoesNotExistError(Exception):
     """Target does not exist in library"""
 
 
-class LibraryNotFoundError(Exception):
-    """Library not found."""
+class LibraryDoesNotExistError(Exception):
+    """Library does not found in the registered libraries"""
 
 
 @dataclass

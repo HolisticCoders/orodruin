@@ -4,7 +4,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from orodruin.library import Library, LibraryManager, LibraryNotFoundError
+from orodruin.library import Library, LibraryManager, LibraryDoesNotExistError
 
 from ...component import Component
 from ...port import Port
@@ -25,7 +25,7 @@ class ExportComponent(Command):
         library = LibraryManager.find_library(self.library_name)
 
         if not library:
-            raise LibraryNotFoundError(
+            raise LibraryDoesNotExistError(
                 f"Found no registered library called {self.library_name}"
             )
 
