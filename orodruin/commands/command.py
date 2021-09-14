@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any
+from typing import Any, Generic, TypeVar
+
+T = TypeVar("T")
 
 
-class Command(metaclass=ABCMeta):
+class Command(Generic[T], metaclass=ABCMeta):
+
     """Encapsulate one or more undoable actions in a single command."""
 
     @abstractmethod

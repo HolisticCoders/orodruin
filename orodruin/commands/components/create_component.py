@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 from uuid import UUID
 
+from orodruin.library import Library
+
 from ...component import Component
 from ...graph import Graph
 from ..command import Command
@@ -13,6 +15,7 @@ class CreateComponent(Command):
     graph: Graph
     name: str
     type: Optional[str] = None
+    library: Optional[Library] = None
 
     created_component: Component = field(init=False)
 

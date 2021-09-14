@@ -1,4 +1,5 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
+import json
 from pathlib import Path, PurePosixPath
 from typing import Generator
 
@@ -195,8 +196,7 @@ def test_component_as_json(root: Component) -> None:
     ConnectPorts(parent.graph(), child_a.output, child_b.input2).do()
     ConnectPorts(parent.graph(), child_b.output, parent.output).do()
 
-    command = ExportComponent(parent, "DummyName")
-    command._component_as_json()
+    ExportComponent._component_as_json(parent)
 
 
 def test_export_component(root: Component) -> None:
@@ -216,62 +216,85 @@ def test_export_component(root: Component) -> None:
     file_path.unlink()
 
 
-# def test_simple_component_from_json() -> None:
-#     component_name = "SimpleComponent"
-#     component = LibraryManager.get_component(component_name)
-#     component_file = (
-#         Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
-#     )
-#     with component_file.open("r") as handle:
-#         file_content = handle.read()
+def test_import_simple_component(root: Component) -> None:
+    component_name = "SimpleComponent"
+    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
 
-#     assert ComponentSerializer.component_as_json(component) == file_content
+    file_path = (
+        Path(__file__).parent.parent
+        / "TestLibrary"
+        / "orodruin"
+        / f"{component_name}.json"
+    )
+    with file_path.open("r") as f:
+        file_content = f.read()
 
-
-# def test_nested_component_from_json() -> None:
-#     component_name = "NestedComponent"
-#     component = LibraryManager.get_component(component_name)
-#     component_file = (
-#         Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
-#     )
-
-#     with component_file.open("r") as handle:
-#         file_content = handle.read()
-
-#     assert ComponentSerializer.component_as_json(component) == file_content
+    # ExportComponent(
+    #     component,
+    #     "TestLibrary",
+    #     component_name=f"{component_name}_test",
+    # ).do()
+    assert ExportComponent._component_as_json(component) == file_content
 
 
-# def test_referencing_component_from_json() -> None:
-#     component_name = "ReferencingSimpleComponent"
-#     component = LibraryManager.get_component(component_name)
-#     component_file = (
-#         Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
-#     )
+def test_import_nested_component(root: Component) -> None:
+    component_name = "NestedComponent"
+    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
 
-#     with component_file.open("r") as handle:
-#         file_content = handle.read()
+    file_path = (
+        Path(__file__).parent.parent
+        / "TestLibrary"
+        / "orodruin"
+        / f"{component_name}.json"
+    )
+    with file_path.open("r") as f:
+        file_content = f.read()
 
-#     assert ComponentSerializer.component_as_json(component) == file_content
-
-
-# def test_referencing_nested_component_from_json() -> None:
-#     component_name = "ReferencingNestedComponent"
-#     component = LibraryManager.get_component(component_name)
-#     component_file = (
-#         Path(__file__).parent / "TestLibrary" / "orodruin" / f"{component_name}.json"
-#     )
-
-#     with component_file.open("r") as handle:
-#         file_content = handle.read()
-
-#     assert ComponentSerializer.component_as_json(component) == file_content
+    # ExportComponent(
+    #     component,
+    #     "TestLibrary",
+    #     component_name=f"{component_name}_test",
+    # ).do()
+    assert ExportComponent._component_as_json(component) == file_content
 
 
-# def test_serialize_custom_port_type() -> None:
-#     root = Component("root")
+def test_import_referencing_component(root: Component) -> None:
+    component_name = "ReferencingSimpleComponent"
+    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
 
-#     sub_component = Component("sub_component")
-#     sub_component.set_parent_graph(root)
+    file_path = (
+        Path(__file__).parent.parent
+        / "TestLibrary"
+        / "orodruin"
+        / f"{component_name}.json"
+    )
+    with file_path.open("r") as f:
+        file_content = f.read()
 
-#     sub_component.register_port("matrix", PortDirection.input, Matrix)
-#     ComponentSerializer.component_as_json(root)
+    # ExportComponent(
+    #     component,
+    #     "TestLibrary",
+    #     component_name=f"{component_name}_test",
+    # ).do()
+    assert ExportComponent._component_as_json(component) == file_content
+
+
+def test_import_referencing_nested_component(root: Component) -> None:
+    component_name = "ReferencingNestedComponent"
+    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
+
+    file_path = (
+        Path(__file__).parent.parent
+        / "TestLibrary"
+        / "orodruin"
+        / f"{component_name}.json"
+    )
+    with file_path.open("r") as f:
+        file_content = f.read()
+
+    # ExportComponent(
+    #     component,
+    #     "TestLibrary",
+    #     component_name=f"{component_name}_test",
+    # ).do()
+    assert ExportComponent._component_as_json(component) == file_content

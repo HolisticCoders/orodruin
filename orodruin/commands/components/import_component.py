@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass, field
 from os import PathLike
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from orodruin.graph import Graph
 from orodruin.library import (
@@ -10,11 +10,15 @@ from orodruin.library import (
     LibraryDoesNotExistError,
     LibraryManager,
 )
+from orodruin.utils import PortDoesNotExistError, port_from_path
 
 from ...component import Component
 from ...port import PortDirection
 from ...port import types as port_types
-from .. import Command, CreateComponent, CreatePort
+from ..command import Command
+from ..connections import ConnectPorts
+from ..ports import CreatePort, SetPort
+from .create_component import CreateComponent
 
 
 @dataclass
@@ -46,6 +50,8 @@ class ImportComponent(Command):
             self.graph,
             component_path,
             self.component_name,
+            self.component_name,
+            library,
         )
 
         return self.imported_component
@@ -54,62 +60,63 @@ class ImportComponent(Command):
         """Exporting a component is not undoable."""
         pass
 
+    @classmethod
     def _component_from_json(
-        self,
+        cls,
         graph: Graph,
         component_path: PathLike,
-        component_name: str
-        # component_type: Optional[str] = None,
-        # library: Optional[Library] = None,
-        # parent: Optional[Component] = None,
+        component_name: str,
+        component_type: Optional[str] = None,
+        library: Optional[Library] = None,
     ) -> "Component":
         """Create a component from its json representation."""
         with open(component_path, "r", encoding="utf-8") as handle:
             component_data = json.loads(handle.read())
 
-        return self._component_from_data(
+        return cls._component_from_data(
             graph,
             component_data,
-            component_name
-            # component_type,
-            # library,
-            # parent,
+            component_name,
+            component_type,
+            library,
         )
 
+    @classmethod
     def _component_from_data(
-        self,
+        cls,
         graph: Graph,
         component_data: Dict[str, Any],
         component_name: str,
         component_type: Optional[str] = None,
-        # library: Optional["Library"] = None,
-        # parent: Optional[Component] = None,
+        library: Optional["Library"] = None,
     ) -> Component:
         """Create a component from its serialized data."""
-        create_component_cmd = CreateComponent(
+        component = CreateComponent(
             graph=graph,
             name=component_name,
-            type=None,
+            type=component_type,
+        ).do()
+
+        if library:
+            component.set_library(library)
+
+        cls._create_ports(graph, component, component_data["ports"])
+
+        cls._create_subcomponents(
+            component,
+            component_data["components"],
+            component_data["definitions"],
         )
-
-        component = create_component_cmd.do()
-
-        self._create_ports(graph, component, component_data["ports"])
-
-        # ComponentDeserializer._create_subcomponents(
-        #     component,
-        #     component_data["components"],
-        #     component_data["definitions"],
-        # )
-        # ComponentDeserializer._create_connections(
-        #     component,
-        #     component_data["connections"],
-        # )
+        cls._create_connections(
+            component,
+            component_data["connections"],
+        )
 
         return component
 
+    @classmethod
     def _create_ports(
-        self,
+        cls,
         graph: Graph,
         component: Component,
         ports_data: Dict,
@@ -127,3 +134,54 @@ class ImportComponent(Command):
                 ) from error
 
             CreatePort(graph, component, name, direction, port_type).do()
+
+    @classmethod
+    def _create_subcomponents(
+        cls,
+        component: Component,
+        subcomponents_data: Dict,
+        internal_definitions: Dict,
+    ) -> None:
+        for subcomponent_data in subcomponents_data:
+            library_name, subcomponent_type = subcomponent_data["type"].split("::")
+            subcomponent_name = subcomponent_data["name"]
+
+            if library_name == "Internal":
+                subcomponent_definition = internal_definitions[subcomponent_type]
+                sub_component = cls._component_from_data(
+                    component.graph(),
+                    subcomponent_definition,
+                    subcomponent_name,
+                    subcomponent_type,
+                )
+            else:
+                sub_component = ImportComponent(
+                    component.graph(),
+                    subcomponent_type,
+                    library_name,
+                ).do()
+                sub_component.set_name(subcomponent_name)
+
+            for port_name, port_value in subcomponent_data["ports"].items():
+                SetPort(sub_component.port(port_name), port_value).do()
+
+    @classmethod
+    def _create_connections(
+        cls,
+        component: Component,
+        connections_data: List[Tuple[str, str]],
+    ) -> None:
+
+        for connection in connections_data:
+            source_name = connection[0]
+            target_name = connection[1]
+
+            source_port = port_from_path(component, source_name)
+            target_port = port_from_path(component, target_name)
+
+            if not source_port:
+                raise PortDoesNotExistError(f"Port {source_name} not found")
+            if not target_port:
+                raise PortDoesNotExistError(f"Port {target_name} not found")
+
+            ConnectPorts(component.graph(), source_port, target_port).do()
