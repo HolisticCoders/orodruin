@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type
-from uuid import uuid4
+from typing import TYPE_CHECKING, Dict, List, Optional
+from uuid import UUID, uuid4
 
-from orodruin.signal import Signal
-
-from .graph_manager import GraphManager
-from .port import Port, PortDirection
+from .graph import Graph
+from .port import Port
+from .signal import Signal
 
 if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
@@ -36,65 +35,65 @@ class Component:
     """
 
     _name: str
-    _type: str
-    library: Optional[Library] = None
-    _parent: Optional[Component] = None
+    _type: str = field(default_factory=lambda: str(uuid4()))
 
-    _ports: List[Port] = field(default_factory=list)
+    _library: Optional[Library] = None
+    _parent_graph: Optional[Graph] = None
+    _graph: Graph = field(init=False)
 
-    _components: List[Component] = field(default_factory=list)
+    _ports: Dict[UUID, Port] = field(default_factory=dict)
+
+    _uuid: UUID = field(default_factory=uuid4)
 
     # Signals
-    name_changed: Signal = field(default_factory=Signal)
-    component_added: Signal = field(default_factory=Signal)
-    port_added: Signal = field(default_factory=Signal)
+    name_changed: Signal[str] = field(default_factory=Signal)
+    port_registered: Signal[Port] = field(default_factory=Signal)
+    port_unregistered: Signal[Port] = field(default_factory=Signal)
 
-    @classmethod
-    def new(
-        cls,
-        name: str,
-        component_type: Optional[str] = None,
-        library: Optional[Library] = None,
-        parent: Optional[Component] = None,
-    ) -> Component:
-        """Create a new component."""
-
-        if component_type is None:
-            component_type = str(uuid4())
-
-        component = cls(name, component_type, library, parent)
-        GraphManager.register_component(component)
-        return component
+    def __post_init__(self) -> None:
+        self._graph = Graph(self)
 
     def type(self) -> str:
         """Type of the Component."""
         return self._type
 
-    def ports(self) -> Sequence[Port]:
+    def set_type(self, value: str) -> None:
+        """Type of the Component."""
+        self._type = value
+
+    def ports(self) -> List[Port]:
         """List of the Component's Ports."""
-        return self._ports
+        return list(self._ports.values())
 
-    def components(self) -> List[Component]:
-        """Sub-components of the component."""
-        return self._components
+    def uuid(self) -> UUID:
+        """UUID of this component."""
+        return self._uuid
 
-    def parent(self) -> Optional[Component]:
-        """Parent of the component."""
-        return self._parent
+    def library(self) -> Optional[Library]:
+        """Return the library declaring this component."""
+        return self._library
 
-    def set_parent(self, other: Component) -> None:
-        """Set the parent of the component."""
-        if other is self:
-            raise ParentToSelfError(f"Cannot parent {self.name} to itself")
+    def set_library(self, library: Library) -> None:
+        """Set the library declaring this component."""
+        self._library = library
 
-        self._parent = other
-        other.add_child(self)
+    def parent_graph(self) -> Optional[Graph]:
+        """Parent graph of the component."""
+        return self._parent_graph
 
-    def add_child(self, child: Component) -> None:
-        """Parent the `component` under this component."""
-        if child not in self._components:
-            self._components.append(child)
-        self.component_added.emit(child)
+    def set_parent_graph(self, graph: Graph) -> None:
+        """Set the parent graph of the component."""
+        self._parent_graph = graph
+
+    def graph(self) -> Graph:
+        """Graph containing child components."""
+        return self._graph
+
+    def parent_component(self) -> Optional[Component]:
+        """Parent component."""
+        if not self._parent_graph:
+            return None
+        return self._parent_graph.parent_component()
 
     def __getattr__(self, name: str) -> Port:
         """Get the Ports of this Component if the Python attribut doesn't exist."""
@@ -106,19 +105,18 @@ class Component:
 
     def port(self, name: str) -> Port:
         """Get a Port of this node from the its name."""
-
         return getattr(self, name)
 
-    def add_port(
-        self,
-        name: str,
-        direction: PortDirection,
-        port_type: Type,
-    ) -> None:
-        """Add a `Port` to this Component."""
-        port = Port.new(name, direction, port_type, self)
-        self._ports.append(port)
-        self.port_added.emit(port, len(self._ports))
+    def register_port(self, port: Port) -> None:
+        """Register an existing port to this component."""
+        self._ports[port.uuid()] = port
+        self.port_registered.emit(port)
+
+    def unregister_port(self, uuid: UUID) -> Port:
+        """Remove a registered port from this component."""
+        port = self._ports.pop(uuid)
+        self.port_unregistered.emit(port)
+        return port
 
     def name(self) -> str:
         """Name of the Component."""
@@ -131,7 +129,7 @@ class Component:
 
     def path(self) -> PurePosixPath:
         """Absolute Path of the Component."""
-        parent = self.parent()
+        parent = self.parent_component()
         if parent:
             path = parent.path() / self.name()
         else:

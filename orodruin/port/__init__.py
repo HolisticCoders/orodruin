@@ -1,1 +1,3 @@
-from .port import Port, PortDirection, SetConnectedPortError
+from .port import Port, PortDirection
+
+__all__ = ["Port", "PortDirection"]

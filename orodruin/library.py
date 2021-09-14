@@ -1,13 +1,9 @@
 """Orodruin Library Management."""
-from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
-
-from .component import Component
-from .serialization import ComponentDeserializer
 
 
 class NoRegisteredLibraryError(Exception):
@@ -22,6 +18,10 @@ class TargetDoesNotExistError(Exception):
     """Target does not exist in library"""
 
 
+class LibraryDoesNotExistError(Exception):
+    """Library does not found in the registered libraries"""
+
+
 @dataclass
 class Library:
     """Orodruin Library Class.
@@ -33,82 +33,50 @@ class Library:
     Any DCC Specific Component should be defined in the appropriate target folder.
     """
 
-    path: Path
+    _path: Path
 
     def name(self) -> str:
         """Name of the Library."""
-        return self.path.name
+        return self._path.name
+
+    def path(self) -> Path:
+        """Path of the Library"""
+        return self._path
 
     def target_path(self, target_name: str) -> Optional[Path]:
         """Return the full path of a target from its name."""
-        for target in self.path.iterdir():
+        for target in self._path.iterdir():
             if target.name == target_name:
                 return target
         return None
 
     def targets(self) -> List[Path]:
         """Return all the targets of this Library"""
-        return list(self.path.iterdir())
+        return list(self._path.iterdir())
 
-    def get_component(self, component_name: str, target: str = "orodruin") -> Component:
-        """Return an Instantiated Component from a given name and target."""
-        target_path = self.target_path(target)
+    def find_component(
+        self,
+        component_name: str,
+        target_name: str = "orodruin",
+    ) -> Optional[Path]:
+        """Return the path of a the given component for the given target name."""
+        target_path = self.target_path(target_name)
 
         if not target_path:
-            raise TargetDoesNotExistError(f"Library {self.name} has no target {target}")
+            raise TargetDoesNotExistError(
+                f"Library {self.name} has no target {target_name}"
+            )
 
         for component_path in target_path.iterdir():
             if (
                 component_path.suffix == ".json"
                 and component_path.stem == component_name
             ):
-                component = ComponentDeserializer.component_from_json(
-                    component_path,
-                    component_type=component_name,
-                    library=self,
-                )
-                component.set_name(component_name)
-                return component
+                return component_path
 
-        raise ComponentNotFoundError(
-            f"No component named {component_name} found in any registered libraries"
-        )
-
-    def components(self, target: str = "orodruin") -> List[Component]:
-        """Return all the components of this library for the given target"""
-        target_path = self.target_path(target)
-
-        if not target_path:
-            raise TargetDoesNotExistError(f"Library {self.name} has no target {target}")
-
-        components: List[Component] = []
-        for component_path in target_path.iterdir():
-            if component_path.suffix == ".json":
-                component = ComponentDeserializer.component_from_json(
-                    component_path,
-                    component_type=component_path.name,
-                    library=self,
-                )
-                component.set_name(component_path.name)
-
-                components.append(component)
-
-        return components
-
-    def __eq__(self, o: object) -> bool:
-        if isinstance(o, str):
-            return os.fspath(self.path) == o
-
-        if isinstance(o, os.PathLike):
-            return self.path == o
-
-        if isinstance(o, Library):
-            return self.path == o.path
-
-        return False
+        return None
 
 
-@dataclass
 class LibraryManager:
     """Manager Class for multiple Libraries.
 
@@ -117,6 +85,11 @@ class LibraryManager:
     """
 
     libraries_env_var = "ORODRUIN_LIBRARIES"
+
+    def __init__(self) -> None:
+        raise NotImplementedError(
+            f"Type {self.__class__.__name__} cannot be instantiated."
+        )
 
     @classmethod
     def libraries(cls) -> List[Library]:
@@ -148,48 +121,45 @@ class LibraryManager:
     @classmethod
     def unregister_library(cls, path: Path) -> None:
         """Unregister the given library."""
-        libraries = [l for l in cls.libraries() if l.path != path]
+        libraries = [l for l in cls.libraries() if l.path() != path]
 
         cls._set_libraries_var(libraries)
 
     @classmethod
     def _set_libraries_var(cls, libraries: List[Library]) -> None:
         """Set the environment variable with the given libraries."""
-        libraries_string = ";".join([str(l.path) for l in libraries])
+        libraries_string = ";".join([str(l.path()) for l in libraries])
         os.environ[cls.libraries_env_var] = libraries_string
 
     @classmethod
-    def get_component(cls, component_name: str, target: str = "orodruin") -> Component:
+    def find_component(
+        cls,
+        component_name: str,
+        library_name: Optional[str] = None,
+        target_name: str = "orodruin",
+    ) -> Optional[Path]:
         """Get the component file from the libraries."""
-
-        namespace = None
-        if "::" in component_name:
-            namespace, component_name = component_name.split("::")
 
         libraries = cls.libraries()
         if not libraries:
             raise NoRegisteredLibraryError("No libraries are registered")
 
-        if namespace:
-            for library in libraries:
-                if namespace and namespace == library.name:
-                    try:
-                        return library.get_component(component_name, target)
-                    except (TargetDoesNotExistError, ComponentNotFoundError):
-                        pass
+        if library_name:
+            library = cls.find_library(library_name)
+            if library:
+                component = library.find_component(component_name, target_name)
+                if component:
+                    return component
         else:
             for library in libraries:
-                try:
-                    return library.get_component(component_name, target)
-                except (TargetDoesNotExistError, ComponentNotFoundError):
-                    pass
+                component = library.find_component(component_name, target_name)
+                if component:
+                    return component
 
-        raise ComponentNotFoundError(
-            f"No component named {component_name} found in any registered libraries"
-        )
+        return None
 
     @classmethod
-    def get_library(cls, name: str) -> Optional[Library]:
+    def find_library(cls, name: str) -> Optional[Library]:
         """Get a Library instance from a name."""
         for library in cls.libraries():
             if library.name() == name:

@@ -15,42 +15,24 @@ Types will be instantiated in one of two ways when creating Ports:
 from __future__ import annotations
 
 from builtins import bool, float, int, str
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
-
-from typing_extensions import Protocol, runtime_checkable
-
-
-@runtime_checkable
-class PortType(Protocol):
-    """Protocol for Port Types, making sure they can be initialized to
-    their default values with a consistent interface.
-    """
-
-    @classmethod
-    def new(cls) -> PortType:
-        """Create a new instance of the PortType, initializing all its fields."""
 
 
 @dataclass
 class Matrix:
     """Matrix representation class."""
 
-    value: List[float]
-
-    @classmethod
-    def new(cls) -> Matrix:
-        """Create a new Identity Matrix."""
-        # fmt: off
-        return cls(
-            [
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1,
-            ]
-        )
-        # fmt: on
+    value: List[float] = field(
+        default_factory=lambda: [
+            # fmt: off
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+            # fmt: on
+        ]
+    )
 
 
 __all__ = [

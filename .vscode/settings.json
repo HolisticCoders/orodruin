@@ -18,4 +18,8 @@
         "--no-cov"
     ],
     "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "orodruin",
+        "unregister"
+    ],
 }
