@@ -1,10 +1,10 @@
+"""Export Component command"""
 import json
 from dataclasses import dataclass, field
-from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
-from orodruin.library import Library, LibraryDoesNotExistError, LibraryManager
+from orodruin.library import LibraryDoesNotExistError, LibraryManager
 
 from ...component import Component
 from ...port import Port
@@ -13,6 +13,7 @@ from ..command import Command
 
 @dataclass
 class ExportComponent(Command):
+    """Export Component command"""
 
     component: Component
     library_name: str
@@ -43,8 +44,7 @@ class ExportComponent(Command):
         return self.exported_path
 
     def undo(self) -> None:
-        """Exporting a component is not undoable."""
-        pass
+        """Command is not undoable."""
 
     @classmethod
     def _component_as_json(cls, component: Component) -> str:

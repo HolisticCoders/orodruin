@@ -1,5 +1,5 @@
+"""Delete Component command."""
 from dataclasses import dataclass, field
-from typing import Optional
 from uuid import UUID
 
 from ...component import Component
@@ -9,6 +9,7 @@ from ..command import Command
 
 @dataclass
 class DeleteComponent(Command):
+    """Delete Component command."""
 
     _graph: Graph
     _component_id: UUID

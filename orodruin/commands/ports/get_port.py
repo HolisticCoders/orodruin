@@ -1,3 +1,4 @@
+"""Get Port command."""
 from dataclasses import dataclass
 from typing import TypeVar
 
@@ -10,6 +11,7 @@ T = TypeVar("T")
 
 @dataclass
 class GetPort(Command[T]):
+    """Get Port command."""
 
     port: Port[T]
 
@@ -17,4 +19,4 @@ class GetPort(Command[T]):
         return self.port.get()
 
     def undo(self) -> None:
-        """Command is not undoable"""
+        """Command is not undoable."""

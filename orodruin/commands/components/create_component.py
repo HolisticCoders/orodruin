@@ -1,6 +1,6 @@
+"""Create Component command."""
 from dataclasses import dataclass, field
 from typing import Optional
-from uuid import UUID
 
 from orodruin.library import Library
 
@@ -11,6 +11,7 @@ from ..command import Command
 
 @dataclass
 class CreateComponent(Command):
+    """Create Component command."""
 
     graph: Graph
     name: str
@@ -25,7 +26,7 @@ class CreateComponent(Command):
             _parent_graph=self.graph,
         )
         if self.type:
-            component._type = self.type
+            component.set_type(self.type)
 
         self.graph.register_component(component)
         self.created_component = component

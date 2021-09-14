@@ -57,6 +57,10 @@ class Component:
         """Type of the Component."""
         return self._type
 
+    def set_type(self, value: str) -> None:
+        """Type of the Component."""
+        self._type = value
+
     def ports(self) -> List[Port]:
         """List of the Component's Ports."""
         return list(self._ports.values())

@@ -4,7 +4,7 @@ from typing import Callable
 
 import pytest
 
-from orodruin.component import Component, ParentToSelfError
+from orodruin.component import Component
 from orodruin.pathed_object import PathedObject
 from orodruin.port import Port, PortDirection
 

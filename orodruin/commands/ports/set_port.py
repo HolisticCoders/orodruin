@@ -1,3 +1,4 @@
+"""Set Port command."""
 from dataclasses import dataclass, field
 from typing import TypeVar
 
@@ -10,6 +11,7 @@ T = TypeVar("T")
 
 @dataclass
 class SetPort(Command[T]):
+    """Set Port command."""
 
     port: Port[T]
     value: T

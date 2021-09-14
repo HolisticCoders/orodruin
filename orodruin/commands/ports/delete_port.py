@@ -1,3 +1,4 @@
+"""Delete Port command."""
 from dataclasses import dataclass, field
 from uuid import UUID
 
@@ -10,6 +11,7 @@ from ..command import Command
 
 @dataclass
 class DeletePort(Command):
+    """Delete Port command."""
 
     _graph: Graph
     _port_id: UUID

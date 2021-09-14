@@ -1,3 +1,4 @@
+"""Import Component command."""
 import json
 from dataclasses import dataclass, field
 from os import PathLike
@@ -23,6 +24,8 @@ from .create_component import CreateComponent
 
 @dataclass
 class ImportComponent(Command):
+    """Import Component command."""
+
     graph: Graph
     component_name: str
     library_name: str
@@ -57,8 +60,7 @@ class ImportComponent(Command):
         return self.imported_component
 
     def undo(self) -> None:
-        """Exporting a component is not undoable."""
-        pass
+        """Command is not undoable."""
 
     @classmethod
     def _component_from_json(

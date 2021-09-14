@@ -1,3 +1,4 @@
+"""Create Port command."""
 from dataclasses import dataclass, field
 from typing import Type
 
@@ -10,6 +11,7 @@ from ..command import Command
 
 @dataclass
 class CreatePort(Command):
+    """Create Port command."""
 
     _graph: Graph
     _component: Component

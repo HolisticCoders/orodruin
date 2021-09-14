@@ -1,13 +1,9 @@
-# """Orodruin Library Management."""
-# from __future__ import annotations
+"""Orodruin Library Management."""
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
-
-# from .component import Component
-# from .serialization import ComponentDeserializer
 
 
 class NoRegisteredLibraryError(Exception):
@@ -44,6 +40,7 @@ class Library:
         return self._path.name
 
     def path(self) -> Path:
+        """Path of the Library"""
         return self._path
 
     def target_path(self, target_name: str) -> Optional[Path]:
@@ -62,6 +59,7 @@ class Library:
         component_name: str,
         target_name: str = "orodruin",
     ) -> Optional[Path]:
+        """Return the path of a the given component for the given target name."""
         target_path = self.target_path(target_name)
 
         if not target_path:
@@ -123,14 +121,14 @@ class LibraryManager:
     @classmethod
     def unregister_library(cls, path: Path) -> None:
         """Unregister the given library."""
-        libraries = [l for l in cls.libraries() if l._path != path]
+        libraries = [l for l in cls.libraries() if l.path() != path]
 
         cls._set_libraries_var(libraries)
 
     @classmethod
     def _set_libraries_var(cls, libraries: List[Library]) -> None:
         """Set the environment variable with the given libraries."""
-        libraries_string = ";".join([str(l._path) for l in libraries])
+        libraries_string = ";".join([str(l.path()) for l in libraries])
         os.environ[cls.libraries_env_var] = libraries_string
 
     @classmethod
