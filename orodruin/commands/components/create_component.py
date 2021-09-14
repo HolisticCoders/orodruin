@@ -18,7 +18,7 @@ class CreateComponent(Command):
     type: Optional[str] = None
     library: Optional[Library] = None
 
-    created_component: Component = field(init=False)
+    _created_component: Component = field(init=False)
 
     def do(self) -> Component:
         component = Component(
@@ -29,17 +29,17 @@ class CreateComponent(Command):
             component.set_type(self.type)
 
         self.graph.register_component(component)
-        self.created_component = component
+        self._created_component = component
 
-        return self.created_component
+        return self._created_component
 
     def undo(self) -> None:
         # TODO: Delete all the connectionts from/to this component
         # TODO: Delete all the Ports from this component
-        self.graph.unregister_component(self.created_component.uuid())
+        self.graph.unregister_component(self._created_component.uuid())
 
     def redo(self) -> Component:
         # TODO: Delete all the Ports from this component
         # TODO: Recreate all the connections from/to this component
-        self.graph.register_component(self.created_component)
-        return self.created_component
+        self.graph.register_component(self._created_component)
+        return self._created_component

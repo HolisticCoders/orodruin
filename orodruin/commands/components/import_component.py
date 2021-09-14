@@ -31,7 +31,7 @@ class ImportComponent(Command):
     library_name: str
     target_name: str = "orodruin"
 
-    imported_component: Component = field(init=False)
+    _imported_component: Component = field(init=False)
 
     def do(self) -> Component:
         library = LibraryManager.find_library(self.library_name)
@@ -49,7 +49,7 @@ class ImportComponent(Command):
                 f"for target {self.target_name}"
             )
 
-        self.imported_component = self._component_from_json(
+        self._imported_component = self._component_from_json(
             self.graph,
             component_path,
             self.component_name,
@@ -57,7 +57,7 @@ class ImportComponent(Command):
             library,
         )
 
-        return self.imported_component
+        return self._imported_component
 
     def undo(self) -> None:
         """Command is not undoable."""

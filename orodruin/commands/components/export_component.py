@@ -20,7 +20,7 @@ class ExportComponent(Command):
     target_name: str = "orodruin"
     component_name: Optional[str] = None
 
-    exported_path: Path = field(init=False)
+    _exported_path: Path = field(init=False)
 
     def do(self) -> Path:
         library = LibraryManager.find_library(self.library_name)
@@ -33,15 +33,15 @@ class ExportComponent(Command):
         if not self.component_name:
             self.component_name = self.component.name()
 
-        self.exported_path = (
+        self._exported_path = (
             library.path() / self.target_name / f"{self.component_name}.json"
         )
 
-        with self.exported_path.open("w") as f:
+        with self._exported_path.open("w") as f:
             serialized_component = self._component_as_json(self.component)
             f.write(serialized_component)
 
-        return self.exported_path
+        return self._exported_path
 
     def undo(self) -> None:
         """Command is not undoable."""
