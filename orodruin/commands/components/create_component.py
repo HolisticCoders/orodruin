@@ -10,31 +10,32 @@ from ..command import Command
 @dataclass
 class CreateComponent(Command):
 
-    _graph: Graph
-    _name: str
-    _type: Optional[str] = None
-    _created_component: Component = field(init=False)
+    graph: Graph
+    name: str
+    type: Optional[str] = None
+
+    created_component: Component = field(init=False)
 
     def do(self) -> Component:
         component = Component(
-            _name=self._name,
-            _parent_graph=self._graph,
+            _name=self.name,
+            _parent_graph=self.graph,
         )
-        if self._type:
-            component._type = self._type
+        if self.type:
+            component._type = self.type
 
-        self._graph.register_component(component)
-        self._created_component = component
+        self.graph.register_component(component)
+        self.created_component = component
 
-        return self._created_component
+        return self.created_component
 
     def undo(self) -> None:
         # TODO: Delete all the connectionts from/to this component
         # TODO: Delete all the Ports from this component
-        self._graph.unregister_component(self._created_component.uuid())
+        self.graph.unregister_component(self.created_component.uuid())
 
     def redo(self) -> Component:
         # TODO: Delete all the Ports from this component
         # TODO: Recreate all the connections from/to this component
-        self._graph.register_component(self._created_component)
-        return self._created_component
+        self.graph.register_component(self.created_component)
+        return self.created_component

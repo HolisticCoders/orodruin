@@ -4,7 +4,13 @@ from typing import Generator
 
 import pytest
 
-from orodruin.commands import ConnectPorts, CreateComponent, CreatePort, ExportComponent
+from orodruin.commands import (
+    ConnectPorts,
+    CreateComponent,
+    CreatePort,
+    ExportComponent,
+    ImportComponent,
+)
 from orodruin.component import Component
 from orodruin.library import LibraryManager
 from orodruin.port import PortDirection
