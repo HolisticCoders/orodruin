@@ -203,19 +203,11 @@ def test_export_component(root: Component) -> None:
     component.input2.set(2)
     component.output.set(4)
 
-    command = ExportComponent(component, "DummyName")
+    command = ExportComponent(component, "TestLibrary")
+    file_path = command.do()
 
-    expected_data = {
-        "type": f"Internal::{component.type()}",
-        "name": "multiply",
-        "ports": {
-            "input1": 2,
-            "input2": 2,
-            "output": 4,
-        },
-    }
-
-    assert command._component_instance_data(component) == expected_data
+    assert file_path.exists()
+    file_path.unlink()
 
 
 # def test_simple_component_from_json() -> None:

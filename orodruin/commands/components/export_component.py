@@ -21,7 +21,7 @@ class ExportComponent(Command):
 
     exported_path: Path = field(init=False)
 
-    def do(self) -> None:
+    def do(self) -> Path:
         library = LibraryManager.find_library(self.library_name)
 
         if not library:
@@ -39,6 +39,8 @@ class ExportComponent(Command):
         with self.exported_path.open("w") as f:
             serialized_component = self._component_as_json()
             f.write(serialized_component)
+
+        return self.exported_path
 
     def undo(self) -> None:
         """Exporting a component is not undoable."""
