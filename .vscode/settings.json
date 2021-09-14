@@ -13,6 +13,7 @@
     },
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
+    "python.linting.pylintUseMinimalCheckers": false,
     "python.linting.mypyEnabled": true,
     "python.testing.pytestArgs": [
         "--no-cov"
