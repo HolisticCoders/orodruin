@@ -54,12 +54,8 @@ class Library:
         """Return all the targets of this Library"""
         return list(self._path.iterdir())
 
-    def find_component(
-        self,
-        component_name: str,
-        target_name: str = "orodruin",
-    ) -> Optional[Path]:
-        """Return the path of a the given component for the given target name."""
+    def components(self, target_name: str = "orodruin") -> List[Path]:
+        """Return all the component paths for the given target."""
         target_path = self.target_path(target_name)
 
         if not target_path:
@@ -67,13 +63,22 @@ class Library:
                 f"Library {self.name} has no target {target_name}"
             )
 
+        components = []
         for component_path in target_path.iterdir():
-            if (
-                component_path.suffix == ".json"
-                and component_path.stem == component_name
-            ):
-                return component_path
+            if component_path.suffix == ".json":
+                components.append(component_path)
 
+        return components
+
+    def find_component(
+        self,
+        component_name: str,
+        target_name: str = "orodruin",
+    ) -> Optional[Path]:
+        """Return the path of a the given component for the given target name."""
+        for component_path in self.components(target_name):
+            if component_path.stem == component_name:
+                return component_path
         return None
 
 
