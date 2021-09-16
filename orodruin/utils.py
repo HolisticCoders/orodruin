@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from .component import Component
 from .connection import Connection
@@ -23,6 +23,16 @@ def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connec
             continue
         return connection
     return None
+
+
+def list_connections(graph, port: Port) -> List[Connection]:
+    """Find all the connections connected to the given port."""
+    connections = []
+    for connection in graph.connections():
+        if connection.source() is port or connection.target() is port:
+            connections.append(connection)
+
+    return connections
 
 
 def port_from_path(component: Component, port_path: str) -> Optional[Port]:

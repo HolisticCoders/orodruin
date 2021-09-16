@@ -4,7 +4,7 @@ from typing import Callable
 import pytest
 
 from orodruin import Component, Port, PortDirection
-from orodruin.commands.connections import (
+from orodruin.commands.ports.connect_ports import (
     ConnectionOnSameComponentError,
     ConnectionToDifferentDirectionError,
     ConnectionToSameDirectionError,

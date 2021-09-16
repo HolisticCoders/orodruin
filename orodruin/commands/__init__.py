@@ -5,8 +5,14 @@ from .components import (
     ExportComponent,
     ImportComponent,
 )
-from .connections import ConnectPorts
-from .ports import CreatePort, DeletePort, GetPort, SetPort
+from .ports import (
+    ConnectPorts,
+    CreatePort,
+    DeletePort,
+    DisconnectPorts,
+    GetPort,
+    SetPort,
+)
 
 __all__ = [
     "Command",
@@ -19,4 +25,5 @@ __all__ = [
     "GetPort",
     "ImportComponent",
     "SetPort",
+    "DisconnectPorts",
 ]

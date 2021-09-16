@@ -17,8 +17,7 @@ from ...component import Component
 from ...port import PortDirection
 from ...port import types as port_types
 from ..command import Command
-from ..connections import ConnectPorts
-from ..ports import CreatePort, SetPort
+from ..ports import ConnectPorts, CreatePort, SetPort
 from .create_component import CreateComponent
 
 
