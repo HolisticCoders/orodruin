@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List
 from uuid import UUID
@@ -10,6 +11,8 @@ from .signal import Signal
 
 if TYPE_CHECKING:
     from .component import Component
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -53,31 +56,37 @@ class Graph:
         """Register an existing component to this graph."""
         self._components[component.uuid()] = component
         self.component_registered.emit(component)
+        logger.debug(f"Registered component {component.uuid()}")
 
     def unregister_component(self, uuid: UUID) -> Component:
         """Remove a registered component from this graph."""
         component = self._components.pop(uuid)
         self.component_unregistered.emit(component)
+        logger.debug(f"Unregistered component {uuid}")
         return component
 
     def register_port(self, port: Port) -> None:
         """Register an existing port to this graph."""
         self._ports[port.uuid()] = port
         self.port_registered.emit(port)
+        logger.debug(f"Registered port {port.uuid()}")
 
     def unregister_port(self, uuid: UUID) -> Port:
         """Remove a registered port from this graph."""
         port = self._ports.pop(uuid)
         self.port_unregistered.emit(port)
+        logger.debug(f"Unregistered port {uuid}")
         return port
 
     def register_connection(self, connection: Connection) -> None:
         """Register an existing connection to this graph."""
         self._connections[connection.uuid()] = connection
         self.connection_registered.emit(connection)
+        logger.debug(f"Registered connection {connection.uuid()}")
 
     def unregister_connection(self, uuid: UUID) -> Connection:
         """Remove a registered connection from this graph."""
         connection = self._connections.pop(uuid)
         self.connection_unregistered.emit(connection)
+        logger.debug(f"Unregistered connection {uuid}")
         return connection
