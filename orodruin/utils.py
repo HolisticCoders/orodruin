@@ -25,7 +25,7 @@ def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connec
     return None
 
 
-def list_connections(graph, port: Port) -> List[Connection]:
+def list_connections(graph: Graph, port: Port) -> List[Connection]:
     """Find all the connections connected to the given port."""
     connections = []
     for connection in graph.connections():

@@ -29,7 +29,7 @@ class DeleteComponent(Command):
 
         for port in self._deleted_component.ports():
             for connection in list_connections(self.graph, port):
-                command = DisconnectPorts(
+                command: Command = DisconnectPorts(
                     self.graph,
                     connection.source(),
                     connection.target(),
