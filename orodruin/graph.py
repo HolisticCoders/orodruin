@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, List, Optional
 from uuid import UUID
 
 from .connection import Connection
@@ -40,13 +40,25 @@ class Graph:
         """Return the components registered to this graph."""
         return list(self._components.values())
 
+    def component_from_uuid(self, uuid: UUID) -> Optional[Component]:
+        """Find a component from its uuid."""
+        return self._components.get(uuid)
+
     def ports(self) -> List[Port]:
         """Return the ports registered to this graph."""
         return list(self._ports.values())
 
+    def port_from_uuid(self, uuid: UUID) -> Optional[Port]:
+        """Find a port from its uuid."""
+        return self._ports.get(uuid)
+
     def connections(self) -> List[Connection]:
         """Return the connections registered to this graph."""
         return list(self._connections.values())
+
+    def connection_from_uuid(self, uuid: UUID) -> Optional[Connection]:
+        """Find a connection from its uuid."""
+        return self._connections.get(uuid)
 
     def parent_component(self) -> Component:
         """Return this graph parent component."""
