@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 
 from .component import Component
@@ -12,6 +13,33 @@ class ComponentDoesNotExistError(ValueError):
 
 class PortDoesNotExistError(ValueError):
     """Given component doesn't exist."""
+
+
+def get_unique_name(graph: Graph, name: str) -> str:
+    """Return a valid unique component name inside of the given graph."""
+    name_pattern = re.compile(r"^(?P<basename>.*?)(?P<index>\d*)?$")
+
+    for component in graph.components():
+        if component.name() == name:
+
+            match = name_pattern.match(name)
+            if not match:
+                raise NameError(f"{name} did not match regex pattern {name_pattern}")
+
+            groups = match.groupdict()
+            basename = groups["basename"]
+            index_str = groups.get("index")
+
+            if not index_str:
+                index = 0
+            else:
+                index = int(index_str)
+            index += 1
+
+            name = f"{basename}{index}"
+
+            get_unique_name(graph, name)
+    return name
 
 
 def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connection]:

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from orodruin.library import Library
+from orodruin.utils import get_unique_name
 
 from ...component import Component
 from ...graph import Graph
@@ -21,8 +22,9 @@ class CreateComponent(Command):
     _created_component: Component = field(init=False)
 
     def do(self) -> Component:
+        unique_name = get_unique_name(self.graph, self.name)
         component = Component(
-            _name=self.name,
+            _name=unique_name,
             _parent_graph=self.graph,
         )
         if self.type:
