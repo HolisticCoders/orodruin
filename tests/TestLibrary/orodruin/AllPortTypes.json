@@ -1,0 +1,67 @@
+{
+    "definitions": {},
+    "components": [],
+    "ports": [
+        {
+            "name": "int_in",
+            "direction": "input",
+            "type": "int"
+        },
+        {
+            "name": "float_in",
+            "direction": "input",
+            "type": "float"
+        },
+        {
+            "name": "bool_in",
+            "direction": "input",
+            "type": "bool"
+        },
+        {
+            "name": "str_in",
+            "direction": "input",
+            "type": "str"
+        },
+        {
+            "name": "Vector3_in",
+            "direction": "input",
+            "type": "Vector3"
+        },
+        {
+            "name": "Matrix4_in",
+            "direction": "input",
+            "type": "Matrix4"
+        },
+        {
+            "name": "int_out",
+            "direction": "output",
+            "type": "int"
+        },
+        {
+            "name": "float_out",
+            "direction": "output",
+            "type": "float"
+        },
+        {
+            "name": "bool_out",
+            "direction": "output",
+            "type": "bool"
+        },
+        {
+            "name": "str_out",
+            "direction": "output",
+            "type": "str"
+        },
+        {
+            "name": "Vector3_out",
+            "direction": "output",
+            "type": "Vector3"
+        },
+        {
+            "name": "Matrix4_out",
+            "direction": "output",
+            "type": "Matrix4"
+        }
+    ],
+    "connections": []
+}

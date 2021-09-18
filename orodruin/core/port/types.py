@@ -16,29 +16,71 @@ from __future__ import annotations
 
 from builtins import bool, float, int, str
 from dataclasses import dataclass, field
-from typing import List
+from typing import Tuple
 
 
 @dataclass
-class Matrix:
+class Vector2:
     """Matrix representation class."""
 
-    value: List[float] = field(
-        default_factory=lambda: [
-            # fmt: off
+    value: Tuple[float, float] = field(default_factory=lambda: (0.0, 0.0))
+
+
+@dataclass
+class Vector3:
+    """Matrix representation class."""
+
+    value: Tuple[float, float, float] = field(default_factory=lambda: (0.0, 0.0, 0.0))
+
+
+@dataclass
+class Matrix3:
+    """Matrix representation class."""
+
+    # fmt: off
+    value: Tuple[
+        float, float, float,
+        float, float, float,
+        float, float, float,
+    ] = field(
+        default_factory=lambda: (
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+        )
+    )
+
+    # fmt: on
+
+
+@dataclass
+class Matrix4:
+    """Matrix representation class."""
+
+    # fmt: off
+    value: Tuple[
+        float, float, float, float,
+        float, float, float, float,
+        float, float, float, float,
+        float, float, float, float,
+    ] = field(
+        default_factory=lambda: (
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
-            # fmt: on
-        ]
+        )
     )
+    # fmt: on
 
 
 __all__ = [
+    "Matrix3",
+    "Matrix4",
+    "Vector2",
+    "Vector3",
+    "bool",
+    "float",
     "int",
     "str",
-    "float",
-    "bool",
-    "Matrix",
 ]
