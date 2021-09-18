@@ -20,6 +20,11 @@ class RenameComponent(Command):
     def do(self) -> str:
         self._old_name = self.component.name()
 
+        if self.name == self._old_name:
+            # Don't rename the node to avoid emiting the name_changed signal
+            self._new_name = self._old_name
+            return self._old_name
+
         parent_graph = self.component.parent_graph()
 
         if parent_graph:
@@ -34,7 +39,15 @@ class RenameComponent(Command):
         return self._new_name
 
     def undo(self) -> None:
+        if self._new_name == self._old_name:
+            # Don't rename the node to avoid emiting the name_changed signal
+            return
+
         self.component.set_name(self._old_name)
 
     def redo(self) -> None:
+        if self._new_name == self._old_name:
+            # Don't rename the node to avoid emiting the name_changed signal
+            return
+
         self.component.set_name(self._new_name)

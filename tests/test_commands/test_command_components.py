@@ -76,3 +76,24 @@ def test_rename_component_do_undo_redo(root: Component) -> None:
     command.redo()
 
     assert component.name() == "new_name"
+
+
+def test_rename_component_same_name(root: Component) -> None:
+    component_name = "my_component"
+    component = CreateComponent(root.graph(), component_name).do()
+
+    command = RenameComponent(component, component_name)
+
+    assert component.name() == component_name
+
+    command.do()
+
+    assert component.name() == component_name
+
+    command.undo()
+
+    assert component.name() == component_name
+
+    command.redo()
+
+    assert component.name() == component_name
