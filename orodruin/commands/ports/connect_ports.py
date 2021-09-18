@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 from orodruin.core import Connection, Graph, Port
-from orodruin.core.utils import find_connection
+from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
     ConnectionOnSameComponentError,
     ConnectionToDifferentDirectionError,
@@ -23,7 +23,7 @@ class ConnectPorts(Command):
     target: Port
     force: bool = False
 
-    _deleted_connection: Optional[Connection] = field(init=False, default=None)
+    _deleted_connections: List[Connection] = field(default_factory=list)
     _created_connection: Optional[Connection] = field(init=False, default=None)
 
     def do(self) -> Connection:
@@ -104,14 +104,14 @@ class ConnectPorts(Command):
                     "can only be of the same direction."
                 )
 
-        self._deleted_connection = find_connection(self.graph, self.source, self.target)
-        if self._deleted_connection:
+        self._deleted_connections = list_connections(self.graph, self.target)
+        if self._deleted_connections:
             if self.force:
-                self.graph.unregister_connection(self._deleted_connection.uuid())
+                for connection in self._deleted_connections:
+                    self.graph.unregister_connection(connection.uuid())
             else:
                 raise PortAlreadyConnectedError(
-                    f"port {self.target.name()} is already connected to "
-                    f"{self._deleted_connection.source().name()}, "
+                    f"port {self.target.name()} is already connected "
                     "use `force=True` to connect regardless."
                 )
 
@@ -123,11 +123,11 @@ class ConnectPorts(Command):
     def undo(self) -> None:
         if self._created_connection:
             self.graph.unregister_connection(self._created_connection.uuid())
-        if self._deleted_connection:
-            self.graph.register_connection(self._deleted_connection)
+        for connection in self._deleted_connections:
+            self.graph.register_connection(connection)
 
     def redo(self) -> None:
-        if self._deleted_connection:
-            self.graph.unregister_connection(self._deleted_connection.uuid())
+        for connection in self._deleted_connections:
+            self.graph.unregister_connection(connection.uuid())
         if self._created_connection:
             self.graph.register_connection(self._created_connection)
