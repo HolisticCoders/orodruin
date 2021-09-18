@@ -56,24 +56,26 @@ class ConnectPorts(Command):
             ]
         ):
             raise OutOfScopeConnectionError(
-                f"port {self.source.name()} and{self.target.name()} "
-                f"don't exist in the same scope"
+                f"Port {self.source.name()} "
+                f"cannot be connected to {self.target.name()}. "
+                f"Ports don't exist in the same scope"
             )
 
         if self.target.component() is self.source.component():
             raise ConnectionOnSameComponentError(
-                f"{self.source.name()} and {self.target.name()} "
-                "can't be connected because they both are on the same component "
-                f"'{self.source.component().name()}'"
+                f"Port {self.source.name()} "
+                f"cannot be connected to {self.target.name()}. "
+                "Both ports exist on the same component."
             )
 
         try:
             self.target.type()(self.source.get())
         except TypeError as e:
             raise TypeError(
-                "Can't connect two ports of different types. "
-                f"{self.source.name()}<{self.source.type().__name__}> to "
-                f"{self.target.name()}<{self.target.type().__name__}>"
+                f"Port {self.source.name()} "
+                f"cannot be connected to {self.target.name()}. "
+                f"Impossible to cast {self.source.type().__name__} to "
+                f"{self.target.type().__name__}."
             ) from e
 
         same_scope_connection = (
@@ -91,16 +93,17 @@ class ConnectPorts(Command):
         if same_scope_connection:
             if self.source.direction() == self.target.direction():
                 raise ConnectionToSameDirectionError(
-                    f"port {self.source.name()} and{self.target.name()} "
-                    f"are of the same direction. "
-                    f"Connection in the same scope can only go from input to output."
+                    f"Port {self.source.name()} "
+                    f"cannot be connected to {self.target.name()}. "
+                    f"Both ports are {self.source.direction()} ports."
                 )
         elif connection_with_parent:
             if self.source.direction() != self.target.direction():
                 raise ConnectionToDifferentDirectionError(
-                    f"port {self.source.name()} and{self.target.name()} "
-                    f"are of different directions. "
-                    f"connection from or to the parent component "
+                    f"Port {self.source.name()} "
+                    f"cannot be connected to {self.target.name()}. "
+                    "Both ports are of different direction. "
+                    "Connection with the parent component "
                     "can only be of the same direction."
                 )
 
@@ -111,6 +114,8 @@ class ConnectPorts(Command):
                     self.graph.unregister_connection(connection.uuid())
             else:
                 raise PortAlreadyConnectedError(
+                    f"Port {self.source.name()} "
+                    f"cannot be connected to {self.target.name()}. "
                     f"port {self.target.name()} is already connected "
                     "use `force=True` to connect regardless."
                 )
