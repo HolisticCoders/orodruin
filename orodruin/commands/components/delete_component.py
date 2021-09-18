@@ -3,10 +3,9 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 from uuid import UUID
 
-from orodruin.utils import list_connections
+from orodruin.core import Component, Graph
+from orodruin.core.utils import list_connections
 
-from ...component import Component
-from ...graph import Graph
 from ..command import Command
 from ..ports import DeletePort, DisconnectPorts
 

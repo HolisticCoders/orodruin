@@ -4,11 +4,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from orodruin.library import LibraryDoesNotExistError, LibraryManager
-
-from ...component import Component
-from ...port import Port
-from ..command import Command
+from orodruin.commands import Command
+from orodruin.core import Component, LibraryManager, Port
+from orodruin.exceptions import LibraryDoesNotExistError
 
 
 @dataclass

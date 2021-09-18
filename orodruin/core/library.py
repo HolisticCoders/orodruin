@@ -5,21 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-
-class NoRegisteredLibraryError(Exception):
-    """No libraries are registered."""
-
-
-class ComponentNotFoundError(Exception):
-    """Component not found in libraries."""
-
-
-class TargetDoesNotExistError(Exception):
-    """Target does not exist in library"""
-
-
-class LibraryDoesNotExistError(Exception):
-    """Library does not found in the registered libraries"""
+from orodruin.exceptions import NoRegisteredLibraryError, TargetDoesNotExistError
 
 
 @dataclass

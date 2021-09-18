@@ -2,12 +2,11 @@
 
 import pytest
 
-from orodruin.component import Component
-from orodruin.pathed_object import PathedObject
-from orodruin.port import Port, PortDirection
+from orodruin.core import Component, Port, PortDirection
+from orodruin.core.pathed_object import PathedObject
 
 
-def test_port_issubclass_pathedobject() -> None:
+def test_port_issubclass_pathed_object() -> None:
     assert issubclass(Port, PathedObject)
 
 

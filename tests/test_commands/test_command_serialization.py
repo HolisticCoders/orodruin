@@ -1,6 +1,5 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring, cyclic-import
-import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Generator
 
 import pytest
@@ -12,10 +11,7 @@ from orodruin.commands import (
     ExportComponent,
     ImportComponent,
 )
-from orodruin.component import Component
-from orodruin.library import LibraryManager
-from orodruin.port import PortDirection
-from orodruin.port.types import Matrix
+from orodruin.core import Component, LibraryManager, PortDirection
 
 
 @pytest.fixture(autouse=True)

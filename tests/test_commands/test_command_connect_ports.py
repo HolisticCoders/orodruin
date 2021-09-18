@@ -3,12 +3,12 @@ from typing import Callable
 
 import pytest
 
-from orodruin import Component, Port, PortDirection
-from orodruin.commands.ports.connect_ports import (
+from orodruin.commands import ConnectPorts
+from orodruin.core import Component, Port, PortDirection
+from orodruin.exceptions import (
     ConnectionOnSameComponentError,
     ConnectionToDifferentDirectionError,
     ConnectionToSameDirectionError,
-    ConnectPorts,
     OutOfScopeConnectionError,
     PortAlreadyConnectedError,
 )

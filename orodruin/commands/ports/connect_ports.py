@@ -1,33 +1,17 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ...connection import Connection
-from ...graph import Graph
-from ...port import Port
-from ...utils import find_connection
+from orodruin.core import Connection, Graph, Port
+from orodruin.core.utils import find_connection
+from orodruin.exceptions import (
+    ConnectionOnSameComponentError,
+    ConnectionToDifferentDirectionError,
+    ConnectionToSameDirectionError,
+    OutOfScopeConnectionError,
+    PortAlreadyConnectedError,
+)
+
 from ..command import Command
-
-
-class PortAlreadyConnectedError(ConnectionError):
-    """Port Already Connected Error."""
-
-
-class ConnectionOnSameComponentError(ConnectionError):
-    """Both ports about to be connected are on the same component."""
-
-
-class OutOfScopeConnectionError(ConnectionError):
-    """Connection from two components not in the same scope."""
-
-
-class ConnectionToSameDirectionError(ConnectionError):
-    """Two ports of the same direction and scope are being connected together."""
-
-
-class ConnectionToDifferentDirectionError(ConnectionError):
-    """Two ports of the component and its parent direction are being connected together
-    while they have the same direction.
-    """
 
 
 @dataclass

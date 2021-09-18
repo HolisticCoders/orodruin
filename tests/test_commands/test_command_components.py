@@ -1,10 +1,7 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
-from typing import Callable
 
-import pytest
-
-from orodruin import Component
 from orodruin.commands import CreateComponent, DeleteComponent
+from orodruin.core import Component
 
 
 def test_create_component_init(root: Component) -> None:

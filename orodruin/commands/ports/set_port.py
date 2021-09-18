@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing import TypeVar
 
-from orodruin.port.port import Port
+from orodruin.core import Port
 
 from ..command import Command
 

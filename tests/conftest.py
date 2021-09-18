@@ -2,7 +2,7 @@ from typing import Callable, Type
 
 import pytest
 
-from orodruin import Component, Port, PortDirection
+from orodruin.core import Component, Port, PortDirection
 
 
 @pytest.fixture(name="root")

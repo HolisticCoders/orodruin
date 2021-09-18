@@ -2,10 +2,8 @@
 from dataclasses import dataclass, field
 from typing import Type
 
-from orodruin.port.port import Port, PortDirection
+from orodruin.core import Component, Graph, Port, PortDirection
 
-from ...component import Component
-from ...graph import Graph
 from ..command import Command
 
 
@@ -35,7 +33,7 @@ class CreatePort(Command):
         return self._created_port
 
     def undo(self) -> None:
-        # TODO: Delete all the connectionts from/to this Port
+        # TODO: Delete all the connections from/to this Port
         self.graph.unregister_port(self._created_port.uuid())
         self.component.unregister_port(self._created_port.uuid())
 

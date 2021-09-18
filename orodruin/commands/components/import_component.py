@@ -4,18 +4,15 @@ from dataclasses import dataclass, field
 from os import PathLike
 from typing import Any, Dict, List, Optional, Tuple
 
-from orodruin.graph import Graph
-from orodruin.library import (
+from orodruin.core import Component, Graph, Library, LibraryManager, PortDirection
+from orodruin.core.port import types as port_types
+from orodruin.core.utils import port_from_path
+from orodruin.exceptions import (
     ComponentNotFoundError,
-    Library,
     LibraryDoesNotExistError,
-    LibraryManager,
+    PortDoesNotExistError,
 )
-from orodruin.utils import PortDoesNotExistError, port_from_path
 
-from ...component import Component
-from ...port import PortDirection
-from ...port import types as port_types
 from ..command import Command
 from ..ports import ConnectPorts, CreatePort, SetPort
 from .create_component import CreateComponent

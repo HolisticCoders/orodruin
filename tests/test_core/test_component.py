@@ -4,12 +4,11 @@ from typing import Callable
 
 import pytest
 
-from orodruin.component import Component
-from orodruin.pathed_object import PathedObject
-from orodruin.port import Port, PortDirection
+from orodruin.core import Component, Port, PortDirection
+from orodruin.core.pathed_object import PathedObject
 
 
-def test_implements_pathedobject() -> None:
+def test_implements_pathed_object() -> None:
     issubclass(Component, PathedObject)
 
 

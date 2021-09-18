@@ -2,10 +2,8 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from orodruin.port.port import Port
+from orodruin.core import Component, Graph, Port
 
-from ...component import Component
-from ...graph import Graph
 from ..command import Command
 
 

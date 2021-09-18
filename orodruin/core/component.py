@@ -13,18 +13,6 @@ if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
 
 
-class ComponentError(Exception):
-    """Generic Component Error"""
-
-
-class ParentToSelfError(ComponentError):
-    """Component parented to itself."""
-
-
-class ComponentDoesNotExistError(ComponentError):
-    """Component does not exist."""
-
-
 @dataclass
 class Component:
     """Orodruin's Component Class.
@@ -96,7 +84,7 @@ class Component:
         return self._parent_graph.parent_component()
 
     def __getattr__(self, name: str) -> Port:
-        """Get the Ports of this Component if the Python attribut doesn't exist."""
+        """Get the Ports of this Component if the Python attribute doesn't exist."""
         for port in self.ports():
             if port.name() == name:
                 return port

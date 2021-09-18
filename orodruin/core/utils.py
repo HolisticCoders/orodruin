@@ -7,14 +7,6 @@ from .graph import Graph
 from .port import Port
 
 
-class ComponentDoesNotExistError(ValueError):
-    """Given component doesn't exist."""
-
-
-class PortDoesNotExistError(ValueError):
-    """Given component doesn't exist."""
-
-
 def get_unique_name(graph: Graph, name: str) -> str:
     """Return a valid unique component name inside of the given graph."""
     name_pattern = re.compile(r"^(?P<basename>.*?)(?P<index>\d*)?$")

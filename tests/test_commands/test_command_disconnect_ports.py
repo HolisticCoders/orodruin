@@ -1,8 +1,8 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 from typing import Callable
 
-from orodruin import Component, Port, PortDirection
 from orodruin.commands import ConnectPorts, DisconnectPorts
+from orodruin.core import Component, Port, PortDirection
 
 
 def test_disconnect_port_init(

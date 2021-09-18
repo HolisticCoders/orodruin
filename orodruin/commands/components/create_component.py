@@ -2,11 +2,9 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from orodruin.library import Library
-from orodruin.utils import get_unique_name
+from orodruin.core import Component, Graph, Library
+from orodruin.core.utils import get_unique_name
 
-from ...component import Component
-from ...graph import Graph
 from ..command import Command
 
 
@@ -36,7 +34,7 @@ class CreateComponent(Command):
         return self._created_component
 
     def undo(self) -> None:
-        # TODO: Delete all the connectionts from/to this component
+        # TODO: Delete all the connections from/to this component
         # TODO: Delete all the Ports from this component
         self.graph.unregister_component(self._created_component.uuid())
 

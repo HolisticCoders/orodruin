@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ...connection import Connection
-from ...graph import Graph
-from ...port import Port
-from ...utils import find_connection
+from orodruin.core import Connection, Graph, Port
+from orodruin.core.utils import find_connection
+
 from ..command import Command
 
 
