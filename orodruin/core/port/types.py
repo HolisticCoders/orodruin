@@ -3,14 +3,9 @@
 to register a new type, it must be available in this module and
 exported through the __all__ variable.
 
-All custom types should be dataclasses as serialization/deserialization
-will assume any non built-in type is a dataclass.
-
-Types will be instantiated in one of two ways when creating Ports:
-1. If the class is a dataclass. the `new` class method will be called.
-    It should _not_ take any argument and initialize all the
-    fields to their default value.
-2. Otherwise, simply instantiate the class.
+The ConnectPort command will try to cast the value of the source port
+to the target's type.
+All custom types should raise a TypeError if the provided value can't be casted
 """
 from __future__ import annotations
 
@@ -25,12 +20,26 @@ class Vector2:
 
     value: Tuple[float, float] = field(default_factory=lambda: (0.0, 0.0))
 
+    def __post_init__(self) -> None:
+        if isinstance(self.value, Vector2):
+            self.value = self.value.value  # pylint: disable = no-member
+
+        if not isinstance(self.value, tuple) or len(self.value) != 2:
+            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+
 
 @dataclass
 class Vector3:
     """Matrix representation class."""
 
     value: Tuple[float, float, float] = field(default_factory=lambda: (0.0, 0.0, 0.0))
+
+    def __post_init__(self) -> None:
+        if isinstance(self.value, Vector3):
+            self.value = self.value.value  # pylint: disable = no-member
+
+        if not isinstance(self.value, tuple) or len(self.value) != 3:
+            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
 @dataclass
@@ -49,8 +58,14 @@ class Matrix3:
             0.0, 0.0, 1.0,
         )
     )
-
     # fmt: on
+
+    def __post_init__(self) -> None:
+        if isinstance(self.value, Matrix3):
+            self.value = self.value.value  # pylint: disable = no-member
+
+        if not isinstance(self.value, tuple) or len(self.value) != 9:
+            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
 @dataclass
@@ -72,6 +87,13 @@ class Matrix4:
         )
     )
     # fmt: on
+
+    def __post_init__(self) -> None:
+        if isinstance(self.value, Matrix4):
+            self.value = self.value.value  # pylint: disable = no-member
+
+        if not isinstance(self.value, tuple) or len(self.value) != 16:
+            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
 __all__ = [
