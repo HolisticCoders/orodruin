@@ -28,9 +28,10 @@ def get_unique_name(graph: Graph, name: str) -> str:
                 index = int(index_str)
             index += 1
 
-            name = f"{basename}{index}"
+            new_name = f"{basename}{index}"
 
-            get_unique_name(graph, name)
+            return get_unique_name(graph, new_name)
+
     return name
 
 
