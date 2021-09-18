@@ -37,8 +37,7 @@ class CreatePort(Command):
         self.graph.unregister_port(self._created_port.uuid())
         self.component.unregister_port(self._created_port.uuid())
 
-    def redo(self) -> Port:
+    def redo(self) -> None:
         # TODO: Recreate all the connections from/to this Port
         self.graph.register_port(self._created_port)
         self.component.register_port(self._created_port)
-        return self._created_port

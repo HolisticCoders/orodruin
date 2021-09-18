@@ -38,8 +38,7 @@ class CreateComponent(Command):
         # TODO: Delete all the Ports from this component
         self.graph.unregister_component(self._created_component.uuid())
 
-    def redo(self) -> Component:
+    def redo(self) -> None:
         # TODO: Delete all the Ports from this component
         # TODO: Recreate all the connections from/to this component
         self.graph.register_component(self._created_component)
-        return self._created_component

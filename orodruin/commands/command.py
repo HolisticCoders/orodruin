@@ -13,9 +13,9 @@ class Command(Generic[T], metaclass=ABCMeta):
         """Perform the command actions."""
 
     @abstractmethod
-    def undo(self) -> Any:
+    def undo(self) -> None:
         """Undo the command actions."""
 
-    def redo(self) -> Any:
+    def redo(self) -> None:
         """Redo the command, after an undo."""
         self.do()

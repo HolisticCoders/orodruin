@@ -23,8 +23,7 @@ class DeletePort(Command):
         self._owner_component = self._deleted_port.component()
         self._owner_component.unregister_port(self.port_id)
 
-    def undo(self) -> Port:
+    def undo(self) -> None:
         # TODO: Recreate all the connections from/to this component
         self.graph.register_port(self._deleted_port)
         self._owner_component.register_port(self._deleted_port)
-        return self._deleted_port
