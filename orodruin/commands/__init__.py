@@ -4,6 +4,7 @@ from .components import (
     DeleteComponent,
     ExportComponent,
     ImportComponent,
+    RenameComponent,
 )
 from .ports import (
     ConnectPorts,
@@ -21,9 +22,10 @@ __all__ = [
     "CreatePort",
     "DeleteComponent",
     "DeletePort",
+    "DisconnectPorts",
     "ExportComponent",
     "GetPort",
     "ImportComponent",
+    "RenameComponent",
     "SetPort",
-    "DisconnectPorts",
 ]

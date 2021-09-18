@@ -1,6 +1,6 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 
-from orodruin.commands import CreateComponent, DeleteComponent
+from orodruin.commands import CreateComponent, DeleteComponent, RenameComponent
 from orodruin.core import Component
 
 
@@ -8,7 +8,7 @@ def test_create_component_init(root: Component) -> None:
     CreateComponent(root.graph(), "my_component")
 
 
-def test_create_port_do_undo_redo(root: Component) -> None:
+def test_create_component_do_undo_redo(root: Component) -> None:
     assert not root.graph().components()
 
     command = CreateComponent(root.graph(), "my_component")
@@ -51,3 +51,28 @@ def test_delete_component_do_undo_redo(root: Component) -> None:
     command.redo()
 
     assert not root.graph().components()
+
+
+def test_rename_component_init(root: Component) -> None:
+    component = CreateComponent(root.graph(), "initial_name").do()
+    RenameComponent(component, "new_name")
+
+
+def test_rename_component_do_undo_redo(root: Component) -> None:
+    component = CreateComponent(root.graph(), "initial_name").do()
+
+    command = RenameComponent(component, "new_name")
+
+    assert component.name() == "initial_name"
+
+    command.do()
+
+    assert component.name() == "new_name"
+
+    command.undo()
+
+    assert component.name() == "initial_name"
+
+    command.redo()
+
+    assert component.name() == "new_name"
