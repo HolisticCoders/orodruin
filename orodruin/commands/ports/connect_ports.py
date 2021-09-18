@@ -67,12 +67,14 @@ class ConnectPorts(Command):
                 f"'{self.source.component().name()}'"
             )
 
-        if self.source.type() is not self.target.type():
+        try:
+            self.target.type()(self.source.get())
+        except TypeError as e:
             raise TypeError(
                 "Can't connect two ports of different types. "
                 f"{self.source.name()}<{self.source.type().__name__}> to "
                 f"{self.target.name()}<{self.target.type().__name__}>"
-            )
+            ) from e
 
         same_scope_connection = (
             self.source.component().parent_graph() is not None
