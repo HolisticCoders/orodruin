@@ -24,6 +24,7 @@ class CreateComponent(Command):
         component = Component(
             _name=unique_name,
             _parent_graph=self.graph,
+            _library=self.library,
         )
         if self.type:
             component.set_type(self.type)

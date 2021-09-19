@@ -86,17 +86,15 @@ class ImportComponent(Command):
         component_data: Dict[str, Any],
         component_name: str,
         component_type: Optional[str] = None,
-        library: Optional["Library"] = None,
+        library: Optional[Library] = None,
     ) -> Component:
         """Create a component from its serialized data."""
         component = CreateComponent(
             graph=graph,
             name=component_name,
             type=component_type,
+            library=library,
         ).do()
-
-        if library:
-            component.set_library(library)
 
         cls._create_ports(graph, component, component_data["ports"])
 
