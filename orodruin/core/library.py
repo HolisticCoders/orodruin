@@ -51,7 +51,7 @@ class Library:
 
         components = []
         for component_path in target_path.iterdir():
-            if component_path.suffix == ".json":
+            if component_path.is_file():
                 components.append(component_path)
 
         return components
@@ -60,10 +60,14 @@ class Library:
         self,
         component_name: str,
         target_name: str = "orodruin",
+        extension: str = "json",
     ) -> Optional[Path]:
         """Return the path of a the given component for the given target name."""
         for component_path in self.components(target_name):
-            if component_path.stem == component_name:
+            if (
+                component_path.stem == component_name
+                and component_path.suffix.endswith(extension)
+            ):
                 return component_path
         return None
 
@@ -128,6 +132,7 @@ class LibraryManager:
         component_name: str,
         library_name: Optional[str] = None,
         target_name: str = "orodruin",
+        extension: str = "json",
     ) -> Optional[Path]:
         """Get the component file from the libraries."""
 
@@ -138,14 +143,22 @@ class LibraryManager:
         if library_name:
             library = cls.find_library(library_name)
             if library:
-                component = library.find_component(component_name, target_name)
-                if component:
-                    return component
+                component_path = library.find_component(
+                    component_name,
+                    target_name,
+                    extension,
+                )
+                if component_path:
+                    return component_path
         else:
             for library in libraries:
-                component = library.find_component(component_name, target_name)
-                if component:
-                    return component
+                component_path = library.find_component(
+                    component_name,
+                    target_name,
+                    extension,
+                )
+                if component_path:
+                    return component_path
 
         return None
 
