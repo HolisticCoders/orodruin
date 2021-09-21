@@ -2,13 +2,13 @@ from typing import Callable, Type
 
 import pytest
 
-from orodruin.core import Component, Port, PortDirection
+from orodruin.core import Component, Graph, Port, PortDirection
 
 
-@pytest.fixture(name="root")
-def fixture_root() -> Component:
-    """Create and return a root component."""
-    return Component("root")
+@pytest.fixture(name="root_graph")
+def fixture_root() -> Graph:
+    """Create and return a root graph."""
+    return Graph()
 
 
 @pytest.fixture(name="create_port")

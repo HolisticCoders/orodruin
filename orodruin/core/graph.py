@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from .connection import Connection
 from .port import Port
@@ -22,7 +22,9 @@ class Graph:
     A graph organizes components, ports, and connections between them.
     """
 
-    _parent_component: Component
+    _parent_component: Optional[Component] = None
+
+    _uuid: UUID = field(default_factory=uuid4)
 
     _components: Dict[UUID, Component] = field(default_factory=dict)
     _ports: Dict[UUID, Port] = field(default_factory=dict)
@@ -35,6 +37,10 @@ class Graph:
     port_unregistered: Signal[Port] = field(default_factory=Signal)
     connection_registered: Signal[Connection] = field(default_factory=Signal)
     connection_unregistered: Signal[Connection] = field(default_factory=Signal)
+
+    def uuid(self) -> UUID:
+        """UUID of this component."""
+        return self._uuid
 
     def components(self) -> List[Component]:
         """Return the components registered to this graph."""
@@ -60,7 +66,7 @@ class Graph:
         """Find a connection from its uuid."""
         return self._connections.get(uuid)
 
-    def parent_component(self) -> Component:
+    def parent_component(self) -> Optional[Component]:
         """Return this graph parent component."""
         return self._parent_component
 

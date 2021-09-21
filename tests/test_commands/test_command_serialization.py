@@ -11,7 +11,7 @@ from orodruin.commands import (
     ExportComponent,
     ImportComponent,
 )
-from orodruin.core import Component, LibraryManager, PortDirection
+from orodruin.core import Graph, LibraryManager, PortDirection
 
 
 @pytest.fixture(autouse=True)
@@ -25,11 +25,11 @@ def clear_registered_components() -> Generator:
         LibraryManager.unregister_library(library._path)
 
 
-def test_component_instance_data(root: Component) -> None:
-    component = CreateComponent(root.graph(), "multiply").do()
-    CreatePort(root.graph(), component, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), component, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), component, "output", PortDirection.output, int).do()
+def test_component_instance_data(root_graph: Graph) -> None:
+    component = CreateComponent(root_graph, "multiply").do()
+    CreatePort(root_graph, component, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, component, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, component, "output", PortDirection.output, int).do()
 
     component.input1.set(2)
     component.input2.set(2)
@@ -50,21 +50,21 @@ def test_component_instance_data(root: Component) -> None:
     assert command._component_instance_data(component) == expected_data
 
 
-def test_component_definition_data(root: Component) -> None:
-    parent = CreateComponent(root.graph(), "parent").do()
-    CreatePort(root.graph(), parent, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), parent, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), parent, "output", PortDirection.output, int).do()
+def test_component_definition_data(root_graph: Graph) -> None:
+    parent = CreateComponent(root_graph, "parent").do()
+    CreatePort(root_graph, parent, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, parent, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, parent, "output", PortDirection.output, int).do()
 
     child_a = CreateComponent(parent.graph(), "child_a").do()
-    CreatePort(root.graph(), child_a, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_a, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_a, "output", PortDirection.output, int).do()
+    CreatePort(root_graph, child_a, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, child_a, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, child_a, "output", PortDirection.output, int).do()
 
     child_b = CreateComponent(parent.graph(), "child_b").do()
-    CreatePort(root.graph(), child_b, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_b, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_b, "output", PortDirection.output, int).do()
+    CreatePort(root_graph, child_b, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, child_b, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, child_b, "output", PortDirection.output, int).do()
 
     ConnectPorts(parent.graph(), parent.input1, child_a.input1).do()
     ConnectPorts(parent.graph(), parent.input2, child_a.input2).do()
@@ -170,21 +170,21 @@ def test_component_definition_data(root: Component) -> None:
     assert command._component_definition_data(parent) == expected_data
 
 
-def test_component_as_json(root: Component) -> None:
-    parent = CreateComponent(root.graph(), "parent").do()
-    CreatePort(root.graph(), parent, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), parent, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), parent, "output", PortDirection.output, int).do()
+def test_component_as_json(root_graph: Graph) -> None:
+    parent = CreateComponent(root_graph, "parent").do()
+    CreatePort(root_graph, parent, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, parent, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, parent, "output", PortDirection.output, int).do()
 
     child_a = CreateComponent(parent.graph(), "child_a").do()
-    CreatePort(root.graph(), child_a, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_a, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_a, "output", PortDirection.output, int).do()
+    CreatePort(root_graph, child_a, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, child_a, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, child_a, "output", PortDirection.output, int).do()
 
     child_b = CreateComponent(parent.graph(), "child_b").do()
-    CreatePort(root.graph(), child_b, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_b, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), child_b, "output", PortDirection.output, int).do()
+    CreatePort(root_graph, child_b, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, child_b, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, child_b, "output", PortDirection.output, int).do()
 
     ConnectPorts(parent.graph(), parent.input1, child_a.input1).do()
     ConnectPorts(parent.graph(), parent.input2, child_a.input2).do()
@@ -195,11 +195,11 @@ def test_component_as_json(root: Component) -> None:
     ExportComponent._component_as_json(parent)
 
 
-def test_export_component(root: Component) -> None:
-    component = CreateComponent(root.graph(), "multiply").do()
-    CreatePort(root.graph(), component, "input1", PortDirection.input, int).do()
-    CreatePort(root.graph(), component, "input2", PortDirection.input, int).do()
-    CreatePort(root.graph(), component, "output", PortDirection.output, int).do()
+def test_export_component(root_graph: Graph) -> None:
+    component = CreateComponent(root_graph, "multiply").do()
+    CreatePort(root_graph, component, "input1", PortDirection.input, int).do()
+    CreatePort(root_graph, component, "input2", PortDirection.input, int).do()
+    CreatePort(root_graph, component, "output", PortDirection.output, int).do()
 
     component.input1.set(2)
     component.input2.set(2)
@@ -212,9 +212,9 @@ def test_export_component(root: Component) -> None:
     file_path.unlink()
 
 
-def test_import_simple_component(root: Component) -> None:
+def test_import_simple_component(root_graph: Graph) -> None:
     component_name = "SimpleComponent"
-    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
+    component = ImportComponent(root_graph, component_name, "TestLibrary").do()
 
     file_path = (
         Path(__file__).parent.parent
@@ -233,9 +233,9 @@ def test_import_simple_component(root: Component) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_nested_component(root: Component) -> None:
+def test_import_nested_component(root_graph: Graph) -> None:
     component_name = "NestedComponent"
-    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
+    component = ImportComponent(root_graph, component_name, "TestLibrary").do()
 
     file_path = (
         Path(__file__).parent.parent
@@ -254,9 +254,9 @@ def test_import_nested_component(root: Component) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_referencing_component(root: Component) -> None:
+def test_import_referencing_component(root_graph: Graph) -> None:
     component_name = "ReferencingSimpleComponent"
-    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
+    component = ImportComponent(root_graph, component_name, "TestLibrary").do()
 
     file_path = (
         Path(__file__).parent.parent
@@ -275,9 +275,9 @@ def test_import_referencing_component(root: Component) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_referencing_nested_component(root: Component) -> None:
+def test_import_referencing_nested_component(root_graph: Graph) -> None:
     component_name = "ReferencingNestedComponent"
-    component = ImportComponent(root.graph(), component_name, "TestLibrary").do()
+    component = ImportComponent(root_graph, component_name, "TestLibrary").do()
 
     file_path = (
         Path(__file__).parent.parent
