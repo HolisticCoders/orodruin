@@ -2,6 +2,9 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from orodruin.core import Connection, Graph, Port
+from orodruin.core.graph import GraphLike
+from orodruin.core.port.port import PortLike
+from orodruin.core.scene import Scene
 from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
     ConnectionOnSameComponentError,
@@ -18,13 +21,22 @@ from ..command import Command
 class ConnectPorts(Command):
     """Connect two ports of the same graph."""
 
-    graph: Graph
-    source: Port
-    target: Port
+    scene: Scene
+    graph: GraphLike
+    source: PortLike
+    target: PortLike
     force: bool = False
 
+    _source: Port = field(init=False)
+    _target: Port = field(init=False)
+    _graph: Graph = field(init=False)
     _deleted_connections: List[Connection] = field(default_factory=list)
     _created_connection: Optional[Connection] = field(init=False, default=None)
+
+    def __post_init__(self) -> None:
+        self._source = self.scene.port_from_portlike(self.source)
+        self._target = self.scene.port_from_portlike(self.target)
+        self._graph = self.scene.graph_from_graphlike(self.graph)
 
     def do(self) -> Connection:
         """Connect the source port to the target port.
@@ -44,95 +56,88 @@ class ConnectPorts(Command):
                 and the force argument is False
         """
         if not (
-            self.graph
+            self._graph
             in [
-                self.source.component().graph(),
-                self.source.component().parent_graph(),
+                self._source.component().graph(),
+                self._source.component().parent_graph(),
             ]
-            and self.graph
+            and self._graph
             in [
-                self.target.component().graph(),
-                self.target.component().parent_graph(),
+                self._target.component().graph(),
+                self._target.component().parent_graph(),
             ]
         ):
             raise OutOfScopeConnectionError(
-                f"Port {self.source.name()} "
-                f"cannot be connected to {self.target.name()}. "
+                f"Port {self._source.name()} "
+                f"cannot be connected to {self._target.name()}. "
                 f"Ports don't exist in the same scope"
             )
 
-        if self.target.component() is self.source.component():
+        if self._target.component() is self._source.component():
             raise ConnectionOnSameComponentError(
-                f"Port {self.source.name()} "
-                f"cannot be connected to {self.target.name()}. "
+                f"Port {self._source.name()} "
+                f"cannot be connected to {self._target.name()}. "
                 "Both ports exist on the same component."
             )
 
         try:
-            self.target.type()(self.source.get())
+            self._target.type()(self._source.get())
         except TypeError as e:
             raise TypeError(
-                f"Port {self.source.name()} "
-                f"cannot be connected to {self.target.name()}. "
-                f"Impossible to cast {self.source.type().__name__} to "
-                f"{self.target.type().__name__}."
+                f"Port {self._source.name()} "
+                f"cannot be connected to {self._target.name()}. "
+                f"Impossible to cast {self._source.type().__name__} to "
+                f"{self._target.type().__name__}."
             ) from e
 
         same_scope_connection = (
-            self.source.component().parent_graph() is not None
-            and self.target.component().parent_graph() is not None
+            self._source.component().parent_graph() is not None
+            and self._target.component().parent_graph() is not None
             and (
-                self.source.component().parent_graph()
-                == self.target.component().parent_graph()
+                self._source.component().parent_graph()
+                == self._target.component().parent_graph()
             )
         )
         connection_with_parent = (
-            self.source.component().parent_component() == self.target.component()
-            or self.source.component() == self.target.component().parent_component()
+            self._source.component().parent_component() == self._target.component()
+            or self._source.component() == self._target.component().parent_component()
         )
         if same_scope_connection:
-            if self.source.direction() == self.target.direction():
+            if self._source.direction() == self._target.direction():
                 raise ConnectionToSameDirectionError(
-                    f"Port {self.source.name()} "
-                    f"cannot be connected to {self.target.name()}. "
-                    f"Both ports are {self.source.direction()} ports."
+                    f"Port {self._source.name()} "
+                    f"cannot be connected to {self._target.name()}. "
+                    f"Both ports are {self._source.direction()} ports."
                 )
         elif connection_with_parent:
-            if self.source.direction() != self.target.direction():
+            if self._source.direction() != self._target.direction():
                 raise ConnectionToDifferentDirectionError(
-                    f"Port {self.source.name()} "
-                    f"cannot be connected to {self.target.name()}. "
+                    f"Port {self._source.name()} "
+                    f"cannot be connected to {self._target.name()}. "
                     "Both ports are of different direction. "
                     "Connection with the parent component "
                     "can only be of the same direction."
                 )
 
-        self._deleted_connections = list_connections(self.graph, self.target)
+        self._deleted_connections = list_connections(self._graph, self._target)
         if self._deleted_connections:
             if self.force:
                 for connection in self._deleted_connections:
-                    self.graph.unregister_connection(connection.uuid())
+                    self._graph.unregister_connection(connection.uuid())
             else:
                 raise PortAlreadyConnectedError(
-                    f"Port {self.source.name()} "
-                    f"cannot be connected to {self.target.name()}. "
-                    f"port {self.target.name()} is already connected "
+                    f"Port {self._source.name()} "
+                    f"cannot be connected to {self._target.name()}. "
+                    f"port {self._target.name()} is already connected "
                     "use `force=True` to connect regardless."
                 )
 
-        self._created_connection = Connection(self.source, self.target)
-        self.graph.register_connection(self._created_connection)
+        self._created_connection = self.scene.create_connection(
+            self._source, self._target
+        )
+        self._graph.register_connection(self._created_connection)
 
         return self._created_connection
 
     def undo(self) -> None:
-        if self._created_connection:
-            self.graph.unregister_connection(self._created_connection.uuid())
-        for connection in self._deleted_connections:
-            self.graph.register_connection(connection)
-
-    def redo(self) -> None:
-        for connection in self._deleted_connections:
-            self.graph.unregister_connection(connection.uuid())
-        if self._created_connection:
-            self.graph.register_connection(self._created_connection)
+        raise NotImplementedError

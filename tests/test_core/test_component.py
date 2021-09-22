@@ -1,10 +1,9 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 from pathlib import PurePosixPath
-from typing import Callable
 
 import pytest
 
-from orodruin.core import Component, Port, PortDirection
+from orodruin.core import Component, Port, PortDirection, Scene
 from orodruin.core.pathed_object import PathedObject
 
 
@@ -12,20 +11,26 @@ def test_implements_pathed_object() -> None:
     issubclass(Component, PathedObject)
 
 
-def test_init_component() -> None:
-    component = Component("component")
+def test_init_component(scene: Scene) -> None:
+    assert len(scene.components()) == 0
+
+    component = scene.create_component("component")
+
+    assert len(scene.components()) == 1
     assert component.name() == "component"
 
 
-def test_add_ports() -> None:
+def test_add_ports(scene: Scene) -> None:
 
-    component = Component("component")
+    component = scene.create_component("component")
 
     assert len(component.ports()) == 0
 
-    input1 = Port("input1", PortDirection.input, int, component)
-    input2 = Port("input2", PortDirection.input, int, component)
-    output = Port("output", PortDirection.input, int, component)
+    input1 = scene.create_port("input1", PortDirection.input, int, component.uuid())
+    input2 = scene.create_port("input2", PortDirection.input, int, component.uuid())
+    output = scene.create_port("output", PortDirection.input, int, component.uuid())
+
+    assert len(scene.ports()) == 3
 
     component.register_port(input1)
     component.register_port(input2)
@@ -34,47 +39,51 @@ def test_add_ports() -> None:
     assert len(component.ports()) == 3
 
 
-def test_set_name() -> None:
-    component = Component("original_name")
+def test_set_name(scene: Scene) -> None:
+    component = scene.create_component("original_name")
+
+    assert component.name() == "original_name"
+
     component.set_name("new_name")
 
     assert component.name() == "new_name"
 
 
-def test_path_root_component() -> None:
-    root_component = Component("root")
-    assert root_component.path() == PurePosixPath("/root")
+def test_path_root_component(scene: Scene) -> None:
+    component = scene.create_component("root")
+    assert component.path() == PurePosixPath("/root")
 
 
-def test_path_nested_component() -> None:
-    root_component = Component("root")
-    child_a = Component("child_a")
-    child_b = Component("child_b")
+def test_path_nested_component(scene: Scene) -> None:
+    root_component = scene.create_component("root")
+    child_a = scene.create_component("child_a")
+    child_b = scene.create_component("child_b")
 
-    child_a.set_parent_graph(root_component.graph())
-    child_b.set_parent_graph(child_a.graph())
+    child_a.set_parent_graph(root_component.graph().uuid())
+    child_b.set_parent_graph(child_a.graph().uuid())
 
     assert child_b.path() == PurePosixPath("/root/child_a/child_b")
 
 
-def test_path_nested_component_relative() -> None:
-    root_component = Component("root")
-    child_a = Component("child_a")
-    child_b = Component("child_b")
+def test_path_nested_component_relative(scene: Scene) -> None:
+    root_component = scene.create_component("root")
+    child_a = scene.create_component("child_a")
+    child_b = scene.create_component("child_b")
 
-    child_a.set_parent_graph(root_component.graph())
-    child_b.set_parent_graph(child_a.graph())
+    child_a.set_parent_graph(root_component.graph().uuid())
+    child_b.set_parent_graph(child_a.graph().uuid())
 
     assert child_b.relative_path(relative_to=child_a) == PurePosixPath("child_b")
 
 
-def test_access_port(create_port: Callable[..., Port]) -> None:
-    component = Component("component")
-    create_port(component, "input1")
-    assert isinstance(component.input1, Port)
+def test_access_port(scene: Scene) -> None:
+    component = scene.create_component("component")
+    port = scene.create_port("input1", PortDirection.input, int, component.uuid())
+    component.register_port(port)
+    assert isinstance(component.port("input1"), Port)
 
 
-def test_access_innexisting_port() -> None:
-    component = Component("component")
+def test_access_innexisting_port(scene: Scene) -> None:
+    component = scene.create_component("component")
     with pytest.raises(NameError):
-        component.this_is_not_a_port  # pylint: disable = pointless-statement
+        component.port("this_is_not_a_port")

@@ -1,28 +1,19 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
-from typing import Callable
 
-from orodruin.core import Component, Connection, Port
+from orodruin.core import PortDirection, Scene
 
 
-def test_connection_source(create_port: Callable[..., Port]) -> None:
-    component_a = Component("component_a")
-    component_b = Component("component_b")
+def test_connection_source(scene: Scene) -> None:
+    component_a = scene.create_component("component_a")
+    component_b = scene.create_component("component_b")
 
-    port_a = create_port(component_a, "port_a")
-    port_b = create_port(component_b, "port_b")
+    port_a = scene.create_port("port_a", PortDirection.input, int, component_a.uuid())
+    port_b = scene.create_port("port_b", PortDirection.input, int, component_b.uuid())
 
-    connection = Connection(port_a, port_b)
+    component_a.register_port(port_a)
+    component_b.register_port(port_b)
+
+    connection = scene.create_connection(port_a.uuid(), port_b.uuid())
 
     assert connection.source() == port_a
-
-
-def test_connection_target(create_port: Callable[..., Port]) -> None:
-    component_a = Component("component_a")
-    component_b = Component("component_b")
-
-    port_a = create_port(component_a, "port_a")
-    port_b = create_port(component_b, "port_b")
-
-    connection = Connection(port_a, port_b)
-
     assert connection.target() == port_b

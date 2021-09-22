@@ -1,15 +1,22 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Union
 from uuid import UUID, uuid4
 
-from .port import Port
+if TYPE_CHECKING:
+    from .port import Port
+    from .scene import Scene
 
 
 @dataclass
 class Connection:
     """Orodruin's port Connection Class."""
 
-    _source: Port
-    _target: Port
+    _scene: Scene
+
+    _source_id: UUID
+    _target_id: UUID
 
     _uuid: UUID = field(default_factory=uuid4)
 
@@ -19,8 +26,16 @@ class Connection:
 
     def source(self) -> Port:
         """Return the source port of this connection."""
-        return self._source
+        return self._scene.port_from_uuid(self._source_id)
 
     def target(self) -> Port:
         """Return the target port of this connection."""
-        return self._target
+        return self._scene.port_from_uuid(self._target_id)
+
+
+ConnectionLike = Union[Connection, UUID]
+
+__all__ = [
+    "Connection",
+    "ConnectionLike",
+]

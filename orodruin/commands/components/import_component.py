@@ -4,7 +4,15 @@ from dataclasses import dataclass, field
 from os import PathLike
 from typing import Any, Dict, List, Optional, Tuple
 
-from orodruin.core import Component, Graph, Library, LibraryManager, PortDirection
+from orodruin.core import (
+    Component,
+    Graph,
+    GraphLike,
+    Library,
+    LibraryManager,
+    PortDirection,
+    Scene,
+)
 from orodruin.core.port import types as port_types
 from orodruin.core.utils import port_from_path
 from orodruin.exceptions import (
@@ -22,12 +30,17 @@ from .create_component import CreateComponent
 class ImportComponent(Command):
     """Import Component command."""
 
-    graph: Graph
+    scene: Scene
+    graph: GraphLike
     component_name: str
     library_name: str
     target_name: str = "orodruin"
 
+    _graph: Graph = field(init=False)
     _imported_component: Component = field(init=False)
+
+    def __post_init__(self) -> None:
+        self._graph = self.scene.graph_from_graphlike(self.graph)
 
     def do(self) -> Component:
         library = LibraryManager.find_library(self.library_name)
@@ -46,7 +59,8 @@ class ImportComponent(Command):
             )
 
         self._imported_component = self._component_from_json(
-            self.graph,
+            self.scene,
+            self._graph,
             component_path,
             self.component_name,
             self.component_name,
@@ -61,6 +75,7 @@ class ImportComponent(Command):
     @classmethod
     def _component_from_json(
         cls,
+        scene: Scene,
         graph: Graph,
         component_path: PathLike,
         component_name: str,
@@ -72,6 +87,7 @@ class ImportComponent(Command):
             component_data = json.loads(handle.read())
 
         return cls._component_from_data(
+            scene,
             graph,
             component_data,
             component_name,
@@ -82,6 +98,7 @@ class ImportComponent(Command):
     @classmethod
     def _component_from_data(
         cls,
+        scene: Scene,
         graph: Graph,
         component_data: Dict[str, Any],
         component_name: str,
@@ -90,20 +107,23 @@ class ImportComponent(Command):
     ) -> Component:
         """Create a component from its serialized data."""
         component = CreateComponent(
+            scene=scene,
             graph=graph,
             name=component_name,
             type=component_type,
             library=library,
         ).do()
 
-        cls._create_ports(graph, component, component_data["ports"])
+        cls._create_ports(scene, component, component_data["ports"])
 
         cls._create_subcomponents(
+            scene,
             component,
             component_data["components"],
             component_data["definitions"],
         )
         cls._create_connections(
+            scene,
             component,
             component_data["connections"],
         )
@@ -113,7 +133,7 @@ class ImportComponent(Command):
     @classmethod
     def _create_ports(
         cls,
-        graph: Graph,
+        scene: Scene,
         component: Component,
         ports_data: Dict,
     ) -> None:
@@ -129,11 +149,12 @@ class ImportComponent(Command):
                     "orodruin port type"
                 ) from error
 
-            CreatePort(graph, component, name, direction, port_type).do()
+            CreatePort(scene, component, name, direction, port_type).do()
 
     @classmethod
     def _create_subcomponents(
         cls,
+        scene: Scene,
         component: Component,
         subcomponents_data: Dict,
         internal_definitions: Dict,
@@ -145,6 +166,7 @@ class ImportComponent(Command):
             if library_name == "Internal":
                 subcomponent_definition = internal_definitions[subcomponent_type]
                 sub_component = cls._component_from_data(
+                    scene,
                     component.graph(),
                     subcomponent_definition,
                     subcomponent_name,
@@ -152,6 +174,7 @@ class ImportComponent(Command):
                 )
             else:
                 sub_component = ImportComponent(
+                    scene,
                     component.graph(),
                     subcomponent_type,
                     library_name,
@@ -164,6 +187,7 @@ class ImportComponent(Command):
     @classmethod
     def _create_connections(
         cls,
+        scene: Scene,
         component: Component,
         connections_data: List[Tuple[str, str]],
     ) -> None:
@@ -180,4 +204,4 @@ class ImportComponent(Command):
             if not target_port:
                 raise PortDoesNotExistError(f"Port {target_name} not found")
 
-            ConnectPorts(component.graph(), source_port, target_port).do()
+            ConnectPorts(scene, component.graph(), source_port, target_port).do()

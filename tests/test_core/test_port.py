@@ -2,7 +2,7 @@
 
 import pytest
 
-from orodruin.core import Component, Port, PortDirection
+from orodruin.core import Port, PortDirection, Scene
 from orodruin.core.pathed_object import PathedObject
 
 
@@ -14,28 +14,43 @@ def test_implements_port() -> None:
     assert issubclass(Port, Port)
 
 
-def test_init_port() -> None:
-    component = Component("component")
-    port = Port("port", PortDirection.input, int, component)
+def test_init_port(scene: Scene) -> None:
+    component = scene.create_component("component")
+    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+    component.register_port(port)
     assert port.name() == "port"
 
 
-def test_set_port_name() -> None:
-    component = Component("component")
-    port = Port("my_port", PortDirection.input, int, component)
+def test_set_port_name(scene: Scene) -> None:
+    component = scene.create_component("component")
+    port = scene.create_port("port", PortDirection.input, int, component.uuid())
     component.register_port(port)
-    port = component.port("my_port")
-    assert port.name() == "my_port"
+
+    assert port.name() == "port"
+
+    port.set_name("new_name")
+
+    assert port.name() == "new_name"
 
     port.set_name("other_name")
     assert port.name() == "other_name"
 
 
-def test_set_port_value(port: Port) -> None:
+def test_set_port_value(scene: Scene) -> None:
+    component = scene.create_component("component")
+    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+    component.register_port(port)
+
     port.set(1)
+
     assert port.get() == 1
 
 
-def test_set_port_wrong_value_type(port: Port) -> None:
+def test_set_port_wrong_value_type(scene: Scene) -> None:
+
+    component = scene.create_component("component")
+    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+    component.register_port(port)
+
     with pytest.raises(TypeError):
-        port.set("string")
+        port.set("string")  # type: ignore

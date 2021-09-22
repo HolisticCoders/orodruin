@@ -3,6 +3,7 @@ from .components import (
     CreateComponent,
     DeleteComponent,
     ExportComponent,
+    GroupComponents,
     ImportComponent,
     RenameComponent,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "DisconnectPorts",
     "ExportComponent",
     "GetPort",
+    "GroupComponents",
     "ImportComponent",
     "RenameComponent",
     "SetPort",
