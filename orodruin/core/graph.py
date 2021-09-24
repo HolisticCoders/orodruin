@@ -53,7 +53,7 @@ class Graph:
         components = []
 
         for component_id in self._component_ids:
-            component = self._scene.component_from_uuid(component_id)
+            component = self._scene.component_from_componentlike(component_id)
             components.append(component)
 
         return components
@@ -63,7 +63,7 @@ class Graph:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._scene.port_from_uuid(port_id)
+            port = self._scene.port_from_portlike(port_id)
             ports.append(port)
 
         return ports
@@ -73,7 +73,7 @@ class Graph:
         connections = []
 
         for connection_id in self._connections_ids:
-            connection = self._scene.connection_from_uuid(connection_id)
+            connection = self._scene.connection_from_connectionlike(connection_id)
             connections.append(connection)
 
         return connections
@@ -81,7 +81,7 @@ class Graph:
     def parent_component(self) -> Optional[Component]:
         """Return this graph parent component."""
         if self._parent_component_id:
-            return self._scene.component_from_uuid(self._parent_component_id)
+            return self._scene.component_from_componentlike(self._parent_component_id)
         return None
 
     def register_component(self, component: ComponentLike) -> None:

@@ -52,11 +52,11 @@ class Port(Generic[PortType]):
 
     def graph(self) -> Graph:
         """Return the graph that this port exists in."""
-        return self._scene.graph_from_uuid(self._graph_id)
+        return self._scene.graph_from_graphlike(self._graph_id)
 
     def component(self) -> Component:
         """The Component this Port is attached on."""
-        return self._scene.component_from_uuid(self._component_id)
+        return self._scene.component_from_componentlike(self._component_id)
 
     def uuid(self) -> UUID:
         """UUID of this port."""

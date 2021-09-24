@@ -27,7 +27,7 @@ class Component:
     """
 
     _scene: Scene
-    _parent_graph_id: UUID
+    _parent_graph_id: Optional[UUID]
 
     _name: str
     _type: str = field(default_factory=lambda: str(uuid4()))
@@ -98,33 +98,28 @@ class Component:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._scene.port_from_uuid(port_id)
+            port = self._scene.port_from_portlike(port_id)
             ports.append(port)
 
         return ports
 
-    def parent_graph(self) -> Graph:
+    def parent_graph(self) -> Optional[Graph]:
         """Parent graph of the component."""
         if self._parent_graph_id:
-            return self._scene.graph_from_uuid(self._parent_graph_id)
+            return self._scene.graph_from_graphlike(self._parent_graph_id)
         return None
 
     def set_parent_graph(self, graph: Optional[GraphLike]) -> None:
         """Set the parent graph of the component."""
-        graph_id: Optional[UUID]
-
-        if not graph:
-            graph_id = None
-        elif isinstance(graph, Graph):
-            graph_id = graph.uuid()
-        elif isinstance(graph, UUID):
-            graph_id = graph
-
-        self._parent_graph_id = graph_id
+        if graph:
+            graph = self.scene().graph_from_graphlike(graph)
+            self._parent_graph_id = graph.uuid()
+        else:
+            self._parent_graph_id = None
 
     def graph(self) -> Graph:
         """Graph containing child components."""
-        return self._scene.graph_from_uuid(self._graph_id)
+        return self._scene.graph_from_graphlike(self._graph_id)
 
     def parent_component(self) -> Optional[Component]:
         """Parent component."""
