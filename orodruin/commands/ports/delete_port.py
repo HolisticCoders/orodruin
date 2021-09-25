@@ -1,7 +1,7 @@
 """Delete Port command."""
 from dataclasses import dataclass, field
 
-from orodruin.core import Component, Graph, Port, PortLike, Scene
+from orodruin.core import Component, Graph, Port, PortLike, State
 
 from ..command import Command
 
@@ -10,7 +10,7 @@ from ..command import Command
 class DeletePort(Command):
     """Delete Port command."""
 
-    scene: Scene
+    state: State
     port: PortLike
 
     _port: Port = field(init=False)
@@ -18,7 +18,7 @@ class DeletePort(Command):
     _component: Component = field(init=False)
 
     def __post_init__(self) -> None:
-        self._port = self.scene.port_from_portlike(self.port)
+        self._port = self.state.port_from_portlike(self.port)
         self._graph = self._port.graph()
         self._component = self._port.component()
 
@@ -26,7 +26,7 @@ class DeletePort(Command):
         # TODO: Delete all the connections from/to this component
         self._component.unregister_port(self.port)
         self._graph.unregister_port(self.port)
-        self.scene.delete_port(self.port)
+        self.state.delete_port(self.port)
 
     def undo(self) -> None:
         raise NotImplementedError

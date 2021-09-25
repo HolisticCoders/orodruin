@@ -3,61 +3,61 @@
 from pathlib import Path
 
 from orodruin.commands import CreateComponent, DeleteComponent, RenameComponent
-from orodruin.core import Scene
+from orodruin.core import State
 from orodruin.core.library import Library
 
 
-def test_create_component_init(scene: Scene) -> None:
-    CreateComponent(scene, "my_component")
-    CreateComponent(scene, "my_component", type="Multiply")
-    CreateComponent(scene, "my_component", library=Library(Path("")))
-    CreateComponent(scene, "my_component", graph=scene.root_graph())
+def test_create_component_init(state: State) -> None:
+    CreateComponent(state, "my_component")
+    CreateComponent(state, "my_component", type="Multiply")
+    CreateComponent(state, "my_component", library=Library(Path("")))
+    CreateComponent(state, "my_component", graph=state.root_graph())
 
 
-def test_create_component_do_undo_redo(scene: Scene) -> None:
-    assert not scene.root_graph().components()
+def test_create_component_do_undo_redo(state: State) -> None:
+    assert not state.root_graph().components()
 
-    command = CreateComponent(scene, "my_component")
+    command = CreateComponent(state, "my_component")
     command.do()
 
-    assert scene.root_graph().components()
+    assert state.root_graph().components()
 
 
-def test_delete_component_init(scene: Scene) -> None:
-    component = CreateComponent(scene, "my_component").do()
+def test_delete_component_init(state: State) -> None:
+    component = CreateComponent(state, "my_component").do()
 
-    DeleteComponent(scene, component)
-    DeleteComponent(scene, component.uuid())
+    DeleteComponent(state, component)
+    DeleteComponent(state, component.uuid())
 
 
-def test_delete_component_do_undo_redo(scene: Scene) -> None:
+def test_delete_component_do_undo_redo(state: State) -> None:
 
-    command = CreateComponent(scene, "my_component")
+    command = CreateComponent(state, "my_component")
     component = command.do()
 
-    assert scene.root_graph().components()
+    assert state.root_graph().components()
 
-    command = DeleteComponent(scene, component)
+    command = DeleteComponent(state, component)
     command.do()
 
-    assert not scene.root_graph().components()
+    assert not state.root_graph().components()
 
     # command.undo()
 
-    # assert scene.root_graph().components()
+    # assert state.root_graph().components()
 
     # command.redo()
 
-    # assert not scene.root_graph().components()
+    # assert not state.root_graph().components()
 
 
-def test_rename_component_init(scene: Scene) -> None:
-    component = CreateComponent(scene, "initial_name").do()
+def test_rename_component_init(state: State) -> None:
+    component = CreateComponent(state, "initial_name").do()
     RenameComponent(component, "new_name")
 
 
-def test_rename_component_do_undo_redo(scene: Scene) -> None:
-    component = CreateComponent(scene, "initial_name").do()
+def test_rename_component_do_undo_redo(state: State) -> None:
+    component = CreateComponent(state, "initial_name").do()
 
     command = RenameComponent(component, "new_name")
 
@@ -76,9 +76,9 @@ def test_rename_component_do_undo_redo(scene: Scene) -> None:
     assert component.name() == "new_name"
 
 
-def test_rename_component_same_name(scene: Scene) -> None:
+def test_rename_component_same_name(state: State) -> None:
     component_name = "my_component"
-    component = CreateComponent(scene, component_name).do()
+    component = CreateComponent(state, component_name).do()
 
     command = RenameComponent(component, component_name)
 

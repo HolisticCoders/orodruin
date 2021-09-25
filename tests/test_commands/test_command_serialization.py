@@ -11,7 +11,7 @@ from orodruin.commands import (
     ExportComponent,
     ImportComponent,
 )
-from orodruin.core import LibraryManager, PortDirection, Scene
+from orodruin.core import LibraryManager, PortDirection, State
 
 
 @pytest.fixture(autouse=True)
@@ -25,11 +25,11 @@ def clear_registered_components() -> Generator:
         LibraryManager.unregister_library(library.path())
 
 
-def test_component_instance_data(scene: Scene) -> None:
-    component = CreateComponent(scene, "multiply").do()
-    CreatePort(scene, component, "input1", PortDirection.input, int).do()
-    CreatePort(scene, component, "input2", PortDirection.input, int).do()
-    CreatePort(scene, component, "output", PortDirection.output, int).do()
+def test_component_instance_data(state: State) -> None:
+    component = CreateComponent(state, "multiply").do()
+    CreatePort(state, component, "input1", PortDirection.input, int).do()
+    CreatePort(state, component, "input2", PortDirection.input, int).do()
+    CreatePort(state, component, "output", PortDirection.output, int).do()
 
     component.port("input1").set(2)
     component.port("input2").set(2)
@@ -50,36 +50,36 @@ def test_component_instance_data(scene: Scene) -> None:
     assert command._component_instance_data(component) == expected_data
 
 
-def test_component_definition_data(scene: Scene) -> None:
-    parent = CreateComponent(scene, "parent").do()
-    CreatePort(scene, parent, "input1", PortDirection.input, int).do()
-    CreatePort(scene, parent, "input2", PortDirection.input, int).do()
-    CreatePort(scene, parent, "output", PortDirection.output, int).do()
+def test_component_definition_data(state: State) -> None:
+    parent = CreateComponent(state, "parent").do()
+    CreatePort(state, parent, "input1", PortDirection.input, int).do()
+    CreatePort(state, parent, "input2", PortDirection.input, int).do()
+    CreatePort(state, parent, "output", PortDirection.output, int).do()
 
-    child_a = CreateComponent(scene, "child_a", graph=parent.graph()).do()
-    CreatePort(scene, child_a, "input1", PortDirection.input, int).do()
-    CreatePort(scene, child_a, "input2", PortDirection.input, int).do()
-    CreatePort(scene, child_a, "output", PortDirection.output, int).do()
+    child_a = CreateComponent(state, "child_a", graph=parent.graph()).do()
+    CreatePort(state, child_a, "input1", PortDirection.input, int).do()
+    CreatePort(state, child_a, "input2", PortDirection.input, int).do()
+    CreatePort(state, child_a, "output", PortDirection.output, int).do()
 
-    child_b = CreateComponent(scene, "child_b", graph=parent.graph()).do()
-    CreatePort(scene, child_b, "input1", PortDirection.input, int).do()
-    CreatePort(scene, child_b, "input2", PortDirection.input, int).do()
-    CreatePort(scene, child_b, "output", PortDirection.output, int).do()
+    child_b = CreateComponent(state, "child_b", graph=parent.graph()).do()
+    CreatePort(state, child_b, "input1", PortDirection.input, int).do()
+    CreatePort(state, child_b, "input2", PortDirection.input, int).do()
+    CreatePort(state, child_b, "output", PortDirection.output, int).do()
 
     ConnectPorts(
-        scene, parent.graph(), parent.port("input1"), child_a.port("input1")
+        state, parent.graph(), parent.port("input1"), child_a.port("input1")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), parent.port("input2"), child_a.port("input2")
+        state, parent.graph(), parent.port("input2"), child_a.port("input2")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_a.port("output"), child_b.port("input1")
+        state, parent.graph(), child_a.port("output"), child_b.port("input1")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_a.port("output"), child_b.port("input2")
+        state, parent.graph(), child_a.port("output"), child_b.port("input2")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_b.port("output"), parent.port("output")
+        state, parent.graph(), child_b.port("output"), parent.port("output")
     ).do()
 
     command = ExportComponent(parent, "DummyName")
@@ -180,46 +180,46 @@ def test_component_definition_data(scene: Scene) -> None:
     assert command._component_definition_data(parent) == expected_data
 
 
-def test_component_as_json(scene: Scene) -> None:
-    parent = CreateComponent(scene, "parent").do()
-    CreatePort(scene, parent, "input1", PortDirection.input, int).do()
-    CreatePort(scene, parent, "input2", PortDirection.input, int).do()
-    CreatePort(scene, parent, "output", PortDirection.output, int).do()
+def test_component_as_json(state: State) -> None:
+    parent = CreateComponent(state, "parent").do()
+    CreatePort(state, parent, "input1", PortDirection.input, int).do()
+    CreatePort(state, parent, "input2", PortDirection.input, int).do()
+    CreatePort(state, parent, "output", PortDirection.output, int).do()
 
-    child_a = CreateComponent(scene, "child_a", graph=parent.graph()).do()
-    CreatePort(scene, child_a, "input1", PortDirection.input, int).do()
-    CreatePort(scene, child_a, "input2", PortDirection.input, int).do()
-    CreatePort(scene, child_a, "output", PortDirection.output, int).do()
+    child_a = CreateComponent(state, "child_a", graph=parent.graph()).do()
+    CreatePort(state, child_a, "input1", PortDirection.input, int).do()
+    CreatePort(state, child_a, "input2", PortDirection.input, int).do()
+    CreatePort(state, child_a, "output", PortDirection.output, int).do()
 
-    child_b = CreateComponent(scene, "child_b", graph=parent.graph()).do()
-    CreatePort(scene, child_b, "input1", PortDirection.input, int).do()
-    CreatePort(scene, child_b, "input2", PortDirection.input, int).do()
-    CreatePort(scene, child_b, "output", PortDirection.output, int).do()
+    child_b = CreateComponent(state, "child_b", graph=parent.graph()).do()
+    CreatePort(state, child_b, "input1", PortDirection.input, int).do()
+    CreatePort(state, child_b, "input2", PortDirection.input, int).do()
+    CreatePort(state, child_b, "output", PortDirection.output, int).do()
 
     ConnectPorts(
-        scene, parent.graph(), parent.port("input1"), child_a.port("input1")
+        state, parent.graph(), parent.port("input1"), child_a.port("input1")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), parent.port("input2"), child_a.port("input2")
+        state, parent.graph(), parent.port("input2"), child_a.port("input2")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_a.port("output"), child_b.port("input1")
+        state, parent.graph(), child_a.port("output"), child_b.port("input1")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_a.port("output"), child_b.port("input2")
+        state, parent.graph(), child_a.port("output"), child_b.port("input2")
     ).do()
     ConnectPorts(
-        scene, parent.graph(), child_b.port("output"), parent.port("output")
+        state, parent.graph(), child_b.port("output"), parent.port("output")
     ).do()
 
     ExportComponent._component_as_json(parent)  # pylint: disable = protected-access
 
 
-def test_export_component(scene: Scene) -> None:
-    component = CreateComponent(scene, "multiply").do()
-    CreatePort(scene, component, "input1", PortDirection.input, int).do()
-    CreatePort(scene, component, "input2", PortDirection.input, int).do()
-    CreatePort(scene, component, "output", PortDirection.output, int).do()
+def test_export_component(state: State) -> None:
+    component = CreateComponent(state, "multiply").do()
+    CreatePort(state, component, "input1", PortDirection.input, int).do()
+    CreatePort(state, component, "input2", PortDirection.input, int).do()
+    CreatePort(state, component, "output", PortDirection.output, int).do()
 
     component.port("input1").set(2)
     component.port("input2").set(2)
@@ -232,11 +232,11 @@ def test_export_component(scene: Scene) -> None:
     file_path.unlink()
 
 
-def test_import_simple_component(scene: Scene) -> None:
+def test_import_simple_component(state: State) -> None:
     component_name = "SimpleComponent"
     component = ImportComponent(
-        scene,
-        scene.root_graph(),
+        state,
+        state.root_graph(),
         component_name,
         "TestLibrary",
     ).do()
@@ -260,10 +260,10 @@ def test_import_simple_component(scene: Scene) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_nested_component(scene: Scene) -> None:
+def test_import_nested_component(state: State) -> None:
     component_name = "NestedComponent"
     component = ImportComponent(
-        scene, scene.root_graph(), component_name, "TestLibrary"
+        state, state.root_graph(), component_name, "TestLibrary"
     ).do()
 
     file_path = (
@@ -285,10 +285,10 @@ def test_import_nested_component(scene: Scene) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_referencing_component(scene: Scene) -> None:
+def test_import_referencing_component(state: State) -> None:
     component_name = "ReferencingSimpleComponent"
     component = ImportComponent(
-        scene, scene.root_graph(), component_name, "TestLibrary"
+        state, state.root_graph(), component_name, "TestLibrary"
     ).do()
 
     file_path = (
@@ -310,10 +310,10 @@ def test_import_referencing_component(scene: Scene) -> None:
     assert ExportComponent._component_as_json(component) == file_content
 
 
-def test_import_referencing_nested_component(scene: Scene) -> None:
+def test_import_referencing_nested_component(state: State) -> None:
     component_name = "ReferencingNestedComponent"
     component = ImportComponent(
-        scene, scene.root_graph(), component_name, "TestLibrary"
+        state, state.root_graph(), component_name, "TestLibrary"
     ).do()
 
     file_path = (

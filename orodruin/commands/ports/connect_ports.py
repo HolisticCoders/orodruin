@@ -4,7 +4,7 @@ from typing import List, Optional
 from orodruin.core import Connection, Graph, Port
 from orodruin.core.graph import GraphLike
 from orodruin.core.port.port import PortLike
-from orodruin.core.scene import Scene
+from orodruin.core.state import State
 from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
     ConnectionOnSameComponentError,
@@ -21,7 +21,7 @@ from ..command import Command
 class ConnectPorts(Command):
     """Connect two ports of the same graph."""
 
-    scene: Scene
+    state: State
     graph: GraphLike
     source: PortLike
     target: PortLike
@@ -34,9 +34,9 @@ class ConnectPorts(Command):
     _created_connection: Optional[Connection] = field(init=False, default=None)
 
     def __post_init__(self) -> None:
-        self._source = self.scene.port_from_portlike(self.source)
-        self._target = self.scene.port_from_portlike(self.target)
-        self._graph = self.scene.graph_from_graphlike(self.graph)
+        self._source = self.state.port_from_portlike(self.source)
+        self._target = self.state.port_from_portlike(self.target)
+        self._graph = self.state.graph_from_graphlike(self.graph)
 
     def do(self) -> Connection:
         """Connect the source port to the target port.
@@ -132,7 +132,7 @@ class ConnectPorts(Command):
                     "use `force=True` to connect regardless."
                 )
 
-        self._created_connection = self.scene.create_connection(
+        self._created_connection = self.state.create_connection(
             self._source, self._target
         )
         self._graph.register_connection(self._created_connection)

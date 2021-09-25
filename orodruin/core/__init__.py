@@ -4,7 +4,7 @@ from .connection import Connection, ConnectionLike
 from .graph import Graph, GraphLike
 from .library import Library, LibraryManager
 from .port import Port, PortDirection, PortLike, PortType
-from .scene import Scene
+from .state import State
 from .signal import Signal
 
 __all__ = [
@@ -20,6 +20,6 @@ __all__ = [
     "PortDirection",
     "PortLike",
     "PortType",
-    "Scene",
+    "state",
     "Signal",
 ]

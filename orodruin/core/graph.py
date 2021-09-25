@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .component import Component, ComponentLike
     from .connection import Connection, ConnectionLike
     from .port import Port, PortLike
-    from .scene import Scene
+    from .state import State
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class Graph:
     A graph organizes components, ports, and connections between them.
     """
 
-    _scene: Scene
+    _state: State
     _parent_component_id: Optional[UUID] = None
 
     _uuid: UUID = field(default_factory=uuid4)
@@ -40,9 +40,9 @@ class Graph:
     connection_registered: Signal[Connection] = field(default_factory=Signal)
     connection_unregistered: Signal[Connection] = field(default_factory=Signal)
 
-    def scene(self) -> Scene:
-        """Return the scene that owns this graph."""
-        return self._scene
+    def state(self) -> State:
+        """Return the state that owns this graph."""
+        return self._state
 
     def uuid(self) -> UUID:
         """UUID of this component."""
@@ -53,7 +53,7 @@ class Graph:
         components = []
 
         for component_id in self._component_ids:
-            component = self._scene.component_from_componentlike(component_id)
+            component = self._state.component_from_componentlike(component_id)
             components.append(component)
 
         return components
@@ -63,7 +63,7 @@ class Graph:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._scene.port_from_portlike(port_id)
+            port = self._state.port_from_portlike(port_id)
             ports.append(port)
 
         return ports
@@ -73,7 +73,7 @@ class Graph:
         connections = []
 
         for connection_id in self._connections_ids:
-            connection = self._scene.connection_from_connectionlike(connection_id)
+            connection = self._state.connection_from_connectionlike(connection_id)
             connections.append(connection)
 
         return connections
@@ -81,12 +81,12 @@ class Graph:
     def parent_component(self) -> Optional[Component]:
         """Return this graph parent component."""
         if self._parent_component_id:
-            return self._scene.component_from_componentlike(self._parent_component_id)
+            return self._state.component_from_componentlike(self._parent_component_id)
         return None
 
     def register_component(self, component: ComponentLike) -> None:
         """Register an existing component to this graph."""
-        component = self._scene.component_from_componentlike(component)
+        component = self._state.component_from_componentlike(component)
 
         self._component_ids.append(component.uuid())
         component.set_parent_graph(self.uuid())
@@ -100,7 +100,7 @@ class Graph:
 
     def unregister_component(self, component: ComponentLike) -> None:
         """Remove a registered component from this graph."""
-        component = self._scene.component_from_componentlike(component)
+        component = self._state.component_from_componentlike(component)
 
         self._component_ids.remove(component.uuid())
         component.set_parent_graph(None)
@@ -114,7 +114,7 @@ class Graph:
 
     def register_port(self, port: PortLike) -> None:
         """Register an existing port to this graph."""
-        port = self._scene.port_from_portlike(port)
+        port = self._state.port_from_portlike(port)
 
         self._port_ids.append(port.uuid())
         self.port_registered.emit(port)
@@ -123,7 +123,7 @@ class Graph:
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this graph."""
-        port = self._scene.port_from_portlike(port)
+        port = self._state.port_from_portlike(port)
 
         self._port_ids.remove(port.uuid())
         self.port_unregistered.emit(port)
@@ -132,7 +132,7 @@ class Graph:
 
     def register_connection(self, connection: ConnectionLike) -> None:
         """Register an existing connection to this graph."""
-        connection = self._scene.connection_from_connectionlike(connection)
+        connection = self._state.connection_from_connectionlike(connection)
 
         self._connections_ids.append(connection.uuid())
         self.connection_registered.emit(connection)
@@ -145,7 +145,7 @@ class Graph:
 
     def unregister_connection(self, connection: ConnectionLike) -> None:
         """Remove a registered connection from this graph."""
-        connection = self._scene.connection_from_connectionlike(connection)
+        connection = self._state.connection_from_connectionlike(connection)
 
         self._connections_ids.remove(connection.uuid())
         self.connection_unregistered.emit(connection)

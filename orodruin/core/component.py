@@ -12,7 +12,7 @@ from .signal import Signal
 if TYPE_CHECKING:
     from .library import Library  # pylint: disable = cyclic-import
     from .port import Port, PortLike
-    from .scene import Scene
+    from .state import State
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class Component:
     and can contain other Components as a subgraph
     """
 
-    _scene: Scene
+    _state: State
     _parent_graph_id: Optional[UUID]
 
     _name: str
@@ -44,11 +44,11 @@ class Component:
     port_unregistered: Signal[Port] = field(default_factory=Signal)
 
     def __post_init__(self) -> None:
-        self._graph_id = self._scene.create_graph(self.uuid()).uuid()
+        self._graph_id = self._state.create_graph(self.uuid()).uuid()
 
-    def scene(self) -> Scene:
-        """Return the scene that owns this component."""
-        return self._scene
+    def state(self) -> State:
+        """Return the state that owns this component."""
+        return self._state
 
     def uuid(self) -> UUID:
         """UUID of this component."""
@@ -98,7 +98,7 @@ class Component:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._scene.port_from_portlike(port_id)
+            port = self._state.port_from_portlike(port_id)
             ports.append(port)
 
         return ports
@@ -106,20 +106,20 @@ class Component:
     def parent_graph(self) -> Optional[Graph]:
         """Parent graph of the component."""
         if self._parent_graph_id:
-            return self._scene.graph_from_graphlike(self._parent_graph_id)
+            return self._state.graph_from_graphlike(self._parent_graph_id)
         return None
 
     def set_parent_graph(self, graph: Optional[GraphLike]) -> None:
         """Set the parent graph of the component."""
         if graph:
-            graph = self.scene().graph_from_graphlike(graph)
+            graph = self.state().graph_from_graphlike(graph)
             self._parent_graph_id = graph.uuid()
         else:
             self._parent_graph_id = None
 
     def graph(self) -> Graph:
         """Graph containing child components."""
-        return self._scene.graph_from_graphlike(self._graph_id)
+        return self._state.graph_from_graphlike(self._graph_id)
 
     def parent_component(self) -> Optional[Component]:
         """Parent component."""
@@ -138,7 +138,7 @@ class Component:
 
     def register_port(self, port: PortLike) -> None:
         """Register an existing port to this component."""
-        port = self._scene.port_from_portlike(port)
+        port = self._state.port_from_portlike(port)
 
         self._port_ids.append(port.uuid())
         self.port_registered.emit(port)
@@ -147,7 +147,7 @@ class Component:
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this component."""
-        port = self._scene.port_from_portlike(port)
+        port = self._state.port_from_portlike(port)
 
         self._port_ids.remove(port.uuid())
         self.port_unregistered.emit(port)

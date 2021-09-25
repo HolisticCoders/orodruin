@@ -6,14 +6,14 @@ from uuid import UUID, uuid4
 
 if TYPE_CHECKING:
     from .port import Port
-    from .scene import Scene
+    from .state import State
 
 
 @dataclass
 class Connection:
     """Orodruin's port Connection Class."""
 
-    _scene: Scene
+    _state: State
 
     _source_id: UUID
     _target_id: UUID
@@ -26,11 +26,11 @@ class Connection:
 
     def source(self) -> Port:
         """Return the source port of this connection."""
-        return self._scene.port_from_portlike(self._source_id)
+        return self._state.port_from_portlike(self._source_id)
 
     def target(self) -> Port:
         """Return the target port of this connection."""
-        return self._scene.port_from_portlike(self._target_id)
+        return self._state.port_from_portlike(self._target_id)
 
 
 ConnectionLike = Union[Connection, UUID]

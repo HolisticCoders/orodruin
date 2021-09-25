@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Type
 
 from orodruin.core import Component, Graph, Port, PortDirection
-from orodruin.core.scene import Scene
+from orodruin.core.state import State
 
 from ..command import Command
 
@@ -12,7 +12,7 @@ from ..command import Command
 class CreatePort(Command):
     """Create Port command."""
 
-    scene: Scene
+    state: State
     component: Component
     name: str
     direction: PortDirection
@@ -25,7 +25,7 @@ class CreatePort(Command):
         self._graph = self.component.parent_graph()
 
     def do(self) -> Port:
-        port = self.scene.create_port(
+        port = self.state.create_port(
             self.name, self.direction, self.type, self.component.uuid()
         )
 

@@ -10,7 +10,7 @@ from orodruin.core.graph import Graph
 
 if TYPE_CHECKING:
     from ..component import Component  # pylint: disable = cyclic-import
-    from ..scene import Scene
+    from ..state import State
 
 
 class PortDirection(Enum):
@@ -31,7 +31,7 @@ class Port(Generic[PortType]):
     It can be connected to other Ports and hold a value
     """
 
-    _scene: Scene
+    _state: State
     _graph_id: UUID
     _component_id: UUID
 
@@ -46,17 +46,17 @@ class Port(Generic[PortType]):
     def __post_init__(self) -> None:
         self._value = self._type()
 
-    def scene(self) -> Scene:
-        """Return the scene that owns this port."""
-        return self._scene
+    def state(self) -> State:
+        """Return the state that owns this port."""
+        return self._state
 
     def graph(self) -> Graph:
         """Return the graph that this port exists in."""
-        return self._scene.graph_from_graphlike(self._graph_id)
+        return self._state.graph_from_graphlike(self._graph_id)
 
     def component(self) -> Component:
         """The Component this Port is attached on."""
-        return self._scene.component_from_componentlike(self._component_id)
+        return self._state.component_from_componentlike(self._component_id)
 
     def uuid(self) -> UUID:
         """UUID of this port."""

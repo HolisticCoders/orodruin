@@ -2,7 +2,7 @@
 
 import pytest
 
-from orodruin.core import Port, PortDirection, Scene
+from orodruin.core import Port, PortDirection, State
 from orodruin.core.pathed_object import PathedObject
 
 
@@ -14,16 +14,16 @@ def test_implements_port() -> None:
     assert issubclass(Port, Port)
 
 
-def test_init_port(scene: Scene) -> None:
-    component = scene.create_component("component")
-    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+def test_init_port(state: State) -> None:
+    component = state.create_component("component")
+    port = state.create_port("port", PortDirection.input, int, component.uuid())
     component.register_port(port)
     assert port.name() == "port"
 
 
-def test_set_port_name(scene: Scene) -> None:
-    component = scene.create_component("component")
-    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+def test_set_port_name(state: State) -> None:
+    component = state.create_component("component")
+    port = state.create_port("port", PortDirection.input, int, component.uuid())
     component.register_port(port)
 
     assert port.name() == "port"
@@ -36,9 +36,9 @@ def test_set_port_name(scene: Scene) -> None:
     assert port.name() == "other_name"
 
 
-def test_set_port_value(scene: Scene) -> None:
-    component = scene.create_component("component")
-    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+def test_set_port_value(state: State) -> None:
+    component = state.create_component("component")
+    port = state.create_port("port", PortDirection.input, int, component.uuid())
     component.register_port(port)
 
     port.set(1)
@@ -46,10 +46,10 @@ def test_set_port_value(scene: Scene) -> None:
     assert port.get() == 1
 
 
-def test_set_port_wrong_value_type(scene: Scene) -> None:
+def test_set_port_wrong_value_type(state: State) -> None:
 
-    component = scene.create_component("component")
-    port = scene.create_port("port", PortDirection.input, int, component.uuid())
+    component = state.create_component("component")
+    port = state.create_port("port", PortDirection.input, int, component.uuid())
     component.register_port(port)
 
     with pytest.raises(TypeError):

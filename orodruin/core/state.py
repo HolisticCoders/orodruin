@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class Scene:
-    """Orodruin's Scene class.
+class State:
+    """Orodruin's State class.
 
     This is the object that "owns" all the Graphs, Components, Ports and Connections.
-    Nothing else than the scene should hold direct references to any of these objects.
+    Nothing else than the state should hold direct references to any of these objects.
     Instead, the UUIDs should be stored and objects accessed when needed
-    with the Scene.<object>_from_uuid methods.
+    with the State.object_from_objectlike methods.
     """
 
     _root_graph: Graph = field(init=False)
@@ -48,7 +48,7 @@ class Scene:
         self._root_graph = self.create_graph()
 
     def root_graph(self) -> Graph:
-        "return the scene's root graph"
+        "return the state's root graph"
         return self._root_graph
 
     def graph_from_graphlike(self, graph: GraphLike) -> Graph:
@@ -140,7 +140,7 @@ class Scene:
         return list(self._connections.values())
 
     def create_graph(self, parent_component: Optional[ComponentLike] = None) -> Graph:
-        """Create graph and register it to the scene."""
+        """Create graph and register it to the state."""
 
         if isinstance(parent_component, Component):
             parent_component = parent_component.uuid()
@@ -154,7 +154,7 @@ class Scene:
         return graph
 
     def delete_graph(self, graph: GraphLike) -> None:
-        """Delete a graph and unregister it from the scene."""
+        """Delete a graph and unregister it from the state."""
 
         graph = self.graph_from_graphlike(graph)
 
@@ -171,12 +171,12 @@ class Scene:
         library: Optional[Library] = None,
         parent_graph_id: Optional[UUID] = None,
     ) -> Component:
-        """Create graph and register it to the scene."""
+        """Create graph and register it to the state."""
         if not parent_graph_id:
             parent_graph_id = self.root_graph().uuid()
 
         component = Component(
-            _scene=self,
+            _state=self,
             _parent_graph_id=parent_graph_id,
             _name=name,
             _library=library,
@@ -193,7 +193,7 @@ class Scene:
         return component
 
     def delete_component(self, component: ComponentLike) -> None:
-        """Delete a component and unregister it from the scene."""
+        """Delete a component and unregister it from the state."""
 
         component = self.component_from_componentlike(component)
 
@@ -210,7 +210,7 @@ class Scene:
         port_type: Type[PortType],
         component: ComponentLike,
     ) -> Port[PortType]:
-        """Create a port and register it to the scene."""
+        """Create a port and register it to the state."""
 
         component = self.component_from_componentlike(component)
 
@@ -233,7 +233,7 @@ class Scene:
         return port
 
     def delete_port(self, port: PortLike) -> None:
-        """Delete a port and unregister it from the scene."""
+        """Delete a port and unregister it from the state."""
 
         port = self.port_from_portlike(port)
 
@@ -241,14 +241,14 @@ class Scene:
 
         self.port_deleted.emit(port.uuid())
 
-        logger.debug("Deleted port %s from the scene.", port.path())
+        logger.debug("Deleted port %s from the state.", port.path())
 
     def create_connection(
         self,
         source: PortLike,
         target: PortLike,
     ) -> Connection:
-        """Create a connection and register it to the scene."""
+        """Create a connection and register it to the state."""
 
         source = self.port_from_portlike(source)
         target = self.port_from_portlike(target)
@@ -262,7 +262,7 @@ class Scene:
         return connection
 
     def delete_connection(self, connection: ConnectionLike) -> None:
-        """Delete a connection and unregister it from the scene."""
+        """Delete a connection and unregister it from the state."""
 
         connection = self.connection_from_connectionlike(connection)
 
