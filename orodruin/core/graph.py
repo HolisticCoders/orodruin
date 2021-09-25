@@ -8,8 +8,8 @@ from uuid import UUID, uuid4
 from .signal import Signal
 
 if TYPE_CHECKING:
-    from .node import Node, NodeLike
     from .connection import Connection, ConnectionLike
+    from .node import Node, NodeLike
     from .port import Port, PortLike
     from .state import State
 
@@ -90,7 +90,6 @@ class Graph:
 
         self._node_ids.append(node.uuid())
         node.set_parent_graph(self.uuid())
-        self.node_registered.emit(node)
 
         logger.debug(
             "Registered node %s to graph %s",
@@ -98,13 +97,14 @@ class Graph:
             self.uuid(),
         )
 
+        self.node_registered.emit(node)
+
     def unregister_node(self, node: NodeLike) -> None:
         """Remove a registered node from this graph."""
         node = self._state.node_from_nodelike(node)
 
         self._node_ids.remove(node.uuid())
         node.set_parent_graph(None)
-        self.node_unregistered.emit(node)
 
         logger.debug(
             "Unregistered node %s from graph %s",
@@ -112,30 +112,33 @@ class Graph:
             self.uuid(),
         )
 
+        self.node_unregistered.emit(node)
+
     def register_port(self, port: PortLike) -> None:
         """Register an existing port to this graph."""
         port = self._state.port_from_portlike(port)
 
         self._port_ids.append(port.uuid())
-        self.port_registered.emit(port)
 
         logger.debug("Registered port %s to graph %s", port.path(), self.uuid())
+
+        self.port_registered.emit(port)
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this graph."""
         port = self._state.port_from_portlike(port)
 
         self._port_ids.remove(port.uuid())
-        self.port_unregistered.emit(port)
 
         logger.debug("Unregistered port %s from graph %s", port.path(), self.uuid())
+
+        self.port_unregistered.emit(port)
 
     def register_connection(self, connection: ConnectionLike) -> None:
         """Register an existing connection to this graph."""
         connection = self._state.connection_from_connectionlike(connection)
 
         self._connections_ids.append(connection.uuid())
-        self.connection_registered.emit(connection)
 
         logger.debug(
             "Registered connection %s to graph %s",
@@ -143,18 +146,21 @@ class Graph:
             self.uuid(),
         )
 
+        self.connection_registered.emit(connection)
+
     def unregister_connection(self, connection: ConnectionLike) -> None:
         """Remove a registered connection from this graph."""
         connection = self._state.connection_from_connectionlike(connection)
 
         self._connections_ids.remove(connection.uuid())
-        self.connection_unregistered.emit(connection)
 
         logger.debug(
             "Unregistered connection %s from graph %s",
             connection.uuid(),
             self.uuid(),
         )
+
+        self.connection_unregistered.emit(connection)
 
 
 GraphLike = Union[Graph, UUID]

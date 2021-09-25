@@ -9,9 +9,9 @@ from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
 from orodruin.core.signal import Signal
 
-from .node import Node, NodeLike
 from .connection import Connection, ConnectionLike
 from .graph import Graph, GraphLike
+from .node import Node, NodeLike
 from .port import Port, PortLike, PortType
 
 logger = logging.getLogger(__name__)
@@ -147,9 +147,10 @@ class State:
 
         graph = Graph(self, parent_node)
         self._graphs[graph.uuid()] = graph
-        self.graph_created.emit(graph)
 
         logger.debug("Created graph %s.", graph.uuid())
+
+        self.graph_created.emit(graph)
 
         return graph
 
@@ -160,9 +161,9 @@ class State:
 
         del self._graphs[graph.uuid()]
 
-        self.graph_deleted.emit(graph.uuid())
-
         logger.debug("Deleted graph %s.", graph.uuid())
+
+        self.graph_deleted.emit(graph.uuid())
 
     def create_node(
         self,
@@ -186,9 +187,9 @@ class State:
 
         self._nodes[node.uuid()] = node
 
-        self.node_created.emit(node)
-
         logger.debug("Created node %s.", node.path())
+
+        self.node_created.emit(node)
 
         return node
 
@@ -199,9 +200,9 @@ class State:
 
         del self._nodes[node.uuid()]
 
-        self.node_deleted.emit(node.uuid())
-
         logger.debug("Deleted node %s.", node.path())
+
+        self.node_deleted.emit(node.uuid())
 
     def create_port(
         self,
@@ -226,9 +227,9 @@ class State:
 
         self._ports[port.uuid()] = port
 
-        self.port_created.emit(port)
-
         logger.debug("Created port %s.", port.path())
+
+        self.port_created.emit(port)
 
         return port
 
@@ -239,9 +240,9 @@ class State:
 
         del self._ports[port.uuid()]
 
-        self.port_deleted.emit(port.uuid())
-
         logger.debug("Deleted port %s from the state.", port.path())
+
+        self.port_deleted.emit(port.uuid())
 
     def create_connection(
         self,
@@ -255,9 +256,10 @@ class State:
 
         connection = Connection(self, source.uuid(), target.uuid())
         self._connections[connection.uuid()] = connection
-        self.connection_created.emit(connection)
 
         logger.debug("Created connection %s.", connection.uuid())
+
+        self.connection_created.emit(connection)
 
         return connection
 
@@ -268,6 +270,6 @@ class State:
 
         del self._connections[connection.uuid()]
 
-        self.connection_deleted.emit(connection.uuid())
-
         logger.debug("Deleted connection %s.", connection.uuid())
+
+        self.connection_deleted.emit(connection.uuid())

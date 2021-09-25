@@ -141,18 +141,20 @@ class Node:
         port = self._state.port_from_portlike(port)
 
         self._port_ids.append(port.uuid())
-        self.port_registered.emit(port)
 
         logger.debug("Registered port %s to node %s", port.path(), self.path())
+
+        self.port_registered.emit(port)
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this node."""
         port = self._state.port_from_portlike(port)
 
         self._port_ids.remove(port.uuid())
-        self.port_unregistered.emit(port)
 
         logger.debug("Unregistered port %s from node %s", port.path(), self.path())
+
+        self.port_unregistered.emit(port)
 
 
 NodeLike = Union[Node, UUID]
