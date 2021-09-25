@@ -1,5 +1,5 @@
 """A Python rigging graph library."""
-from .component import Component, ComponentLike
+from .node import Node, NodeLike
 from .connection import Connection, ConnectionLike
 from .graph import Graph, GraphLike
 from .library import Library, LibraryManager
@@ -8,8 +8,8 @@ from .state import State
 from .signal import Signal
 
 __all__ = [
-    "Component",
-    "ComponentLike",
+    "Node",
+    "NodeLike",
     "Connection",
     "ConnectionLike",
     "Graph",

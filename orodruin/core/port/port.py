@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 from orodruin.core.graph import Graph
 
 if TYPE_CHECKING:
-    from ..component import Component  # pylint: disable = cyclic-import
+    from ..node import Node  # pylint: disable = cyclic-import
     from ..state import State
 
 
@@ -27,13 +27,13 @@ PortType = TypeVar("PortType")  # pylint: disable = invalid-name
 class Port(Generic[PortType]):
     """Orodruin's Port class
 
-    A Port is only meant to be attached on a Component
+    A Port is only meant to be attached on a Node
     It can be connected to other Ports and hold a value
     """
 
     _state: State
     _graph_id: UUID
-    _component_id: UUID
+    _node_id: UUID
 
     _name: str
     _direction: PortDirection
@@ -54,9 +54,9 @@ class Port(Generic[PortType]):
         """Return the graph that this port exists in."""
         return self._state.graph_from_graphlike(self._graph_id)
 
-    def component(self) -> Component:
-        """The Component this Port is attached on."""
-        return self._state.component_from_componentlike(self._component_id)
+    def node(self) -> Node:
+        """The Node this Port is attached on."""
+        return self._state.node_from_nodelike(self._node_id)
 
     def uuid(self) -> UUID:
         """UUID of this port."""
@@ -102,11 +102,11 @@ class Port(Generic[PortType]):
 
     def path(self) -> PurePosixPath:
         """The absolute path of this Port."""
-        return self.component().path().with_suffix(f".{self.name()}")
+        return self.node().path().with_suffix(f".{self.name()}")
 
-    def relative_path(self, relative_to: Component) -> PurePosixPath:
-        """The relative path of the port to the component."""
-        if relative_to is self.component():
+    def relative_path(self, relative_to: Node) -> PurePosixPath:
+        """The relative path of the port to the node."""
+        if relative_to is self.node():
             path = PurePosixPath(f".{self.name()}")
         else:
             path = self.path().relative_to(relative_to.path())

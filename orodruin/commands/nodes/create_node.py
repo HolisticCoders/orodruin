@@ -1,8 +1,8 @@
-"""Create Component command."""
+"""Create Node command."""
 from dataclasses import dataclass, field
 from typing import Optional
 
-from orodruin.core import Component, Graph, Library
+from orodruin.core import Graph, Library, Node
 from orodruin.core.graph import GraphLike
 from orodruin.core.state import State
 from orodruin.core.utils import get_unique_name
@@ -11,8 +11,8 @@ from ..command import Command
 
 
 @dataclass
-class CreateComponent(Command):
-    """Create Component command."""
+class CreateNode(Command):
+    """Create Node command."""
 
     state: State
     name: str
@@ -21,7 +21,7 @@ class CreateComponent(Command):
     graph: Optional[GraphLike] = None
 
     _graph: Graph = field(init=False)
-    _created_component: Component = field(init=False)
+    _created_node: Node = field(init=False)
 
     def __post_init__(self) -> None:
         if self.graph:
@@ -29,21 +29,21 @@ class CreateComponent(Command):
         else:
             self._graph = self.state.root_graph()
 
-    def do(self) -> Component:
+    def do(self) -> Node:
         unique_name = get_unique_name(self._graph, self.name)
 
-        component = self.state.create_component(
+        node = self.state.create_node(
             name=unique_name,
             parent_graph_id=self._graph.uuid(),
             library=self.library,
         )
         if self.type:
-            component.set_type(self.type)
+            node.set_type(self.type)
 
-        self._graph.register_component(component)
-        self._created_component = component
+        self._graph.register_node(node)
+        self._created_node = node
 
-        return self._created_component
+        return self._created_node
 
     def undo(self) -> None:
         raise NotImplementedError

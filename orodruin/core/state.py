@@ -9,7 +9,7 @@ from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
 from orodruin.core.signal import Signal
 
-from .component import Component, ComponentLike
+from .node import Node, NodeLike
 from .connection import Connection, ConnectionLike
 from .graph import Graph, GraphLike
 from .port import Port, PortLike, PortType
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class State:
     """Orodruin's State class.
 
-    This is the object that "owns" all the Graphs, Components, Ports and Connections.
+    This is the object that "owns" all the Graphs, Nodes, Ports and Connections.
     Nothing else than the state should hold direct references to any of these objects.
     Instead, the UUIDs should be stored and objects accessed when needed
     with the State.object_from_objectlike methods.
@@ -30,15 +30,15 @@ class State:
     _root_graph: Graph = field(init=False)
 
     _graphs: Dict[UUID, Graph] = field(init=False, default_factory=dict)
-    _components: Dict[UUID, Component] = field(init=False, default_factory=dict)
+    _nodes: Dict[UUID, Node] = field(init=False, default_factory=dict)
     _ports: Dict[UUID, Port] = field(init=False, default_factory=dict)
     _connections: Dict[UUID, Connection] = field(init=False, default_factory=dict)
 
     # Signals
     graph_created: Signal[Graph] = field(default_factory=Signal)
     graph_deleted: Signal[UUID] = field(default_factory=Signal)
-    component_created: Signal[Component] = field(default_factory=Signal)
-    component_deleted: Signal[UUID] = field(default_factory=Signal)
+    node_created: Signal[Node] = field(default_factory=Signal)
+    node_deleted: Signal[UUID] = field(default_factory=Signal)
     port_created: Signal[Port] = field(default_factory=Signal)
     port_deleted: Signal[UUID] = field(default_factory=Signal)
     connection_created: Signal[Connection] = field(default_factory=Signal)
@@ -69,23 +69,23 @@ class State:
 
         return graph
 
-    def component_from_componentlike(self, component: ComponentLike) -> Component:
-        """Return a Component from a ComponentLike object.
+    def node_from_nodelike(self, node: NodeLike) -> Node:
+        """Return a Node from a NodeLike object.
 
         Raises:
-            TypeError: When the component is not a valid ComponentLike object.
+            TypeError: When the node is not a valid NodeLike object.
         """
-        if isinstance(component, Component):
+        if isinstance(node, Node):
             pass
-        elif isinstance(component, UUID):
-            component = self._components[component]
+        elif isinstance(node, UUID):
+            node = self._nodes[node]
         else:
             raise TypeError(
-                f"{type(component)} is not a valid ComponentLike type. "
-                "Should be Union[Component, UUID]"
+                f"{type(node)} is not a valid NodeLike type. "
+                "Should be Union[Node, UUID]"
             )
 
-        return component
+        return node
 
     def port_from_portlike(self, port: PortLike) -> Port:
         """Return a Port from a PortLike object.
@@ -127,9 +127,9 @@ class State:
         """Return a list of the registered graphs."""
         return list(self._graphs.values())
 
-    def components(self) -> List[Component]:
-        """Return a list of the registered components."""
-        return list(self._components.values())
+    def nodes(self) -> List[Node]:
+        """Return a list of the registered nodes."""
+        return list(self._nodes.values())
 
     def ports(self) -> List[Port]:
         """Return a list of the registered ports."""
@@ -139,13 +139,13 @@ class State:
         """Return a list of the registered connections."""
         return list(self._connections.values())
 
-    def create_graph(self, parent_component: Optional[ComponentLike] = None) -> Graph:
+    def create_graph(self, parent_node: Optional[NodeLike] = None) -> Graph:
         """Create graph and register it to the state."""
 
-        if isinstance(parent_component, Component):
-            parent_component = parent_component.uuid()
+        if isinstance(parent_node, Node):
+            parent_node = parent_node.uuid()
 
-        graph = Graph(self, parent_component)
+        graph = Graph(self, parent_node)
         self._graphs[graph.uuid()] = graph
         self.graph_created.emit(graph)
 
@@ -164,61 +164,61 @@ class State:
 
         logger.debug("Deleted graph %s.", graph.uuid())
 
-    def create_component(
+    def create_node(
         self,
         name: str,
-        component_type: Optional[str] = None,
+        node_type: Optional[str] = None,
         library: Optional[Library] = None,
         parent_graph_id: Optional[UUID] = None,
-    ) -> Component:
+    ) -> Node:
         """Create graph and register it to the state."""
         if not parent_graph_id:
             parent_graph_id = self.root_graph().uuid()
 
-        component = Component(
+        node = Node(
             _state=self,
             _parent_graph_id=parent_graph_id,
             _name=name,
             _library=library,
         )
-        if component_type:
-            component.set_type(component_type)
+        if node_type:
+            node.set_type(node_type)
 
-        self._components[component.uuid()] = component
+        self._nodes[node.uuid()] = node
 
-        self.component_created.emit(component)
+        self.node_created.emit(node)
 
-        logger.debug("Created component %s.", component.path())
+        logger.debug("Created node %s.", node.path())
 
-        return component
+        return node
 
-    def delete_component(self, component: ComponentLike) -> None:
-        """Delete a component and unregister it from the state."""
+    def delete_node(self, node: NodeLike) -> None:
+        """Delete a node and unregister it from the state."""
 
-        component = self.component_from_componentlike(component)
+        node = self.node_from_nodelike(node)
 
-        del self._components[component.uuid()]
+        del self._nodes[node.uuid()]
 
-        self.component_deleted.emit(component.uuid())
+        self.node_deleted.emit(node.uuid())
 
-        logger.debug("Deleted component %s.", component.path())
+        logger.debug("Deleted node %s.", node.path())
 
     def create_port(
         self,
         name: str,
         direction: PortDirection,
         port_type: Type[PortType],
-        component: ComponentLike,
+        node: NodeLike,
     ) -> Port[PortType]:
         """Create a port and register it to the state."""
 
-        component = self.component_from_componentlike(component)
+        node = self.node_from_nodelike(node)
 
-        graph = component.parent_graph()
+        graph = node.parent_graph()
         port = Port(
             self,
             graph.uuid(),
-            component.uuid(),
+            node.uuid(),
             name,
             direction,
             port_type,

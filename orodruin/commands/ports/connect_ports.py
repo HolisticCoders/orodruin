@@ -7,7 +7,7 @@ from orodruin.core.port.port import PortLike
 from orodruin.core.state import State
 from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
-    ConnectionOnSameComponentError,
+    ConnectionOnSameNodeError,
     ConnectionToDifferentDirectionError,
     ConnectionToSameDirectionError,
     OutOfScopeConnectionError,
@@ -42,12 +42,12 @@ class ConnectPorts(Command):
         """Connect the source port to the target port.
 
         Raises:
-            ConnectionOnSameComponentError: when trying to connect on another port of
-                the same Component
+            ConnectionOnSameNodeError: when trying to connect on another port of
+                the same Node
             TypeError: when trying to connect ports of different types.
             ConnectionToSameDirectionError: when two ports of the same direction
                 and scope are being connected together.
-            ConnectionToDifferentDirectionError: when two ports of the component
+            ConnectionToDifferentDirectionError: when two ports of the node
                 and its parent direction are being connected together while they
                 have the same direction.
             OutOfScopeConnectionError: when trying to connect ports from
@@ -58,13 +58,13 @@ class ConnectPorts(Command):
         if not (
             self._graph
             in [
-                self._source.component().graph(),
-                self._source.component().parent_graph(),
+                self._source.node().graph(),
+                self._source.node().parent_graph(),
             ]
             and self._graph
             in [
-                self._target.component().graph(),
-                self._target.component().parent_graph(),
+                self._target.node().graph(),
+                self._target.node().parent_graph(),
             ]
         ):
             raise OutOfScopeConnectionError(
@@ -73,11 +73,11 @@ class ConnectPorts(Command):
                 f"Ports don't exist in the same scope"
             )
 
-        if self._target.component() is self._source.component():
-            raise ConnectionOnSameComponentError(
+        if self._target.node() is self._source.node():
+            raise ConnectionOnSameNodeError(
                 f"Port {self._source.name()} "
                 f"cannot be connected to {self._target.name()}. "
-                "Both ports exist on the same component."
+                "Both ports exist on the same node."
             )
 
         try:
@@ -91,16 +91,15 @@ class ConnectPorts(Command):
             ) from e
 
         same_scope_connection = (
-            self._source.component().parent_graph() is not None
-            and self._target.component().parent_graph() is not None
+            self._source.node().parent_graph() is not None
+            and self._target.node().parent_graph() is not None
             and (
-                self._source.component().parent_graph()
-                == self._target.component().parent_graph()
+                self._source.node().parent_graph() == self._target.node().parent_graph()
             )
         )
         connection_with_parent = (
-            self._source.component().parent_component() == self._target.component()
-            or self._source.component() == self._target.component().parent_component()
+            self._source.node().parent_node() == self._target.node()
+            or self._source.node() == self._target.node().parent_node()
         )
         if same_scope_connection:
             if self._source.direction() == self._target.direction():
@@ -115,7 +114,7 @@ class ConnectPorts(Command):
                     f"Port {self._source.name()} "
                     f"cannot be connected to {self._target.name()}. "
                     "Both ports are of different direction. "
-                    "Connection with the parent component "
+                    "Connection with the parent node "
                     "can only be of the same direction."
                 )
 

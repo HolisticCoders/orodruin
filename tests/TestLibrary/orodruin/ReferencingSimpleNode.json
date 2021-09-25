@@ -1,9 +1,9 @@
 {
     "definitions": {},
-    "components": [
+    "nodes": [
         {
-            "type": "TestLibrary::SimpleComponent",
-            "name": "referenced_component",
+            "type": "TestLibrary::SimpleNode",
+            "name": "referenced_node",
             "ports": {
                 "input1": 1,
                 "input2": 1,

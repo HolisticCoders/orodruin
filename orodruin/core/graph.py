@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 from .signal import Signal
 
 if TYPE_CHECKING:
-    from .component import Component, ComponentLike
+    from .node import Node, NodeLike
     from .connection import Connection, ConnectionLike
     from .port import Port, PortLike
     from .state import State
@@ -20,21 +20,21 @@ logger = logging.getLogger(__name__)
 class Graph:
     """Orodruin's Graph Class.
 
-    A graph organizes components, ports, and connections between them.
+    A graph organizes nodes, ports, and connections between them.
     """
 
     _state: State
-    _parent_component_id: Optional[UUID] = None
+    _parent_node_id: Optional[UUID] = None
 
     _uuid: UUID = field(default_factory=uuid4)
 
-    _component_ids: List[UUID] = field(default_factory=list)
+    _node_ids: List[UUID] = field(default_factory=list)
     _port_ids: List[UUID] = field(default_factory=list)
     _connections_ids: List[UUID] = field(default_factory=list)
 
     # Signals
-    component_registered: Signal[Component] = field(default_factory=Signal)
-    component_unregistered: Signal[Component] = field(default_factory=Signal)
+    node_registered: Signal[Node] = field(default_factory=Signal)
+    node_unregistered: Signal[Node] = field(default_factory=Signal)
     port_registered: Signal[Port] = field(default_factory=Signal)
     port_unregistered: Signal[Port] = field(default_factory=Signal)
     connection_registered: Signal[Connection] = field(default_factory=Signal)
@@ -45,18 +45,18 @@ class Graph:
         return self._state
 
     def uuid(self) -> UUID:
-        """UUID of this component."""
+        """UUID of this node."""
         return self._uuid
 
-    def components(self) -> List[Component]:
-        """Return the components registered to this graph."""
-        components = []
+    def nodes(self) -> List[Node]:
+        """Return the nodes registered to this graph."""
+        nodes = []
 
-        for component_id in self._component_ids:
-            component = self._state.component_from_componentlike(component_id)
-            components.append(component)
+        for node_id in self._node_ids:
+            node = self._state.node_from_nodelike(node_id)
+            nodes.append(node)
 
-        return components
+        return nodes
 
     def ports(self) -> List[Port]:
         """Return the ports registered to this graph."""
@@ -78,37 +78,37 @@ class Graph:
 
         return connections
 
-    def parent_component(self) -> Optional[Component]:
-        """Return this graph parent component."""
-        if self._parent_component_id:
-            return self._state.component_from_componentlike(self._parent_component_id)
+    def parent_node(self) -> Optional[Node]:
+        """Return this graph parent node."""
+        if self._parent_node_id:
+            return self._state.node_from_nodelike(self._parent_node_id)
         return None
 
-    def register_component(self, component: ComponentLike) -> None:
-        """Register an existing component to this graph."""
-        component = self._state.component_from_componentlike(component)
+    def register_node(self, node: NodeLike) -> None:
+        """Register an existing node to this graph."""
+        node = self._state.node_from_nodelike(node)
 
-        self._component_ids.append(component.uuid())
-        component.set_parent_graph(self.uuid())
-        self.component_registered.emit(component)
+        self._node_ids.append(node.uuid())
+        node.set_parent_graph(self.uuid())
+        self.node_registered.emit(node)
 
         logger.debug(
-            "Registered component %s to graph %s",
-            component.path(),
+            "Registered node %s to graph %s",
+            node.path(),
             self.uuid(),
         )
 
-    def unregister_component(self, component: ComponentLike) -> None:
-        """Remove a registered component from this graph."""
-        component = self._state.component_from_componentlike(component)
+    def unregister_node(self, node: NodeLike) -> None:
+        """Remove a registered node from this graph."""
+        node = self._state.node_from_nodelike(node)
 
-        self._component_ids.remove(component.uuid())
-        component.set_parent_graph(None)
-        self.component_unregistered.emit(component)
+        self._node_ids.remove(node.uuid())
+        node.set_parent_graph(None)
+        self.node_unregistered.emit(node)
 
         logger.debug(
-            "Unregistered component %s from graph %s",
-            component.path(),
+            "Unregistered node %s from graph %s",
+            node.path(),
             self.uuid(),
         )
 

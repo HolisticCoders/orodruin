@@ -1,6 +1,6 @@
 {
     "definitions": {},
-    "components": [],
+    "nodes": [],
     "ports": [
         {
             "name": "int_in",

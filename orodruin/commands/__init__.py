@@ -1,11 +1,11 @@
 from .command import Command
-from .components import (
-    CreateComponent,
-    DeleteComponent,
-    ExportComponent,
-    GroupComponents,
-    ImportComponent,
-    RenameComponent,
+from .nodes import (
+    CreateNode,
+    DeleteNode,
+    ExportNode,
+    GroupNodes,
+    ImportNode,
+    RenameNode,
 )
 from .ports import (
     ConnectPorts,
@@ -19,15 +19,15 @@ from .ports import (
 __all__ = [
     "Command",
     "ConnectPorts",
-    "CreateComponent",
+    "CreateNode",
     "CreatePort",
-    "DeleteComponent",
+    "DeleteNode",
     "DeletePort",
     "DisconnectPorts",
-    "ExportComponent",
+    "ExportNode",
     "GetPort",
-    "GroupComponents",
-    "ImportComponent",
-    "RenameComponent",
+    "GroupNodes",
+    "ImportNode",
+    "RenameNode",
     "SetPort",
 ]

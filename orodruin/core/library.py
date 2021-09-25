@@ -12,11 +12,11 @@ from orodruin.exceptions import NoRegisteredLibraryError, TargetDoesNotExistErro
 class Library:
     """Orodruin Library Class.
 
-    A Library is a collection of serialized Components.
+    A Library is a collection of serialized Nodes.
     Each subfolder of the collection represents a "target" implemention
-    of the components for the library.
-    The generic Components are saved in the "orodruin" target.
-    Any DCC Specific Component should be defined in the appropriate target folder.
+    of the nodes for the library.
+    The generic Nodes are saved in the "orodruin" target.
+    Any DCC Specific Node should be defined in the appropriate target folder.
     """
 
     _path: Path
@@ -40,8 +40,8 @@ class Library:
         """Return all the targets of this Library"""
         return list(self._path.iterdir())
 
-    def components(self, target_name: str = "orodruin") -> List[Path]:
-        """Return all the component paths for the given target."""
+    def nodes(self, target_name: str = "orodruin") -> List[Path]:
+        """Return all the node paths for the given target."""
         target_path = self.target_path(target_name)
 
         if not target_path:
@@ -49,26 +49,23 @@ class Library:
                 f"Library {self.name} has no target {target_name}"
             )
 
-        components = []
-        for component_path in target_path.iterdir():
-            if component_path.is_file():
-                components.append(component_path)
+        nodes = []
+        for node_path in target_path.iterdir():
+            if node_path.is_file():
+                nodes.append(node_path)
 
-        return components
+        return nodes
 
-    def find_component(
+    def find_node(
         self,
-        component_name: str,
+        node_name: str,
         target_name: str = "orodruin",
         extension: str = "json",
     ) -> Optional[Path]:
-        """Return the path of a the given component for the given target name."""
-        for component_path in self.components(target_name):
-            if (
-                component_path.stem == component_name
-                and component_path.suffix.endswith(extension)
-            ):
-                return component_path
+        """Return the path of a the given node for the given target name."""
+        for node_path in self.nodes(target_name):
+            if node_path.stem == node_name and node_path.suffix.endswith(extension):
+                return node_path
         return None
 
 
@@ -127,14 +124,14 @@ class LibraryManager:
         os.environ[cls.libraries_env_var] = libraries_string
 
     @classmethod
-    def find_component(
+    def find_node(
         cls,
-        component_name: str,
+        node_name: str,
         library_name: Optional[str] = None,
         target_name: str = "orodruin",
         extension: str = "json",
     ) -> Optional[Path]:
-        """Get the component file from the libraries."""
+        """Get the node file from the libraries."""
 
         libraries = cls.libraries()
         if not libraries:
@@ -143,22 +140,22 @@ class LibraryManager:
         if library_name:
             library = cls.find_library(library_name)
             if library:
-                component_path = library.find_component(
-                    component_name,
+                node_path = library.find_node(
+                    node_name,
                     target_name,
                     extension,
                 )
-                if component_path:
-                    return component_path
+                if node_path:
+                    return node_path
         else:
             for library in libraries:
-                component_path = library.find_component(
-                    component_name,
+                node_path = library.find_node(
+                    node_name,
                     target_name,
                     extension,
                 )
-                if component_path:
-                    return component_path
+                if node_path:
+                    return node_path
 
         return None
 

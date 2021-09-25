@@ -6,16 +6,16 @@ import pytest
 
 from orodruin.commands import (
     ConnectPorts,
-    CreateComponent,
+    CreateNode,
     CreatePort,
-    ExportComponent,
-    ImportComponent,
+    ExportNode,
+    ImportNode,
 )
 from orodruin.core import LibraryManager, PortDirection, State
 
 
 @pytest.fixture(autouse=True)
-def clear_registered_components() -> Generator:
+def clear_registered_nodes() -> Generator:
     library_path = Path(__file__).parent.parent / "TestLibrary"
     LibraryManager.register_library(library_path)
 
@@ -25,20 +25,20 @@ def clear_registered_components() -> Generator:
         LibraryManager.unregister_library(library.path())
 
 
-def test_component_instance_data(state: State) -> None:
-    component = CreateComponent(state, "multiply").do()
-    CreatePort(state, component, "input1", PortDirection.input, int).do()
-    CreatePort(state, component, "input2", PortDirection.input, int).do()
-    CreatePort(state, component, "output", PortDirection.output, int).do()
+def test_node_instance_data(state: State) -> None:
+    node = CreateNode(state, "multiply").do()
+    CreatePort(state, node, "input1", PortDirection.input, int).do()
+    CreatePort(state, node, "input2", PortDirection.input, int).do()
+    CreatePort(state, node, "output", PortDirection.output, int).do()
 
-    component.port("input1").set(2)
-    component.port("input2").set(2)
-    component.port("output").set(4)
+    node.port("input1").set(2)
+    node.port("input2").set(2)
+    node.port("output").set(4)
 
-    command = ExportComponent(component, "DummyName")
+    command = ExportNode(node, "DummyName")
 
     expected_data = {
-        "type": f"Internal::{component.type()}",
+        "type": f"Internal::{node.type()}",
         "name": "multiply",
         "ports": {
             "input1": 2,
@@ -47,21 +47,21 @@ def test_component_instance_data(state: State) -> None:
         },
     }
 
-    assert command._component_instance_data(component) == expected_data
+    assert command._node_instance_data(node) == expected_data
 
 
-def test_component_definition_data(state: State) -> None:
-    parent = CreateComponent(state, "parent").do()
+def test_node_definition_data(state: State) -> None:
+    parent = CreateNode(state, "parent").do()
     CreatePort(state, parent, "input1", PortDirection.input, int).do()
     CreatePort(state, parent, "input2", PortDirection.input, int).do()
     CreatePort(state, parent, "output", PortDirection.output, int).do()
 
-    child_a = CreateComponent(state, "child_a", graph=parent.graph()).do()
+    child_a = CreateNode(state, "child_a", graph=parent.graph()).do()
     CreatePort(state, child_a, "input1", PortDirection.input, int).do()
     CreatePort(state, child_a, "input2", PortDirection.input, int).do()
     CreatePort(state, child_a, "output", PortDirection.output, int).do()
 
-    child_b = CreateComponent(state, "child_b", graph=parent.graph()).do()
+    child_b = CreateNode(state, "child_b", graph=parent.graph()).do()
     CreatePort(state, child_b, "input1", PortDirection.input, int).do()
     CreatePort(state, child_b, "input2", PortDirection.input, int).do()
     CreatePort(state, child_b, "output", PortDirection.output, int).do()
@@ -82,13 +82,13 @@ def test_component_definition_data(state: State) -> None:
         state, parent.graph(), child_b.port("output"), parent.port("output")
     ).do()
 
-    command = ExportComponent(parent, "DummyName")
+    command = ExportNode(parent, "DummyName")
 
     expected_data = {
         "definitions": {
             str(child_a.type()): {
                 "definitions": {},
-                "components": [],
+                "nodes": [],
                 "connections": [],
                 "ports": [
                     {
@@ -110,7 +110,7 @@ def test_component_definition_data(state: State) -> None:
             },
             str(child_b.type()): {
                 "definitions": {},
-                "components": [],
+                "nodes": [],
                 "connections": [],
                 "ports": [
                     {
@@ -131,7 +131,7 @@ def test_component_definition_data(state: State) -> None:
                 ],
             },
         },
-        "components": [
+        "nodes": [
             {
                 "name": "child_a",
                 "type": f"Internal::{child_a.type()}",
@@ -177,21 +177,21 @@ def test_component_definition_data(state: State) -> None:
         ],
     }
 
-    assert command._component_definition_data(parent) == expected_data
+    assert command._node_definition_data(parent) == expected_data
 
 
-def test_component_as_json(state: State) -> None:
-    parent = CreateComponent(state, "parent").do()
+def test_node_as_json(state: State) -> None:
+    parent = CreateNode(state, "parent").do()
     CreatePort(state, parent, "input1", PortDirection.input, int).do()
     CreatePort(state, parent, "input2", PortDirection.input, int).do()
     CreatePort(state, parent, "output", PortDirection.output, int).do()
 
-    child_a = CreateComponent(state, "child_a", graph=parent.graph()).do()
+    child_a = CreateNode(state, "child_a", graph=parent.graph()).do()
     CreatePort(state, child_a, "input1", PortDirection.input, int).do()
     CreatePort(state, child_a, "input2", PortDirection.input, int).do()
     CreatePort(state, child_a, "output", PortDirection.output, int).do()
 
-    child_b = CreateComponent(state, "child_b", graph=parent.graph()).do()
+    child_b = CreateNode(state, "child_b", graph=parent.graph()).do()
     CreatePort(state, child_b, "input1", PortDirection.input, int).do()
     CreatePort(state, child_b, "input2", PortDirection.input, int).do()
     CreatePort(state, child_b, "output", PortDirection.output, int).do()
@@ -212,124 +212,106 @@ def test_component_as_json(state: State) -> None:
         state, parent.graph(), child_b.port("output"), parent.port("output")
     ).do()
 
-    ExportComponent._component_as_json(parent)  # pylint: disable = protected-access
+    ExportNode._node_as_json(parent)  # pylint: disable = protected-access
 
 
-def test_export_component(state: State) -> None:
-    component = CreateComponent(state, "multiply").do()
-    CreatePort(state, component, "input1", PortDirection.input, int).do()
-    CreatePort(state, component, "input2", PortDirection.input, int).do()
-    CreatePort(state, component, "output", PortDirection.output, int).do()
+def test_export_node(state: State) -> None:
+    node = CreateNode(state, "multiply").do()
+    CreatePort(state, node, "input1", PortDirection.input, int).do()
+    CreatePort(state, node, "input2", PortDirection.input, int).do()
+    CreatePort(state, node, "output", PortDirection.output, int).do()
 
-    component.port("input1").set(2)
-    component.port("input2").set(2)
-    component.port("output").set(4)
+    node.port("input1").set(2)
+    node.port("input2").set(2)
+    node.port("output").set(4)
 
-    command = ExportComponent(component, "TestLibrary")
+    command = ExportNode(node, "TestLibrary")
     file_path = command.do()
 
     assert file_path.exists()
     file_path.unlink()
 
 
-def test_import_simple_component(state: State) -> None:
-    component_name = "SimpleComponent"
-    component = ImportComponent(
+def test_import_simple_node(state: State) -> None:
+    node_name = "SimpleNode"
+    node = ImportNode(
         state,
         state.root_graph(),
-        component_name,
+        node_name,
         "TestLibrary",
     ).do()
 
     file_path = (
-        Path(__file__).parent.parent
-        / "TestLibrary"
-        / "orodruin"
-        / f"{component_name}.json"
+        Path(__file__).parent.parent / "TestLibrary" / "orodruin" / f"{node_name}.json"
     )
     with file_path.open("r") as f:
         file_content = f.read()
 
-    # ExportComponent(
-    #     component,
+    # ExportNode(
+    #     node,
     #     "TestLibrary",
-    #     component_name=f"{component_name}_test",
+    #     node_name=f"{node_name}_test",
     # ).do()
 
     # pylint: disable = protected-access
-    assert ExportComponent._component_as_json(component) == file_content
+    assert ExportNode._node_as_json(node) == file_content
 
 
-def test_import_nested_component(state: State) -> None:
-    component_name = "NestedComponent"
-    component = ImportComponent(
-        state, state.root_graph(), component_name, "TestLibrary"
-    ).do()
+def test_import_nested_node(state: State) -> None:
+    node_name = "NestedNode"
+    node = ImportNode(state, state.root_graph(), node_name, "TestLibrary").do()
 
     file_path = (
-        Path(__file__).parent.parent
-        / "TestLibrary"
-        / "orodruin"
-        / f"{component_name}.json"
+        Path(__file__).parent.parent / "TestLibrary" / "orodruin" / f"{node_name}.json"
     )
     with file_path.open("r") as f:
         file_content = f.read()
 
-    # ExportComponent(
-    #     component,
+    # ExportNode(
+    #     node,
     #     "TestLibrary",
-    #     component_name=f"{component_name}_test",
+    #     node_name=f"{node_name}_test",
     # ).do()
 
     # pylint: disable = protected-access
-    assert ExportComponent._component_as_json(component) == file_content
+    assert ExportNode._node_as_json(node) == file_content
 
 
-def test_import_referencing_component(state: State) -> None:
-    component_name = "ReferencingSimpleComponent"
-    component = ImportComponent(
-        state, state.root_graph(), component_name, "TestLibrary"
-    ).do()
+def test_import_referencing_node(state: State) -> None:
+    node_name = "ReferencingSimpleNode"
+    node = ImportNode(state, state.root_graph(), node_name, "TestLibrary").do()
 
     file_path = (
-        Path(__file__).parent.parent
-        / "TestLibrary"
-        / "orodruin"
-        / f"{component_name}.json"
+        Path(__file__).parent.parent / "TestLibrary" / "orodruin" / f"{node_name}.json"
     )
     with file_path.open("r") as f:
         file_content = f.read()
 
-    # ExportComponent(
-    #     component,
+    # ExportNode(
+    #     node,
     #     "TestLibrary",
-    #     component_name=f"{component_name}_test",
+    #     node_name=f"{node_name}_test",
     # ).do()
 
     # pylint: disable = protected-access
-    assert ExportComponent._component_as_json(component) == file_content
+    assert ExportNode._node_as_json(node) == file_content
 
 
-def test_import_referencing_nested_component(state: State) -> None:
-    component_name = "ReferencingNestedComponent"
-    component = ImportComponent(
-        state, state.root_graph(), component_name, "TestLibrary"
-    ).do()
+def test_import_referencing_nested_node(state: State) -> None:
+    node_name = "ReferencingNestedNode"
+    node = ImportNode(state, state.root_graph(), node_name, "TestLibrary").do()
 
     file_path = (
-        Path(__file__).parent.parent
-        / "TestLibrary"
-        / "orodruin"
-        / f"{component_name}.json"
+        Path(__file__).parent.parent / "TestLibrary" / "orodruin" / f"{node_name}.json"
     )
     with file_path.open("r") as f:
         file_content = f.read()
 
-    # ExportComponent(
-    #     component,
+    # ExportNode(
+    #     node,
     #     "TestLibrary",
-    #     component_name=f"{component_name}_test",
+    #     node_name=f"{node_name}_test",
     # ).do()
 
     # pylint: disable = protected-access
-    assert ExportComponent._component_as_json(component) == file_content
+    assert ExportNode._node_as_json(node) == file_content

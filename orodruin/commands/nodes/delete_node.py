@@ -1,7 +1,7 @@
-"""Delete Component command."""
+"""Delete Node command."""
 from dataclasses import dataclass, field
 
-from orodruin.core import Component, ComponentLike, Graph, GraphLike, State
+from orodruin.core import Node, NodeLike, Graph, GraphLike, State
 from orodruin.core.utils import list_connections
 
 from ..command import Command
@@ -9,21 +9,21 @@ from ..ports import DeletePort, DisconnectPorts
 
 
 @dataclass
-class DeleteComponent(Command):
-    """Delete Component command."""
+class DeleteNode(Command):
+    """Delete Node command."""
 
     state: State
-    component: ComponentLike
+    node: NodeLike
 
-    _component: Component = field(init=False)
+    _node: Node = field(init=False)
     _graph: Graph = field(init=False)
 
     def __post_init__(self) -> None:
-        self._component = self.state.component_from_componentlike(self.component)
-        self._graph = self._component.parent_graph()
+        self._node = self.state.node_from_nodelike(self.node)
+        self._graph = self._node.parent_graph()
 
     def do(self) -> None:
-        for port in self._component.ports():
+        for port in self._node.ports():
             for connection in list_connections(self._graph, port):
                 DisconnectPorts(
                     self._graph,
@@ -33,8 +33,8 @@ class DeleteComponent(Command):
 
             DeletePort(self.state, port).do()
 
-        self._graph.unregister_component(self._component)
-        self.state.delete_component(self._component)
+        self._graph.unregister_node(self._node)
+        self.state.delete_node(self._node)
 
     def undo(self) -> None:
         raise NotImplementedError

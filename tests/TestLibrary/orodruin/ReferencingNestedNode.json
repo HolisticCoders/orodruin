@@ -1,9 +1,9 @@
 {
     "definitions": {},
-    "components": [
+    "nodes": [
         {
-            "type": "TestLibrary::NestedComponent",
-            "name": "referenced_component",
+            "type": "TestLibrary::NestedNode",
+            "name": "referenced_node",
             "ports": {
                 "input1": 0,
                 "input2": 0,

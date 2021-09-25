@@ -15,16 +15,16 @@ def test_implements_port() -> None:
 
 
 def test_init_port(state: State) -> None:
-    component = state.create_component("component")
-    port = state.create_port("port", PortDirection.input, int, component.uuid())
-    component.register_port(port)
+    node = state.create_node("node")
+    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    node.register_port(port)
     assert port.name() == "port"
 
 
 def test_set_port_name(state: State) -> None:
-    component = state.create_component("component")
-    port = state.create_port("port", PortDirection.input, int, component.uuid())
-    component.register_port(port)
+    node = state.create_node("node")
+    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    node.register_port(port)
 
     assert port.name() == "port"
 
@@ -37,9 +37,9 @@ def test_set_port_name(state: State) -> None:
 
 
 def test_set_port_value(state: State) -> None:
-    component = state.create_component("component")
-    port = state.create_port("port", PortDirection.input, int, component.uuid())
-    component.register_port(port)
+    node = state.create_node("node")
+    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    node.register_port(port)
 
     port.set(1)
 
@@ -48,9 +48,9 @@ def test_set_port_value(state: State) -> None:
 
 def test_set_port_wrong_value_type(state: State) -> None:
 
-    component = state.create_component("component")
-    port = state.create_port("port", PortDirection.input, int, component.uuid())
-    component.register_port(port)
+    node = state.create_node("node")
+    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    node.register_port(port)
 
     with pytest.raises(TypeError):
         port.set("string")  # type: ignore

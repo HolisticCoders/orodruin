@@ -3,87 +3,87 @@ from pathlib import PurePosixPath
 
 import pytest
 
-from orodruin.core import Component, Port, PortDirection, State
+from orodruin.core import Node, Port, PortDirection, State
 from orodruin.core.pathed_object import PathedObject
 
 
 def test_implements_pathed_object() -> None:
-    issubclass(Component, PathedObject)
+    issubclass(Node, PathedObject)
 
 
-def test_init_component(state: State) -> None:
-    assert len(state.components()) == 0
+def test_init_node(state: State) -> None:
+    assert len(state.nodes()) == 0
 
-    component = state.create_component("component")
+    node = state.create_node("node")
 
-    assert len(state.components()) == 1
-    assert component.name() == "component"
+    assert len(state.nodes()) == 1
+    assert node.name() == "node"
 
 
 def test_add_ports(state: State) -> None:
 
-    component = state.create_component("component")
+    node = state.create_node("node")
 
-    assert len(component.ports()) == 0
+    assert len(node.ports()) == 0
 
-    input1 = state.create_port("input1", PortDirection.input, int, component.uuid())
-    input2 = state.create_port("input2", PortDirection.input, int, component.uuid())
-    output = state.create_port("output", PortDirection.input, int, component.uuid())
+    input1 = state.create_port("input1", PortDirection.input, int, node.uuid())
+    input2 = state.create_port("input2", PortDirection.input, int, node.uuid())
+    output = state.create_port("output", PortDirection.input, int, node.uuid())
 
     assert len(state.ports()) == 3
 
-    component.register_port(input1)
-    component.register_port(input2)
-    component.register_port(output)
+    node.register_port(input1)
+    node.register_port(input2)
+    node.register_port(output)
 
-    assert len(component.ports()) == 3
+    assert len(node.ports()) == 3
 
 
 def test_set_name(state: State) -> None:
-    component = state.create_component("original_name")
+    node = state.create_node("original_name")
 
-    assert component.name() == "original_name"
+    assert node.name() == "original_name"
 
-    component.set_name("new_name")
+    node.set_name("new_name")
 
-    assert component.name() == "new_name"
-
-
-def test_path_root_component(state: State) -> None:
-    component = state.create_component("root")
-    assert component.path() == PurePosixPath("/root")
+    assert node.name() == "new_name"
 
 
-def test_path_nested_component(state: State) -> None:
-    root_component = state.create_component("root")
-    child_a = state.create_component("child_a")
-    child_b = state.create_component("child_b")
+def test_path_root_node(state: State) -> None:
+    node = state.create_node("root")
+    assert node.path() == PurePosixPath("/root")
 
-    child_a.set_parent_graph(root_component.graph().uuid())
+
+def test_path_nested_node(state: State) -> None:
+    root_node = state.create_node("root")
+    child_a = state.create_node("child_a")
+    child_b = state.create_node("child_b")
+
+    child_a.set_parent_graph(root_node.graph().uuid())
     child_b.set_parent_graph(child_a.graph().uuid())
 
     assert child_b.path() == PurePosixPath("/root/child_a/child_b")
 
 
-def test_path_nested_component_relative(state: State) -> None:
-    root_component = state.create_component("root")
-    child_a = state.create_component("child_a")
-    child_b = state.create_component("child_b")
+def test_path_nested_node_relative(state: State) -> None:
+    root_node = state.create_node("root")
+    child_a = state.create_node("child_a")
+    child_b = state.create_node("child_b")
 
-    child_a.set_parent_graph(root_component.graph().uuid())
+    child_a.set_parent_graph(root_node.graph().uuid())
     child_b.set_parent_graph(child_a.graph().uuid())
 
     assert child_b.relative_path(relative_to=child_a) == PurePosixPath("child_b")
 
 
 def test_access_port(state: State) -> None:
-    component = state.create_component("component")
-    port = state.create_port("input1", PortDirection.input, int, component.uuid())
-    component.register_port(port)
-    assert isinstance(component.port("input1"), Port)
+    node = state.create_node("node")
+    port = state.create_port("input1", PortDirection.input, int, node.uuid())
+    node.register_port(port)
+    assert isinstance(node.port("input1"), Port)
 
 
 def test_access_innexisting_port(state: State) -> None:
-    component = state.create_component("component")
+    node = state.create_node("node")
     with pytest.raises(NameError):
-        component.port("this_is_not_a_port")
+        node.port("this_is_not_a_port")

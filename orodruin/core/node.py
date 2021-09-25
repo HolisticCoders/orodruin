@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class Component:
-    """Orodruin's Component Class.
+class Node:
+    """Orodruin's Node Class.
 
-    A component can be seen as both a node and a graph,
+    A node can be seen as both a node and a graph,
     it has `Ports` to receive and pass Data through the graph
-    and can contain other Components as a subgraph
+    and can contain other Nodes as a subgraph
     """
 
     _state: State
@@ -47,41 +47,41 @@ class Component:
         self._graph_id = self._state.create_graph(self.uuid()).uuid()
 
     def state(self) -> State:
-        """Return the state that owns this component."""
+        """Return the state that owns this node."""
         return self._state
 
     def uuid(self) -> UUID:
-        """UUID of this component."""
+        """UUID of this node."""
         return self._uuid
 
     def name(self) -> str:
-        """Name of the component."""
+        """Name of the node."""
         return self._name
 
     def set_name(self, name: str) -> None:
-        """Set the name of this component."""
+        """Set the name of this node."""
         self._name = name
         self.name_changed.emit(name)
 
     def type(self) -> str:
-        """Type of this component."""
+        """Type of this node."""
         return self._type
 
     def set_type(self, value: str) -> None:
-        """Type of this Component."""
+        """Type of this Node."""
         self._type = value
 
     def library(self) -> Optional[Library]:
-        """Return the library declaring this component."""
+        """Return the library declaring this node."""
         return self._library
 
     def set_library(self, library: Library) -> None:
-        """Set the library declaring this component."""
+        """Set the library declaring this node."""
         self._library = library
 
     def path(self) -> PurePosixPath:
-        """Absolute Path of this component."""
-        parent = self.parent_component()
+        """Absolute Path of this node."""
+        parent = self.parent_node()
         if parent:
             path = parent.path() / self.name()
         else:
@@ -89,12 +89,12 @@ class Component:
 
         return path
 
-    def relative_path(self, relative_to: Component) -> PurePosixPath:
-        """Path of the Component relative to another one."""
+    def relative_path(self, relative_to: Node) -> PurePosixPath:
+        """Path of the Node relative to another one."""
         return self.path().relative_to(relative_to.path())
 
     def ports(self) -> List[Port]:
-        """Return the ports registered to this component."""
+        """Return the ports registered to this node."""
         ports = []
 
         for port_id in self._port_ids:
@@ -104,13 +104,13 @@ class Component:
         return ports
 
     def parent_graph(self) -> Optional[Graph]:
-        """Parent graph of the component."""
+        """Parent graph of the node."""
         if self._parent_graph_id:
             return self._state.graph_from_graphlike(self._parent_graph_id)
         return None
 
     def set_parent_graph(self, graph: Optional[GraphLike]) -> None:
-        """Set the parent graph of the component."""
+        """Set the parent graph of the node."""
         if graph:
             graph = self.state().graph_from_graphlike(graph)
             self._parent_graph_id = graph.uuid()
@@ -118,15 +118,15 @@ class Component:
             self._parent_graph_id = None
 
     def graph(self) -> Graph:
-        """Graph containing child components."""
+        """Graph containing child nodes."""
         return self._state.graph_from_graphlike(self._graph_id)
 
-    def parent_component(self) -> Optional[Component]:
-        """Parent component."""
+    def parent_node(self) -> Optional[Node]:
+        """Parent node."""
         parent_graph = self.parent_graph()
         if not parent_graph:
             return None
-        return parent_graph.parent_component()
+        return parent_graph.parent_node()
 
     def port(self, name: str) -> Port:
         """Get a Port of this node from the its name."""
@@ -134,30 +134,30 @@ class Component:
             if port.name() == name:
                 return port
 
-        raise NameError(f"Component {self.name()} has no port named {name}")
+        raise NameError(f"Node {self.name()} has no port named {name}")
 
     def register_port(self, port: PortLike) -> None:
-        """Register an existing port to this component."""
+        """Register an existing port to this node."""
         port = self._state.port_from_portlike(port)
 
         self._port_ids.append(port.uuid())
         self.port_registered.emit(port)
 
-        logger.debug("Registered port %s to component %s", port.path(), self.path())
+        logger.debug("Registered port %s to node %s", port.path(), self.path())
 
     def unregister_port(self, port: PortLike) -> None:
-        """Remove a registered port from this component."""
+        """Remove a registered port from this node."""
         port = self._state.port_from_portlike(port)
 
         self._port_ids.remove(port.uuid())
         self.port_unregistered.emit(port)
 
-        logger.debug("Unregistered port %s from component %s", port.path(), self.path())
+        logger.debug("Unregistered port %s from node %s", port.path(), self.path())
 
 
-ComponentLike = Union[Component, UUID]
+NodeLike = Union[Node, UUID]
 
 __all__ = [
-    "Component",
-    "ComponentLike",
+    "Node",
+    "NodeLike",
 ]

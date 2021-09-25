@@ -2,96 +2,96 @@
 
 from pathlib import Path
 
-from orodruin.commands import CreateComponent, DeleteComponent, RenameComponent
+from orodruin.commands import CreateNode, DeleteNode, RenameNode
 from orodruin.core import State
 from orodruin.core.library import Library
 
 
-def test_create_component_init(state: State) -> None:
-    CreateComponent(state, "my_component")
-    CreateComponent(state, "my_component", type="Multiply")
-    CreateComponent(state, "my_component", library=Library(Path("")))
-    CreateComponent(state, "my_component", graph=state.root_graph())
+def test_create_node_init(state: State) -> None:
+    CreateNode(state, "my_node")
+    CreateNode(state, "my_node", type="Multiply")
+    CreateNode(state, "my_node", library=Library(Path("")))
+    CreateNode(state, "my_node", graph=state.root_graph())
 
 
-def test_create_component_do_undo_redo(state: State) -> None:
-    assert not state.root_graph().components()
+def test_create_node_do_undo_redo(state: State) -> None:
+    assert not state.root_graph().nodes()
 
-    command = CreateComponent(state, "my_component")
+    command = CreateNode(state, "my_node")
     command.do()
 
-    assert state.root_graph().components()
+    assert state.root_graph().nodes()
 
 
-def test_delete_component_init(state: State) -> None:
-    component = CreateComponent(state, "my_component").do()
+def test_delete_node_init(state: State) -> None:
+    node = CreateNode(state, "my_node").do()
 
-    DeleteComponent(state, component)
-    DeleteComponent(state, component.uuid())
+    DeleteNode(state, node)
+    DeleteNode(state, node.uuid())
 
 
-def test_delete_component_do_undo_redo(state: State) -> None:
+def test_delete_node_do_undo_redo(state: State) -> None:
 
-    command = CreateComponent(state, "my_component")
-    component = command.do()
+    command = CreateNode(state, "my_node")
+    node = command.do()
 
-    assert state.root_graph().components()
+    assert state.root_graph().nodes()
 
-    command = DeleteComponent(state, component)
+    command = DeleteNode(state, node)
     command.do()
 
-    assert not state.root_graph().components()
+    assert not state.root_graph().nodes()
 
     # command.undo()
 
-    # assert state.root_graph().components()
+    # assert state.root_graph().nodes()
 
     # command.redo()
 
-    # assert not state.root_graph().components()
+    # assert not state.root_graph().nodes()
 
 
-def test_rename_component_init(state: State) -> None:
-    component = CreateComponent(state, "initial_name").do()
-    RenameComponent(component, "new_name")
+def test_rename_node_init(state: State) -> None:
+    node = CreateNode(state, "initial_name").do()
+    RenameNode(node, "new_name")
 
 
-def test_rename_component_do_undo_redo(state: State) -> None:
-    component = CreateComponent(state, "initial_name").do()
+def test_rename_node_do_undo_redo(state: State) -> None:
+    node = CreateNode(state, "initial_name").do()
 
-    command = RenameComponent(component, "new_name")
+    command = RenameNode(node, "new_name")
 
-    assert component.name() == "initial_name"
-
-    command.do()
-
-    assert component.name() == "new_name"
-
-    command.undo()
-
-    assert component.name() == "initial_name"
-
-    command.redo()
-
-    assert component.name() == "new_name"
-
-
-def test_rename_component_same_name(state: State) -> None:
-    component_name = "my_component"
-    component = CreateComponent(state, component_name).do()
-
-    command = RenameComponent(component, component_name)
-
-    assert component.name() == component_name
+    assert node.name() == "initial_name"
 
     command.do()
 
-    assert component.name() == component_name
+    assert node.name() == "new_name"
 
     command.undo()
 
-    assert component.name() == component_name
+    assert node.name() == "initial_name"
 
     command.redo()
 
-    assert component.name() == component_name
+    assert node.name() == "new_name"
+
+
+def test_rename_node_same_name(state: State) -> None:
+    node_name = "my_node"
+    node = CreateNode(state, node_name).do()
+
+    command = RenameNode(node, node_name)
+
+    assert node.name() == node_name
+
+    command.do()
+
+    assert node.name() == node_name
+
+    command.undo()
+
+    assert node.name() == node_name
+
+    command.redo()
+
+    assert node.name() == node_name
