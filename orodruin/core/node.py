@@ -60,7 +60,11 @@ class Node:
 
     def set_name(self, name: str) -> None:
         """Set the name of this node."""
+        old_name = self._name
         self._name = name
+
+        logger.debug("Renamed node %s to %s.", old_name, name)
+
         self.name_changed.emit(name)
 
     def type(self) -> str:
