@@ -1,7 +1,7 @@
 """Delete Port command."""
 from dataclasses import dataclass, field
 
-from orodruin.core import Node, Graph, Port, PortLike, State
+from orodruin.core import Graph, Node, Port, PortLike, State
 
 from ..command import Command
 

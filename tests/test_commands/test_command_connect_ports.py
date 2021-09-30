@@ -4,7 +4,7 @@ from typing import Callable
 import pytest
 
 from orodruin.commands import ConnectPorts, CreateNode, CreatePort
-from orodruin.core import Node, Graph, Port, PortDirection, State
+from orodruin.core import Graph, Node, Port, PortDirection, State
 from orodruin.exceptions import (
     ConnectionOnSameNodeError,
     ConnectionToDifferentDirectionError,
