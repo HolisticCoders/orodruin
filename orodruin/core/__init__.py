@@ -1,18 +1,25 @@
 """A Python rigging graph library."""
-from .component import Component
-from .connection import Connection
-from .graph import Graph
+from .connection import Connection, ConnectionLike
+from .graph import Graph, GraphLike
 from .library import Library, LibraryManager
-from .port import Port, PortDirection
+from .node import Node, NodeLike
+from .port import Port, PortDirection, PortLike, PortType
 from .signal import Signal
+from .state import State
 
 __all__ = [
-    "Component",
+    "Node",
+    "NodeLike",
     "Connection",
+    "ConnectionLike",
     "Graph",
+    "GraphLike",
     "Library",
     "LibraryManager",
     "Port",
     "PortDirection",
+    "PortLike",
+    "PortType",
+    "state",
     "Signal",
 ]

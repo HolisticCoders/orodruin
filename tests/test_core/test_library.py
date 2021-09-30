@@ -59,10 +59,10 @@ def test_unregister_library() -> None:
     assert len(LibraryManager.libraries()) == 0
 
 
-def test_get_component() -> None:
+def test_get_node() -> None:
     library_path = Path(__file__).parent.parent / "TestLibrary"
     LibraryManager.register_library(library_path)
 
-    component = LibraryManager.find_component("SimpleComponent")
+    node = LibraryManager.find_node("SimpleNode")
 
-    assert isinstance(component, PathLike)
+    assert isinstance(node, PathLike)

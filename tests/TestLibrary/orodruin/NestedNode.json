@@ -2,7 +2,7 @@
     "definitions": {
         "03fc2487-ab6f-4556-9d0d-ac229f436ada": {
             "definitions": {},
-            "components": [],
+            "nodes": [],
             "ports": [
                 {
                     "name": "input1",
@@ -24,7 +24,7 @@
         },
         "08d4cb04-ddbb-4716-8dfb-2dbada1a5df1": {
             "definitions": {},
-            "components": [],
+            "nodes": [],
             "ports": [
                 {
                     "name": "input1",
@@ -45,7 +45,7 @@
             "connections": []
         }
     },
-    "components": [
+    "nodes": [
         {
             "type": "Internal::03fc2487-ab6f-4556-9d0d-ac229f436ada",
             "name": "child_a",

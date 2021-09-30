@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from typing_extensions import Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from .component import Component
+    from .node import Node
 
 
 @runtime_checkable
@@ -22,5 +22,5 @@ class PathedObject(Protocol):
     def path(self) -> PurePosixPath:
         """Absolute Path of object."""
 
-    def relative_path(self, relative_to: Component) -> PurePosixPath:
+    def relative_path(self, relative_to: Node) -> PurePosixPath:
         """Path of the Object to relative another one."""

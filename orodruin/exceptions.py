@@ -10,36 +10,36 @@ class LibraryDoesNotExistError(Exception):
     """Library does not found in the registered libraries"""
 
 
-class ComponentNotFoundError(Exception):
-    """Component not found in libraries."""
+class NodeNotFoundError(Exception):
+    """Node not found in libraries."""
 
 
-class ComponentError(Exception):
-    """Generic Component Error"""
+class NodeError(Exception):
+    """Generic Node Error"""
 
 
-class ParentToSelfError(ComponentError):
-    """Component parented to itself."""
+class ParentToSelfError(NodeError):
+    """Node parented to itself."""
 
 
-class ComponentDoesNotExistError(ComponentError):
-    """Component does not exist."""
+class NodeDoesNotExistError(NodeError):
+    """Node does not exist."""
 
 
 class PortDoesNotExistError(ValueError):
-    """Given component doesn't exist."""
+    """Given node doesn't exist."""
 
 
 class PortAlreadyConnectedError(ConnectionError):
     """Port Already Connected Error."""
 
 
-class ConnectionOnSameComponentError(ConnectionError):
-    """Both ports about to be connected are on the same component."""
+class ConnectionOnSameNodeError(ConnectionError):
+    """Both ports about to be connected are on the same node."""
 
 
 class OutOfScopeConnectionError(ConnectionError):
-    """Connection from two components not in the same scope."""
+    """Connection from two nodes not in the same scope."""
 
 
 class ConnectionToSameDirectionError(ConnectionError):
@@ -47,6 +47,6 @@ class ConnectionToSameDirectionError(ConnectionError):
 
 
 class ConnectionToDifferentDirectionError(ConnectionError):
-    """Two ports of the component and its parent direction are being connected together
+    """Two ports of the node and its parent direction are being connected together
     while they have the same direction.
     """

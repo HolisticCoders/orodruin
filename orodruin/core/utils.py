@@ -1,18 +1,18 @@
 import re
 from typing import List, Optional
 
-from .component import Component
 from .connection import Connection
 from .graph import Graph
+from .node import Node
 from .port import Port
 
 
-def get_unique_name(graph: Graph, name: str) -> str:
-    """Return a valid unique component name inside of the given graph."""
+def get_unique_node_name(graph: Graph, name: str) -> str:
+    """Return a valid unique node name inside of the given graph."""
     name_pattern = re.compile(r"^(?P<basename>.*?)(?P<index>\d*)?$")
 
-    for component in graph.components():
-        if component.name() == name:
+    for node in graph.nodes():
+        if node.name() == name:
 
             match = name_pattern.match(name)
             if not match:
@@ -30,7 +30,35 @@ def get_unique_name(graph: Graph, name: str) -> str:
 
             new_name = f"{basename}{index}"
 
-            return get_unique_name(graph, new_name)
+            return get_unique_node_name(graph, new_name)
+
+    return name
+
+
+def get_unique_port_name(node: Node, name: str) -> str:
+    """Return a valid unique node name inside of the given graph."""
+    name_pattern = re.compile(r"^(?P<basename>.*?)(?P<index>\d*)?$")
+
+    for port in node.ports():
+        if port.name() == name:
+
+            match = name_pattern.match(name)
+            if not match:
+                raise NameError(f"{name} did not match regex pattern {name_pattern}")
+
+            groups = match.groupdict()
+            basename = groups["basename"]
+            index_str = groups.get("index")
+
+            if not index_str:
+                index = 0
+            else:
+                index = int(index_str)
+            index += 1
+
+            new_name = f"{basename}{index}"
+
+            return get_unique_port_name(node, new_name)
 
     return name
 
@@ -56,24 +84,24 @@ def list_connections(graph: Graph, port: Port) -> List[Connection]:
     return connections
 
 
-def port_from_path(component: Component, port_path: str) -> Optional[Port]:
-    """Get a port from the given path, relative to the component."""
+def port_from_path(node: Node, port_path: str) -> Optional[Port]:
+    """Get a port from the given path, relative to the node."""
     if port_path.startswith("."):
-        port = component.port(port_path.strip("."))
+        port = node.port(port_path.strip("."))
     else:
-        component_name, port_name = port_path.split(".")
+        node_name, port_name = port_path.split(".")
 
-        sub_component = None
-        for _sub_component in component.graph().components():
-            if component_name == _sub_component.name():
-                sub_component = _sub_component
+        sub_node = None
+        for _sub_node in node.graph().nodes():
+            if node_name == _sub_node.name():
+                sub_node = _sub_node
                 break
 
-        if sub_component is None:
+        if sub_node is None:
             return None
 
         try:
-            port = sub_component.port(port_name)
+            port = sub_node.port(port_name)
         except NameError:
             return None
 
