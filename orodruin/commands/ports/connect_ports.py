@@ -132,7 +132,7 @@ class ConnectPorts(Command):
                 )
 
         self._created_connection = self.state.create_connection(
-            self._source, self._target
+            self._graph, self._source, self._target
         )
         self._graph.register_connection(self._created_connection)
 

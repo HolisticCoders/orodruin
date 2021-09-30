@@ -5,19 +5,19 @@ from os import PathLike
 from typing import Any, Dict, List, Optional, Tuple
 
 from orodruin.core import (
-    Node,
     Graph,
     GraphLike,
     Library,
     LibraryManager,
+    Node,
     PortDirection,
     State,
 )
 from orodruin.core.port import types as port_types
 from orodruin.core.utils import port_from_path
 from orodruin.exceptions import (
-    NodeNotFoundError,
     LibraryDoesNotExistError,
+    NodeNotFoundError,
     PortDoesNotExistError,
 )
 

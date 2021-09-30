@@ -246,6 +246,7 @@ class State:
 
     def create_connection(
         self,
+        graph: GraphLike,
         source: PortLike,
         target: PortLike,
     ) -> Connection:
@@ -254,7 +255,7 @@ class State:
         source = self.port_from_portlike(source)
         target = self.port_from_portlike(target)
 
-        connection = Connection(self, source.uuid(), target.uuid())
+        connection = Connection(self, graph, source.uuid(), target.uuid())
         self._connections[connection.uuid()] = connection
 
         logger.debug("Created connection %s.", connection.uuid())

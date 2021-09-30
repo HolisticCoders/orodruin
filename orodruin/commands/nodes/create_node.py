@@ -36,9 +36,8 @@ class CreateNode(Command):
             name=unique_name,
             parent_graph_id=self._graph.uuid(),
             library=self.library,
+            node_type=self.type,
         )
-        if self.type:
-            node.set_type(self.type)
 
         self._graph.register_node(node)
         self._created_node = node

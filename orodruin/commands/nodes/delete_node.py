@@ -1,7 +1,7 @@
 """Delete Node command."""
 from dataclasses import dataclass, field
 
-from orodruin.core import Node, NodeLike, Graph, GraphLike, State
+from orodruin.core import Graph, GraphLike, Node, NodeLike, State
 from orodruin.core.utils import list_connections
 
 from ..command import Command
@@ -26,6 +26,7 @@ class DeleteNode(Command):
         for port in self._node.ports():
             for connection in list_connections(self._graph, port):
                 DisconnectPorts(
+                    self.state,
                     self._graph,
                     connection.source(),
                     connection.target(),

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Union
 from uuid import UUID, uuid4
 
 if TYPE_CHECKING:
+    from .graph import Graph
     from .port import Port
     from .state import State
 
@@ -14,7 +15,7 @@ class Connection:
     """Orodruin's port Connection Class."""
 
     _state: State
-
+    _graph: UUID
     _source_id: UUID
     _target_id: UUID
 
@@ -23,6 +24,9 @@ class Connection:
     def uuid(self) -> UUID:
         """UUID of this connection."""
         return self._uuid
+
+    def graph(self) -> Graph:
+        return self._state.graph_from_graphlike(self._graph_id)
 
     def source(self) -> Port:
         """Return the source port of this connection."""
