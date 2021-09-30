@@ -1,7 +1,7 @@
 """Delete Node command."""
 from dataclasses import dataclass, field
 
-from orodruin.core import Graph, GraphLike, Node, NodeLike, State
+from orodruin.core import Graph, Node, NodeLike, State
 from orodruin.core.utils import list_connections
 
 from ..command import Command
@@ -20,7 +20,12 @@ class DeleteNode(Command):
 
     def __post_init__(self) -> None:
         self._node = self.state.node_from_nodelike(self.node)
-        self._graph = self._node.parent_graph()
+        parent_graph = self._node.parent_graph()
+
+        if not parent_graph:
+            raise TypeError("Cannot create a Port on a node with no graph.")
+
+        self._graph = parent_graph
 
     def do(self) -> None:
         for port in self._node.ports():

@@ -26,9 +26,15 @@ def test_add_ports(state: State) -> None:
 
     assert len(node.ports()) == 0
 
-    input1 = state.create_port("input1", PortDirection.input, int, node.uuid())
-    input2 = state.create_port("input2", PortDirection.input, int, node.uuid())
-    output = state.create_port("output", PortDirection.input, int, node.uuid())
+    input1 = state.create_port(
+        "input1", PortDirection.input, int, node, state.root_graph()
+    )
+    input2 = state.create_port(
+        "input2", PortDirection.input, int, node, state.root_graph()
+    )
+    output = state.create_port(
+        "output", PortDirection.input, int, node, state.root_graph()
+    )
 
     assert len(state.ports()) == 3
 
@@ -70,15 +76,17 @@ def test_path_nested_node_relative(state: State) -> None:
     child_a = state.create_node("child_a")
     child_b = state.create_node("child_b")
 
-    child_a.set_parent_graph(root_node.graph().uuid())
-    child_b.set_parent_graph(child_a.graph().uuid())
+    child_a.set_parent_graph(root_node.graph())
+    child_b.set_parent_graph(child_a.graph())
 
     assert child_b.relative_path(relative_to=child_a) == PurePosixPath("child_b")
 
 
 def test_access_port(state: State) -> None:
     node = state.create_node("node")
-    port = state.create_port("input1", PortDirection.input, int, node.uuid())
+    port = state.create_port(
+        "input1", PortDirection.input, int, node, state.root_graph()
+    )
     node.register_port(port)
     assert isinstance(node.port("input1"), Port)
 

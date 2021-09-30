@@ -210,12 +210,13 @@ class State:
         direction: PortDirection,
         port_type: Type[PortType],
         node: NodeLike,
+        graph: GraphLike,
     ) -> Port[PortType]:
         """Create a port and register it to the state."""
 
         node = self.node_from_nodelike(node)
+        graph = self.graph_from_graphlike(graph)
 
-        graph = node.parent_graph()
         port = Port(
             self,
             graph.uuid(),
@@ -252,10 +253,11 @@ class State:
     ) -> Connection:
         """Create a connection and register it to the state."""
 
+        graph = self.graph_from_graphlike(graph)
         source = self.port_from_portlike(source)
         target = self.port_from_portlike(target)
 
-        connection = Connection(self, graph, source.uuid(), target.uuid())
+        connection = Connection(self, graph.uuid(), source.uuid(), target.uuid())
         self._connections[connection.uuid()] = connection
 
         logger.debug("Created connection %s.", connection.uuid())

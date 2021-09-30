@@ -34,7 +34,8 @@ def get_unique_node_name(graph: Graph, name: str) -> str:
 
     return name
 
-def get_unique_port_name(node: Node, name: str):
+
+def get_unique_port_name(node: Node, name: str) -> str:
     """Return a valid unique node name inside of the given graph."""
     name_pattern = re.compile(r"^(?P<basename>.*?)(?P<index>\d*)?$")
 
@@ -60,9 +61,6 @@ def get_unique_port_name(node: Node, name: str):
             return get_unique_port_name(node, new_name)
 
     return name
-
-
-
 
 
 def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connection]:

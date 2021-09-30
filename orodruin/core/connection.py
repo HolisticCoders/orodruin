@@ -15,7 +15,7 @@ class Connection:
     """Orodruin's port Connection Class."""
 
     _state: State
-    _graph: UUID
+    _graph_id: UUID
     _source_id: UUID
     _target_id: UUID
 
@@ -26,6 +26,7 @@ class Connection:
         return self._uuid
 
     def graph(self) -> Graph:
+        """Return the graph this connection exists in."""
         return self._state.graph_from_graphlike(self._graph_id)
 
     def source(self) -> Port:

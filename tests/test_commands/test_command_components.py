@@ -35,11 +35,13 @@ def test_delete_node_do_undo_redo(state: State) -> None:
     command = CreateNode(state, "my_node")
     node = command.do()
 
+    assert state.nodes()
     assert state.root_graph().nodes()
 
     command = DeleteNode(state, node)
     command.do()
 
+    assert not state.nodes()
     assert not state.root_graph().nodes()
 
     # command.undo()
@@ -53,13 +55,13 @@ def test_delete_node_do_undo_redo(state: State) -> None:
 
 def test_rename_node_init(state: State) -> None:
     node = CreateNode(state, "initial_name").do()
-    RenameNode(node, "new_name")
+    RenameNode(state, node, "new_name")
 
 
 def test_rename_node_do_undo_redo(state: State) -> None:
     node = CreateNode(state, "initial_name").do()
 
-    command = RenameNode(node, "new_name")
+    command = RenameNode(state, node, "new_name")
 
     assert node.name() == "initial_name"
 
@@ -80,7 +82,7 @@ def test_rename_node_same_name(state: State) -> None:
     node_name = "my_node"
     node = CreateNode(state, node_name).do()
 
-    command = RenameNode(node, node_name)
+    command = RenameNode(state, node, node_name)
 
     assert node.name() == node_name
 

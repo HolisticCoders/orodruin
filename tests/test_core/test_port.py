@@ -16,14 +16,14 @@ def test_implements_port() -> None:
 
 def test_init_port(state: State) -> None:
     node = state.create_node("node")
-    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    port = state.create_port("port", PortDirection.input, int, node, state.root_graph())
     node.register_port(port)
     assert port.name() == "port"
 
 
 def test_set_port_name(state: State) -> None:
     node = state.create_node("node")
-    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    port = state.create_port("port", PortDirection.input, int, node, state.root_graph())
     node.register_port(port)
 
     assert port.name() == "port"
@@ -38,7 +38,7 @@ def test_set_port_name(state: State) -> None:
 
 def test_set_port_value(state: State) -> None:
     node = state.create_node("node")
-    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    port = state.create_port("port", PortDirection.input, int, node, state.root_graph())
     node.register_port(port)
 
     port.set(1)
@@ -49,7 +49,7 @@ def test_set_port_value(state: State) -> None:
 def test_set_port_wrong_value_type(state: State) -> None:
 
     node = state.create_node("node")
-    port = state.create_port("port", PortDirection.input, int, node.uuid())
+    port = state.create_port("port", PortDirection.input, int, node, state.root_graph())
     node.register_port(port)
 
     with pytest.raises(TypeError):
