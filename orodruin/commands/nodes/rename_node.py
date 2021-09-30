@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from orodruin.core import Node
 from orodruin.core.node import NodeLike
 from orodruin.core.state import State
-from orodruin.core.utils import get_unique_name
+from orodruin.core.utils import get_unique_node_name
 
 from ..command import Command
 
@@ -35,7 +35,7 @@ class RenameNode(Command):
         parent_graph = self._node.parent_graph()
 
         if parent_graph:
-            self._new_name = get_unique_name(parent_graph, self.name)
+            self._new_name = get_unique_node_name(parent_graph, self.name)
         else:
             # The node isn't in a graph,
             # the new name can't clash with any other name.

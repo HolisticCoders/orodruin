@@ -5,7 +5,7 @@ from typing import Optional
 from orodruin.core import Graph, Library, Node
 from orodruin.core.graph import GraphLike
 from orodruin.core.state import State
-from orodruin.core.utils import get_unique_name
+from orodruin.core.utils import get_unique_node_name
 
 from ..command import Command
 
@@ -30,7 +30,7 @@ class CreateNode(Command):
             self._graph = self.state.root_graph()
 
     def do(self) -> Node:
-        unique_name = get_unique_name(self._graph, self.name)
+        unique_name = get_unique_node_name(self._graph, self.name)
 
         node = self.state.create_node(
             name=unique_name,
