@@ -43,7 +43,11 @@ class Node:
     port_registered: Signal[Port] = field(default_factory=Signal)
     port_unregistered: Signal[Port] = field(default_factory=Signal)
 
-    def __post_init__(self) -> None:
+    def post_node_created(self) -> None:
+        """Method called after the state has created and registered the node."""
+
+        # The graph has to be created after the `State.node_created` signal is emitted
+        # or `Graph._parent_node_id` will point to a node not yet registered.
         self._graph_id = self._state.create_graph(self.uuid()).uuid()
 
     def state(self) -> State:

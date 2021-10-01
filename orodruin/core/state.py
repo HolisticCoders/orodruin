@@ -191,6 +191,8 @@ class State:
 
         self.node_created.emit(node)
 
+        node.post_node_created()
+
         return node
 
     def delete_node(self, node: NodeLike) -> None:
