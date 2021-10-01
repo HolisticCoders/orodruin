@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import PurePosixPath
@@ -7,10 +8,13 @@ from typing import TYPE_CHECKING, Generic, Type, TypeVar, Union
 from uuid import UUID, uuid4
 
 from orodruin.core.graph import Graph
+from orodruin.core.signal import Signal
 
 if TYPE_CHECKING:
     from ..node import Node  # pylint: disable = cyclic-import
     from ..state import State
+
+logger = logging.getLogger(__name__)
 
 
 class PortDirection(Enum):
@@ -43,6 +47,8 @@ class Port(Generic[PortType]):
 
     _uuid: UUID = field(default_factory=uuid4)
 
+    name_changed: Signal[str] = field(default_factory=Signal)
+
     def __post_init__(self) -> None:
         self._value = self._type()
 
@@ -67,8 +73,13 @@ class Port(Generic[PortType]):
         return self._name
 
     def set_name(self, name: str) -> None:
-        """Set the name of the port."""
+        """Set the name of this port."""
+        old_name = self._name
         self._name = name
+
+        logger.debug("Renamed port %s to %s.", old_name, name)
+
+        self.name_changed.emit(name)
 
     def direction(self) -> PortDirection:
         """Direction of the port."""

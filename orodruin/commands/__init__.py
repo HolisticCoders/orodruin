@@ -13,6 +13,7 @@ from .ports import (
     DeletePort,
     DisconnectPorts,
     GetPort,
+    RenamePort,
     SetPort,
 )
 
@@ -29,5 +30,6 @@ __all__ = [
     "GroupNodes",
     "ImportNode",
     "RenameNode",
+    "RenamePort",
     "SetPort",
 ]
