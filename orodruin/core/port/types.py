@@ -16,7 +16,7 @@ from typing import Tuple
 
 @dataclass
 class Vector2:
-    """Matrix representation class."""
+    """Vector2 representation class."""
 
     value: Tuple[float, float] = field(default_factory=lambda: (0.0, 0.0))
 
@@ -30,7 +30,7 @@ class Vector2:
 
 @dataclass
 class Vector3:
-    """Matrix representation class."""
+    """Vector3 representation class."""
 
     value: Tuple[float, float, float] = field(default_factory=lambda: (0.0, 0.0, 0.0))
 
@@ -39,6 +39,22 @@ class Vector3:
             self.value = self.value.value  # pylint: disable = no-member
 
         if not isinstance(self.value, tuple) or len(self.value) != 3:
+            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+
+
+@dataclass
+class Quaternion:
+    """Quaternion representation class."""
+
+    value: Tuple[float, float, float, float] = field(
+        default_factory=lambda: (0.0, 0.0, 0.0, 1.0)
+    )
+
+    def __post_init__(self) -> None:
+        if isinstance(self.value, Quaternion):
+            self.value = self.value.value  # pylint: disable = no-member
+
+        if not isinstance(self.value, tuple) or len(self.value) != 4:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
@@ -101,6 +117,7 @@ __all__ = [
     "Matrix4",
     "Vector2",
     "Vector3",
+    "Quaternion",
     "bool",
     "float",
     "int",
