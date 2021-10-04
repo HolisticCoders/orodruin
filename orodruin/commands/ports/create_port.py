@@ -34,6 +34,11 @@ class CreatePort(Command):
 
         self._graph = parent_graph
 
+        if self.parent_port:
+            self._parent_port = self.state.port_from_portlike(self.parent_port)
+        else:
+            self._parent_port = None
+
     def do(self) -> Port:
         unique_name = get_unique_port_name(self._node, self.name)
 
