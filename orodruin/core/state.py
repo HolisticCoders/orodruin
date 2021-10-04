@@ -213,6 +213,7 @@ class State:
         port_type: Type[PortType],
         node: NodeLike,
         graph: GraphLike,
+        parent_port: Optional[PortLike] = None,
     ) -> Port[PortType]:
         """Create a port and register it to the state."""
 
@@ -227,6 +228,11 @@ class State:
             direction,
             port_type,
         )
+
+        if parent_port is not None:
+            parent_port = self.port_from_portlike(parent_port)
+            port.set_parent_port(parent_port)
+            parent_port.add_child_port(port)
 
         self._ports[port.uuid()] = port
 
