@@ -1,8 +1,9 @@
 """Create Port command."""
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Optional, Type
 
 from orodruin.core import Graph, Node, NodeLike, Port, PortDirection, State
+from orodruin.core.port.port import PortLike
 from orodruin.core.utils import get_unique_port_name
 
 from ..command import Command
@@ -17,10 +18,12 @@ class CreatePort(Command):
     name: str
     direction: PortDirection
     type: Type
+    parent_port: Optional[PortLike] = None
 
     _node: Node = field(init=False)
     _graph: Graph = field(init=False)
     _created_port: Port = field(init=False)
+    _parent_port: Optional[Port] = field(init=False, default=None)
 
     def __post_init__(self) -> None:
         self._node = self.state.node_from_nodelike(self.node)
@@ -31,11 +34,21 @@ class CreatePort(Command):
 
         self._graph = parent_graph
 
+        if self.parent_port:
+            self._parent_port = self.state.port_from_portlike(self.parent_port)
+        else:
+            self._parent_port = None
+
     def do(self) -> Port:
         unique_name = get_unique_port_name(self._node, self.name)
 
         port = self.state.create_port(
-            unique_name, self.direction, self.type, self._node, self._graph
+            unique_name,
+            self.direction,
+            self.type,
+            self._node,
+            self._graph,
+            self._parent_port,
         )
 
         self._graph.register_port(port)

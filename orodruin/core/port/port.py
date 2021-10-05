@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Generic, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Generic, List, Optional, Type, TypeVar, Union
 from uuid import UUID, uuid4
 
 from orodruin.core.graph import Graph
@@ -44,6 +44,9 @@ class Port(Generic[PortType]):
     _type: Type[PortType]
 
     _value: PortType = field(init=False)
+
+    _parent_port_id: Optional[UUID] = field(init=False, default=None)
+    _child_port_ids: List[UUID] = field(init=False, default_factory=list)
 
     _uuid: UUID = field(default_factory=uuid4)
 
@@ -110,6 +113,24 @@ class Port(Generic[PortType]):
             )
 
         self._value = value
+
+    def parent_port(self) -> Optional[Port]:
+        """Parent port of the port."""
+        if self._parent_port_id:
+            return self._state.port_from_portlike(self._parent_port_id)
+        return None
+
+    def set_parent_port(self, port: Port) -> None:
+        """Set the parent port of the port."""
+        self._parent_port_id = port.uuid()
+
+    def child_ports(self) -> List[Port]:
+        """Children of the port."""
+        return [self._state.port_from_portlike(port) for port in self._child_port_ids]
+
+    def add_child_port(self, port: Port) -> None:
+        """Add a child port to the port."""
+        self._child_port_ids.append(port.uuid())
 
     def path(self) -> PurePosixPath:
         """The absolute path of this Port."""

@@ -10,6 +10,7 @@ from orodruin.core import (
     Library,
     LibraryManager,
     Node,
+    Port,
     PortDirection,
     State,
 )
@@ -136,6 +137,7 @@ class ImportNode(Command):
         state: State,
         node: Node,
         ports_data: Dict,
+        parent_port: Optional[Port] = None,
     ) -> None:
         for port_data in ports_data:
             name = port_data["name"]
@@ -149,7 +151,11 @@ class ImportNode(Command):
                     "orodruin port type"
                 ) from error
 
-            CreatePort(state, node, name, direction, port_type).do()
+            port = CreatePort(state, node, name, direction, port_type, parent_port).do()
+
+            children_data = port_data.get("children", [])
+            if children_data:
+                cls._create_ports(state, node, children_data, port)
 
     @classmethod
     def _create_subnodes(
