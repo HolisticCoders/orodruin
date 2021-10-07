@@ -1,6 +1,6 @@
 """Create Node command."""
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 from uuid import UUID
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
@@ -8,7 +8,7 @@ from orodruin.core import Graph, Node
 from orodruin.core.connection import Connection
 from orodruin.core.graph import GraphLike
 from orodruin.core.node import NodeLike
-from orodruin.core.port.port import PortDirection
+from orodruin.core.port.port import Port, PortDirection
 from orodruin.core.state import State
 from orodruin.core.utils import list_connections
 
@@ -28,6 +28,8 @@ class GroupNodes(Command):
     _nodes: List[Node] = field(init=False)
     _graph: Graph = field(init=False)
     _created_node: Node = field(init=False)
+
+    _created_ports: Dict[UUID, Port] = field(init=False, default_factory=dict)
 
     def __post_init__(self) -> None:
         self._nodes = [self.state.node_from_nodelike(node) for node in self.nodes]
@@ -63,13 +65,9 @@ class GroupNodes(Command):
                             ingoing_connections[source.uuid()] = _connections
                         else:
                             target = connection.target()
-                            new_port = CreatePort(
-                                self.state,
-                                self._created_node,
-                                port.name(),
-                                PortDirection.output,
-                                port.type(),
-                            ).do()
+                            new_port = self._create_or_get_port(
+                                port, PortDirection.output
+                            )
                             ConnectPorts(
                                 self.state,
                                 self._graph,
@@ -87,13 +85,7 @@ class GroupNodes(Command):
 
         for source_id, connections in ingoing_connections.items():
             source_port = self.state.port_from_portlike(source_id)
-            new_port = CreatePort(
-                self.state,
-                self._created_node,
-                source_port.name(),
-                PortDirection.input,
-                source_port.type(),
-            ).do()
+            new_port = self._create_or_get_port(source_port, PortDirection.input)
             ConnectPorts(
                 self.state,
                 self._graph,
@@ -117,3 +109,48 @@ class GroupNodes(Command):
 
     def undo(self) -> None:
         raise NotImplementedError
+
+    def _create_or_get_port(self, origin_port: Port, direction: PortDirection) -> Port:
+        """
+        Creates or gets the port on the command's created_node matching the origin_port.
+
+        If the port has a parent, there's a chance it's already been created in previous run.
+        """
+        new_port = self._created_ports.get(origin_port.uuid())
+        if new_port:
+            return new_port
+
+        top_most_parent = origin_port
+        while True:
+            parent_port = top_most_parent.parent_port()
+            if parent_port is None:
+                break
+            top_most_parent = parent_port
+
+        new_port = self._create_port(top_most_parent, direction)
+
+        return new_port
+
+    def _create_port(self, origin_port: Port, direction: PortDirection) -> Port:
+        """Recursively creates a port and all its children on the command's created node"""
+        origin_parent_port = origin_port.parent_port()
+        if origin_parent_port:
+            parent_port = self._created_ports.get(origin_parent_port.uuid())
+        else:
+            parent_port = None
+
+        new_port = CreatePort(
+            self.state,
+            self._created_node,
+            origin_port.name(),
+            direction,
+            origin_port.type(),
+            parent_port,
+        ).do()
+
+        self._created_ports[origin_port.uuid()] = new_port
+
+        for port in origin_port.child_ports():
+            self._create_port(port, direction)
+
+        return new_port
