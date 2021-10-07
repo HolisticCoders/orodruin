@@ -1,6 +1,6 @@
 """Create Node command."""
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List
 from uuid import UUID
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
@@ -114,7 +114,8 @@ class GroupNodes(Command):
         """
         Creates or gets the port on the command's created_node matching the origin_port.
 
-        If the port has a parent, there's a chance it's already been created in previous run.
+        If the port has a parent, there's a chance it's already been created in
+        previous run.
         """
         new_port = self._created_ports.get(origin_port.uuid())
         if new_port:
@@ -132,7 +133,9 @@ class GroupNodes(Command):
         return new_port
 
     def _create_port(self, origin_port: Port, direction: PortDirection) -> Port:
-        """Recursively creates a port and all its children on the command's created node"""
+        """
+        Recursively creates a port and all its children on the command's created node
+        """
         origin_parent_port = origin_port.parent_port()
         if origin_parent_port:
             parent_port = self._created_ports.get(origin_parent_port.uuid())
