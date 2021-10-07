@@ -10,6 +10,17 @@ from orodruin.exceptions import LibraryDoesNotExistError
 from ..command import Command
 
 
+class OrodruinEncoder(json.JSONEncoder):
+    """JSON Encoder for Orodruin nodes."""
+
+    def default(self, o: Any) -> Any:
+        try:
+            # try to get the internal value of the more complex port types
+            return o.value
+        except NameError:
+            return super().default(o)
+
+
 @dataclass
 class ExportNode(Command):
     """Export Node command"""
@@ -49,8 +60,7 @@ class ExportNode(Command):
     def _node_as_json(cls, node: Node) -> str:
         """Returns the serialized representation of the node."""
         return json.dumps(
-            cls._node_definition_data(node),
-            indent=4,
+            cls._node_definition_data(node), indent=4, cls=OrodruinEncoder
         )
 
     @classmethod
@@ -107,25 +117,34 @@ class ExportNode(Command):
             "name": node.name(),
             "ports": {p.name(): p.get() for p in node.ports()},
         }
+
         return data
 
     @classmethod
-    def _serialize_ports(cls, node: Node) -> List[Dict[str, str]]:
+    def _serialize_ports(cls, node: Node) -> List[Dict[str, Any]]:
         ports_data = []
 
         for port in node.ports():
-            ports_data.append(cls._port_definition_data(port))
+
+            # children port data is included in the parent port data
+            if not port.parent_port():
+                ports_data.append(cls._port_definition_data(port))
 
         return ports_data
 
     @classmethod
-    def _port_definition_data(cls, port: Port) -> Dict[str, str]:
+    def _port_definition_data(cls, port: Port) -> Dict[str, Any]:
         """Returns a dict representing the given Port definition."""
-        data = {
+        data: Dict[str, Any] = {
             "name": port.name(),
             "direction": port.direction().name,
             "type": port.type().__name__,
         }
+        if port.child_ports():
+            children_data = [
+                cls._port_definition_data(child) for child in port.child_ports()
+            ]
+            data["children"] = children_data
         return data
 
     @classmethod

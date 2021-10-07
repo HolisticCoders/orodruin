@@ -106,11 +106,13 @@ class Port(Generic[PortType]):
         Raises:
             SetConnectedPortError: when called and the port is connected.
         """
-        if not isinstance(value, self._type):
+        try:
+            self._type(value)  # type: ignore[call-arg]
+        except TypeError as error:
             raise TypeError(
-                f"Cannot set Port {self._name}[{self._type}] to a value "
-                f"of {value}[{type(value)}]."
-            )
+                f"Cannot set Port {self._name}[{self._type.__name__}] to a value "
+                f"of {value}."
+            ) from error
 
         self._value = value
 

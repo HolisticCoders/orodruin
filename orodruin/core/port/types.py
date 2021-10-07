@@ -11,20 +11,20 @@ from __future__ import annotations
 
 from builtins import bool, float, int, str
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import List
 
 
 @dataclass
 class Vector2:
     """Vector2 representation class."""
 
-    value: Tuple[float, float] = field(default_factory=lambda: (0.0, 0.0))
+    value: List[float] = field(default_factory=lambda: [0.0, 0.0])
 
     def __post_init__(self) -> None:
         if isinstance(self.value, Vector2):
             self.value = self.value.value  # pylint: disable = no-member
 
-        if not isinstance(self.value, tuple) or len(self.value) != 2:
+        if not isinstance(self.value, list) or len(self.value) != 2:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
@@ -32,13 +32,13 @@ class Vector2:
 class Vector3:
     """Vector3 representation class."""
 
-    value: Tuple[float, float, float] = field(default_factory=lambda: (0.0, 0.0, 0.0))
+    value: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
 
     def __post_init__(self) -> None:
         if isinstance(self.value, Vector3):
             self.value = self.value.value  # pylint: disable = no-member
 
-        if not isinstance(self.value, tuple) or len(self.value) != 3:
+        if not isinstance(self.value, List) or len(self.value) != 3:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
@@ -46,15 +46,13 @@ class Vector3:
 class Quaternion:
     """Quaternion representation class."""
 
-    value: Tuple[float, float, float, float] = field(
-        default_factory=lambda: (0.0, 0.0, 0.0, 1.0)
-    )
+    value: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 1.0])
 
     def __post_init__(self) -> None:
         if isinstance(self.value, Quaternion):
             self.value = self.value.value  # pylint: disable = no-member
 
-        if not isinstance(self.value, tuple) or len(self.value) != 4:
+        if not isinstance(self.value, list) or len(self.value) != 4:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
@@ -62,25 +60,21 @@ class Quaternion:
 class Matrix3:
     """Matrix representation class."""
 
-    # fmt: off
-    value: Tuple[
-        float, float, float,
-        float, float, float,
-        float, float, float,
-    ] = field(
-        default_factory=lambda: (
+    value: List[float] = field(
+        # fmt: off
+        default_factory=lambda: [
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0,
-        )
+        ]
+        # fmt: on
     )
-    # fmt: on
 
     def __post_init__(self) -> None:
         if isinstance(self.value, Matrix3):
             self.value = self.value.value  # pylint: disable = no-member
 
-        if not isinstance(self.value, tuple) or len(self.value) != 9:
+        if not isinstance(self.value, list) or len(self.value) != 9:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
@@ -88,27 +82,22 @@ class Matrix3:
 class Matrix4:
     """Matrix representation class."""
 
-    # fmt: off
-    value: Tuple[
-        float, float, float, float,
-        float, float, float, float,
-        float, float, float, float,
-        float, float, float, float,
-    ] = field(
-        default_factory=lambda: (
+    value: List[float] = field(
+        # fmt: off
+        default_factory=lambda: [
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
-        )
+        ]
+        # fmt: on
     )
-    # fmt: on
 
     def __post_init__(self) -> None:
         if isinstance(self.value, Matrix4):
             self.value = self.value.value  # pylint: disable = no-member
 
-        if not isinstance(self.value, tuple) or len(self.value) != 16:
+        if not isinstance(self.value, list) or len(self.value) != 16:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 

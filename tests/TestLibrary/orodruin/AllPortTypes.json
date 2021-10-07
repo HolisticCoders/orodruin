@@ -25,7 +25,51 @@
         {
             "name": "Vector3_in",
             "direction": "input",
-            "type": "Vector3"
+            "type": "Vector3",
+            "children": [
+                {
+                    "name": "Vector3_inX",
+                    "direction": "input",
+                    "type": "float"
+                },
+                {
+                    "name": "Vector3_inY",
+                    "direction": "input",
+                    "type": "float"
+                },
+                {
+                    "name": "Vector3_inZ",
+                    "direction": "input",
+                    "type": "float"
+                }
+            ]
+        },
+        {
+            "name": "Quaternion_in",
+            "direction": "input",
+            "type": "Quaternion",
+            "children": [
+                {
+                    "name": "Quaternion_inX",
+                    "direction": "input",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_inY",
+                    "direction": "input",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_inZ",
+                    "direction": "input",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_inW",
+                    "direction": "input",
+                    "type": "float"
+                }
+            ]
         },
         {
             "name": "Matrix4_in",
@@ -55,7 +99,51 @@
         {
             "name": "Vector3_out",
             "direction": "output",
-            "type": "Vector3"
+            "type": "Vector3",
+            "children": [
+                {
+                    "name": "Vector3_outX",
+                    "direction": "output",
+                    "type": "float"
+                },
+                {
+                    "name": "Vector3_outY",
+                    "direction": "output",
+                    "type": "float"
+                },
+                {
+                    "name": "Vector3_outZ",
+                    "direction": "output",
+                    "type": "float"
+                }
+            ]
+        },
+        {
+            "name": "Quaternion_out",
+            "direction": "output",
+            "type": "Quaternion",
+            "children": [
+                {
+                    "name": "Quaternion_outX",
+                    "direction": "output",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_outY",
+                    "direction": "output",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_outZ",
+                    "direction": "output",
+                    "type": "float"
+                },
+                {
+                    "name": "Quaternion_outW",
+                    "direction": "output",
+                    "type": "float"
+                }
+            ]
         },
         {
             "name": "Matrix4_out",
