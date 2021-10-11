@@ -3,7 +3,7 @@ from .connection import Connection, ConnectionLike
 from .graph import Graph, GraphLike
 from .library import Library, LibraryManager
 from .node import Node, NodeLike
-from .port import Port, PortDirection, PortLike, PortType
+from .port import Port, PortDirection, PortLike, PortType, PortTypes
 from .signal import Signal
 from .state import State
 
@@ -20,6 +20,7 @@ __all__ = [
     "PortDirection",
     "PortLike",
     "PortType",
+    "PortTypes",
     "state",
     "Signal",
 ]

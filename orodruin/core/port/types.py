@@ -11,7 +11,8 @@ from __future__ import annotations
 
 from builtins import bool, float, int, str
 from dataclasses import dataclass, field
-from typing import List
+from enum import Enum
+from typing import List, TypeVar
 
 
 @dataclass
@@ -101,7 +102,35 @@ class Matrix4:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
+PortType = TypeVar(
+    "PortType",
+    Matrix3,
+    Matrix4,
+    Vector2,
+    Vector3,
+    Quaternion,
+    bool,
+    float,
+    int,
+    str,
+)
+
+
+class PortTypes(Enum):
+    Matrix3 = Matrix3
+    Matrix4 = Matrix4
+    Vector2 = Vector2
+    Vector3 = Vector3
+    Quaternion = Quaternion
+    bool = bool
+    float = float
+    int = int
+    str = str
+
+
 __all__ = [
+    "PortType",
+    "PortTypes",
     "Matrix3",
     "Matrix4",
     "Vector2",

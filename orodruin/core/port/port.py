@@ -10,6 +10,8 @@ from uuid import UUID, uuid4
 from orodruin.core.graph import Graph
 from orodruin.core.signal import Signal
 
+from .types import PortType
+
 if TYPE_CHECKING:
     from ..node import Node  # pylint: disable = cyclic-import
     from ..state import State
@@ -22,9 +24,6 @@ class PortDirection(Enum):
 
     input = "input"
     output = "output"
-
-
-PortType = TypeVar("PortType")  # pylint: disable = invalid-name
 
 
 @dataclass
@@ -107,8 +106,8 @@ class Port(Generic[PortType]):
             SetConnectedPortError: when called and the port is connected.
         """
         try:
-            self._type(value)  # type: ignore[call-arg]
-        except TypeError as error:
+            self._type(value)  # type: ignore[arg-type]
+        except Exception as error:
             raise TypeError(
                 f"Cannot set Port {self._name}[{self._type.__name__}] to a value "
                 f"of {value}."
