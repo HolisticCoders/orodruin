@@ -27,15 +27,15 @@ class Connection:
 
     def graph(self) -> Graph:
         """Return the graph this connection exists in."""
-        return self._state.graph_from_graphlike(self._graph_id)
+        return self._state.get_graph(self._graph_id)
 
     def source(self) -> Port:
         """Return the source port of this connection."""
-        return self._state.port_from_portlike(self._source_id)
+        return self._state.get_port(self._source_id)
 
     def target(self) -> Port:
         """Return the target port of this connection."""
-        return self._state.port_from_portlike(self._target_id)
+        return self._state.get_port(self._target_id)
 
 
 ConnectionLike = Union[Connection, UUID]

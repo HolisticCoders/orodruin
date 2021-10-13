@@ -24,9 +24,9 @@ class DisconnectPorts(Command):
     _deleted_connection: Optional[Connection] = field(init=False, default=None)
 
     def __post_init__(self) -> None:
-        self._source = self.state.port_from_portlike(self.source)
-        self._target = self.state.port_from_portlike(self.target)
-        self._graph = self.state.graph_from_graphlike(self.graph)
+        self._source = self.state.get_port(self.source)
+        self._target = self.state.get_port(self.target)
+        self._graph = self.state.get_graph(self.graph)
 
     def do(self) -> None:
         """Disconnect the source port from the target port."""

@@ -26,7 +26,7 @@ class CreatePort(Command):
     _parent_port: Optional[Port] = field(init=False, default=None)
 
     def __post_init__(self) -> None:
-        self._node = self.state.node_from_nodelike(self.node)
+        self._node = self.state.get_node(self.node)
         parent_graph = self._node.parent_graph()
 
         if not parent_graph:
@@ -35,7 +35,7 @@ class CreatePort(Command):
         self._graph = parent_graph
 
         if self.parent_port:
-            self._parent_port = self.state.port_from_portlike(self.parent_port)
+            self._parent_port = self.state.get_port(self.parent_port)
         else:
             self._parent_port = None
 

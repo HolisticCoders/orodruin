@@ -60,11 +60,11 @@ class Port(Generic[PortType]):
 
     def graph(self) -> Graph:
         """Return the graph that this port exists in."""
-        return self._state.graph_from_graphlike(self._graph_id)
+        return self._state.get_graph(self._graph_id)
 
     def node(self) -> Node:
         """The Node this Port is attached on."""
-        return self._state.node_from_nodelike(self._node_id)
+        return self._state.get_node(self._node_id)
 
     def uuid(self) -> UUID:
         """UUID of this port."""
@@ -118,7 +118,7 @@ class Port(Generic[PortType]):
     def parent_port(self) -> Optional[Port]:
         """Parent port of the port."""
         if self._parent_port_id:
-            return self._state.port_from_portlike(self._parent_port_id)
+            return self._state.get_port(self._parent_port_id)
         return None
 
     def set_parent_port(self, port: Port) -> None:
@@ -127,7 +127,7 @@ class Port(Generic[PortType]):
 
     def child_ports(self) -> List[Port]:
         """Children of the port."""
-        return [self._state.port_from_portlike(port) for port in self._child_port_ids]
+        return [self._state.get_port(port) for port in self._child_port_ids]
 
     def add_child_port(self, port: Port) -> None:
         """Add a child port to the port."""

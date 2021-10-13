@@ -51,7 +51,7 @@ class State:
         "return the state's root graph"
         return self._root_graph
 
-    def graph_from_graphlike(self, graph: GraphLike) -> Graph:
+    def get_graph(self, graph: GraphLike) -> Graph:
         """Return a Graph from a GraphLike object.
 
         Raises:
@@ -69,7 +69,7 @@ class State:
 
         return graph
 
-    def node_from_nodelike(self, node: NodeLike) -> Node:
+    def get_node(self, node: NodeLike) -> Node:
         """Return a Node from a NodeLike object.
 
         Raises:
@@ -87,7 +87,7 @@ class State:
 
         return node
 
-    def port_from_portlike(self, port: PortLike) -> Port:
+    def get_port(self, port: PortLike) -> Port:
         """Return a Port from a PortLike object.
 
         Raises:
@@ -105,7 +105,7 @@ class State:
 
         return port
 
-    def connection_from_connectionlike(self, connection: ConnectionLike) -> Connection:
+    def get_connection(self, connection: ConnectionLike) -> Connection:
         """Return a Connection from a ConnectionLike object.
 
         Raises:
@@ -157,7 +157,7 @@ class State:
     def delete_graph(self, graph: GraphLike) -> None:
         """Delete a graph and unregister it from the state."""
 
-        graph = self.graph_from_graphlike(graph)
+        graph = self.get_graph(graph)
 
         del self._graphs[graph.uuid()]
 
@@ -198,7 +198,7 @@ class State:
     def delete_node(self, node: NodeLike) -> None:
         """Delete a node and unregister it from the state."""
 
-        node = self.node_from_nodelike(node)
+        node = self.get_node(node)
 
         del self._nodes[node.uuid()]
 
@@ -217,8 +217,8 @@ class State:
     ) -> Port[PortType]:
         """Create a port and register it to the state."""
 
-        node = self.node_from_nodelike(node)
-        graph = self.graph_from_graphlike(graph)
+        node = self.get_node(node)
+        graph = self.get_graph(graph)
 
         port = Port(
             self,
@@ -230,7 +230,7 @@ class State:
         )
 
         if parent_port is not None:
-            parent_port = self.port_from_portlike(parent_port)
+            parent_port = self.get_port(parent_port)
             port.set_parent_port(parent_port)
             parent_port.add_child_port(port)
 
@@ -245,7 +245,7 @@ class State:
     def delete_port(self, port: PortLike) -> None:
         """Delete a port and unregister it from the state."""
 
-        port = self.port_from_portlike(port)
+        port = self.get_port(port)
 
         del self._ports[port.uuid()]
 
@@ -261,9 +261,9 @@ class State:
     ) -> Connection:
         """Create a connection and register it to the state."""
 
-        graph = self.graph_from_graphlike(graph)
-        source = self.port_from_portlike(source)
-        target = self.port_from_portlike(target)
+        graph = self.get_graph(graph)
+        source = self.get_port(source)
+        target = self.get_port(target)
 
         connection = Connection(self, graph.uuid(), source.uuid(), target.uuid())
         self._connections[connection.uuid()] = connection
@@ -277,7 +277,7 @@ class State:
     def delete_connection(self, connection: ConnectionLike) -> None:
         """Delete a connection and unregister it from the state."""
 
-        connection = self.connection_from_connectionlike(connection)
+        connection = self.get_connection(connection)
 
         del self._connections[connection.uuid()]
 

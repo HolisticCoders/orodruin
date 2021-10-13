@@ -106,7 +106,7 @@ class Node:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._state.port_from_portlike(port_id)
+            port = self._state.get_port(port_id)
             ports.append(port)
 
         return ports
@@ -114,20 +114,20 @@ class Node:
     def parent_graph(self) -> Optional[Graph]:
         """Parent graph of the node."""
         if self._parent_graph_id:
-            return self._state.graph_from_graphlike(self._parent_graph_id)
+            return self._state.get_graph(self._parent_graph_id)
         return None
 
     def set_parent_graph(self, graph: Optional[GraphLike]) -> None:
         """Set the parent graph of the node."""
         if graph:
-            graph = self.state().graph_from_graphlike(graph)
+            graph = self.state().get_graph(graph)
             self._parent_graph_id = graph.uuid()
         else:
             self._parent_graph_id = None
 
     def graph(self) -> Graph:
         """Graph containing child nodes."""
-        return self._state.graph_from_graphlike(self._graph_id)
+        return self._state.get_graph(self._graph_id)
 
     def parent_node(self) -> Optional[Node]:
         """Parent node."""
@@ -146,7 +146,7 @@ class Node:
 
     def register_port(self, port: PortLike) -> None:
         """Register an existing port to this node."""
-        port = self._state.port_from_portlike(port)
+        port = self._state.get_port(port)
 
         self._port_ids.append(port.uuid())
 
@@ -156,7 +156,7 @@ class Node:
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this node."""
-        port = self._state.port_from_portlike(port)
+        port = self._state.get_port(port)
 
         self._port_ids.remove(port.uuid())
 

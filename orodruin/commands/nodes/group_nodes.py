@@ -32,8 +32,8 @@ class GroupNodes(Command):
     _created_ports: Dict[UUID, Port] = field(init=False, default_factory=dict)
 
     def __post_init__(self) -> None:
-        self._nodes = [self.state.node_from_nodelike(node) for node in self.nodes]
-        self._graph = self.state.graph_from_graphlike(self.graph)
+        self._nodes = [self.state.get_node(node) for node in self.nodes]
+        self._graph = self.state.get_graph(self.graph)
 
     def do(self) -> Node:
 
@@ -84,7 +84,7 @@ class GroupNodes(Command):
                             ).do()
 
         for source_id, connections in ingoing_connections.items():
-            source_port = self.state.port_from_portlike(source_id)
+            source_port = self.state.get_port(source_id)
             new_port = self._create_or_get_port(source_port, PortDirection.input)
             ConnectPorts(
                 self.state,

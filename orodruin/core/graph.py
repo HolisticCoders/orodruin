@@ -57,7 +57,7 @@ class Graph:
         nodes = []
 
         for node_id in self._node_ids:
-            node = self._state.node_from_nodelike(node_id)
+            node = self._state.get_node(node_id)
             nodes.append(node)
 
         return nodes
@@ -67,7 +67,7 @@ class Graph:
         ports = []
 
         for port_id in self._port_ids:
-            port = self._state.port_from_portlike(port_id)
+            port = self._state.get_port(port_id)
             ports.append(port)
 
         return ports
@@ -77,7 +77,7 @@ class Graph:
         connections = []
 
         for connection_id in self._connections_ids:
-            connection = self._state.connection_from_connectionlike(connection_id)
+            connection = self._state.get_connection(connection_id)
             connections.append(connection)
 
         return connections
@@ -85,12 +85,12 @@ class Graph:
     def parent_node(self) -> Optional[Node]:
         """Return this graph parent node."""
         if self._parent_node_id:
-            return self._state.node_from_nodelike(self._parent_node_id)
+            return self._state.get_node(self._parent_node_id)
         return None
 
     def register_node(self, node: NodeLike) -> None:
         """Register an existing node to this graph."""
-        node = self._state.node_from_nodelike(node)
+        node = self._state.get_node(node)
 
         self._node_ids.append(node.uuid())
         node.set_parent_graph(self.uuid())
@@ -105,7 +105,7 @@ class Graph:
 
     def unregister_node(self, node: NodeLike) -> None:
         """Remove a registered node from this graph."""
-        node = self._state.node_from_nodelike(node)
+        node = self._state.get_node(node)
 
         self._node_ids.remove(node.uuid())
         node.set_parent_graph(None)
@@ -120,7 +120,7 @@ class Graph:
 
     def register_port(self, port: PortLike) -> None:
         """Register an existing port to this graph."""
-        port = self._state.port_from_portlike(port)
+        port = self._state.get_port(port)
 
         self._port_ids.append(port.uuid())
 
@@ -130,7 +130,7 @@ class Graph:
 
     def unregister_port(self, port: PortLike) -> None:
         """Remove a registered port from this graph."""
-        port = self._state.port_from_portlike(port)
+        port = self._state.get_port(port)
 
         self._port_ids.remove(port.uuid())
 
@@ -140,7 +140,7 @@ class Graph:
 
     def register_connection(self, connection: ConnectionLike) -> None:
         """Register an existing connection to this graph."""
-        connection = self._state.connection_from_connectionlike(connection)
+        connection = self._state.get_connection(connection)
 
         self._connections_ids.append(connection.uuid())
 
@@ -154,7 +154,7 @@ class Graph:
 
     def unregister_connection(self, connection: ConnectionLike) -> None:
         """Remove a registered connection from this graph."""
-        connection = self._state.connection_from_connectionlike(connection)
+        connection = self._state.get_connection(connection)
 
         self._connections_ids.remove(connection.uuid())
 

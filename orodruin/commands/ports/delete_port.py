@@ -18,7 +18,7 @@ class DeletePort(Command):
     _node: Node = field(init=False)
 
     def __post_init__(self) -> None:
-        self._port = self.state.port_from_portlike(self.port)
+        self._port = self.state.get_port(self.port)
         self._graph = self._port.graph()
         self._node = self._port.node()
 

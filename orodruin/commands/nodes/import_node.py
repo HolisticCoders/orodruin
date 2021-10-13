@@ -41,7 +41,7 @@ class ImportNode(Command):
     _imported_node: Node = field(init=False)
 
     def __post_init__(self) -> None:
-        self._graph = self.state.graph_from_graphlike(self.graph)
+        self._graph = self.state.get_graph(self.graph)
 
     def do(self) -> Node:
         library = LibraryManager.find_library(self.library_name)

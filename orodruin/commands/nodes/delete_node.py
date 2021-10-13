@@ -19,7 +19,7 @@ class DeleteNode(Command):
     _graph: Graph = field(init=False)
 
     def __post_init__(self) -> None:
-        self._node = self.state.node_from_nodelike(self.node)
+        self._node = self.state.get_node(self.node)
         parent_graph = self._node.parent_graph()
 
         if not parent_graph:

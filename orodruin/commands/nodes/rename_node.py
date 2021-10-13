@@ -22,7 +22,7 @@ class RenameNode(Command):
     _new_name: str = field(init=False)
 
     def __post_init__(self) -> None:
-        self._node = self.state.node_from_nodelike(self.node)
+        self._node = self.state.get_node(self.node)
 
     def do(self) -> str:
         self._old_name = self._node.name()

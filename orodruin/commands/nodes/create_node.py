@@ -25,7 +25,7 @@ class CreateNode(Command):
 
     def __post_init__(self) -> None:
         if self.graph:
-            self._graph = self.state.graph_from_graphlike(self.graph)
+            self._graph = self.state.get_graph(self.graph)
         else:
             self._graph = self.state.root_graph()
 
