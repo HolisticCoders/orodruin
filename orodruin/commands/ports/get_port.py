@@ -1,21 +1,18 @@
 """Get Port command."""
 from dataclasses import dataclass
-from typing import TypeVar
 
-from orodruin.core import Port
+from orodruin.core import Port, PortType
 
 from ..command import Command
 
-T = TypeVar("T")
-
 
 @dataclass
-class GetPort(Command[T]):
+class GetPort(Command[PortType]):
     """Get Port command."""
 
-    port: Port[T]
+    port: Port[PortType]
 
-    def do(self) -> T:
+    def do(self) -> PortType:
         return self.port.get()
 
     def undo(self) -> None:

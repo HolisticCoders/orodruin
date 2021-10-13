@@ -1,22 +1,19 @@
 """Set Port command."""
 from dataclasses import dataclass, field
-from typing import TypeVar
 
-from orodruin.core import Port
+from orodruin.core import Port, PortType
 
 from ..command import Command
 
-T = TypeVar("T")
-
 
 @dataclass
-class SetPort(Command[T]):
+class SetPort(Command[PortType]):
     """Set Port command."""
 
-    port: Port[T]
-    value: T
+    port: Port[PortType]
+    value: PortType
 
-    _previous_value: T = field(init=False)
+    _previous_value: PortType = field(init=False)
 
     def do(self) -> None:
         self._previous_value = self.port.get()
