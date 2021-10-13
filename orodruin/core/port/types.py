@@ -117,6 +117,8 @@ PortType = TypeVar(
 
 
 class PortTypes(Enum):
+    """Enum registering all the possible orodruin types."""
+
     Matrix3 = Matrix3
     Matrix4 = Matrix4
     Vector2 = Vector2

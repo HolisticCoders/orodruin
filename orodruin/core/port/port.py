@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Generic, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Generic, List, Optional, Type, Union
 from uuid import UUID, uuid4
 
 from orodruin.core.graph import Graph
