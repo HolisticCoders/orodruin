@@ -35,14 +35,14 @@ class State:
     _connections: Dict[UUID, Connection] = field(init=False, default_factory=dict)
 
     # Signals
-    graph_created: Signal[Graph] = field(default_factory=Signal)
-    graph_deleted: Signal[UUID] = field(default_factory=Signal)
-    node_created: Signal[Node] = field(default_factory=Signal)
-    node_deleted: Signal[UUID] = field(default_factory=Signal)
-    port_created: Signal[Port] = field(default_factory=Signal)
-    port_deleted: Signal[UUID] = field(default_factory=Signal)
-    connection_created: Signal[Connection] = field(default_factory=Signal)
-    connection_deleted: Signal[UUID] = field(default_factory=Signal)
+    graph_created: Signal[Graph] = field(init=False, default_factory=Signal)
+    graph_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
+    node_created: Signal[Node] = field(init=False, default_factory=Signal)
+    node_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
+    port_created: Signal[Port] = field(init=False, default_factory=Signal)
+    port_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
+    connection_created: Signal[Connection] = field(init=False, default_factory=Signal)
+    connection_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
 
     def __post_init__(self) -> None:
         self._root_graph = self.create_graph()

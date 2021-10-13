@@ -49,7 +49,7 @@ class Port(Generic[PortType]):
 
     _uuid: UUID = field(default_factory=uuid4)
 
-    name_changed: Signal[str] = field(default_factory=Signal)
+    name_changed: Signal[str] = field(init=False, default_factory=Signal)
 
     def __post_init__(self) -> None:
         self._value = self._type()

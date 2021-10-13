@@ -33,12 +33,16 @@ class Graph:
     _connections_ids: List[UUID] = field(default_factory=list)
 
     # Signals
-    node_registered: Signal[Node] = field(default_factory=Signal)
-    node_unregistered: Signal[Node] = field(default_factory=Signal)
-    port_registered: Signal[Port] = field(default_factory=Signal)
-    port_unregistered: Signal[Port] = field(default_factory=Signal)
-    connection_registered: Signal[Connection] = field(default_factory=Signal)
-    connection_unregistered: Signal[Connection] = field(default_factory=Signal)
+    node_registered: Signal[Node] = field(init=False, default_factory=Signal)
+    node_unregistered: Signal[Node] = field(init=False, default_factory=Signal)
+    port_registered: Signal[Port] = field(init=False, default_factory=Signal)
+    port_unregistered: Signal[Port] = field(init=False, default_factory=Signal)
+    connection_registered: Signal[Connection] = field(
+        init=False, default_factory=Signal
+    )
+    connection_unregistered: Signal[Connection] = field(
+        init=False, default_factory=Signal
+    )
 
     def state(self) -> State:
         """Return the state that owns this graph."""

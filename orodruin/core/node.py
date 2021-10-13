@@ -39,9 +39,9 @@ class Node:
     _port_ids: List[UUID] = field(default_factory=list)
 
     # Signals
-    name_changed: Signal[str] = field(default_factory=Signal)
-    port_registered: Signal[Port] = field(default_factory=Signal)
-    port_unregistered: Signal[Port] = field(default_factory=Signal)
+    name_changed: Signal[str] = field(init=False, default_factory=Signal)
+    port_registered: Signal[Port] = field(init=False, default_factory=Signal)
+    port_unregistered: Signal[Port] = field(init=False, default_factory=Signal)
 
     def post_node_created(self) -> None:
         """Method called after the state has created and registered the node."""
