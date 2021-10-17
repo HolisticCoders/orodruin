@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Optional, Union
 from uuid import UUID, uuid4
+
+import attr
 
 from .signal import Signal
 
@@ -16,33 +17,29 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@attr.s
 class Graph:
     """Orodruin's Graph Class.
 
     A graph organizes nodes, ports, and connections between them.
     """
 
-    _state: State
-    _parent_node_id: Optional[UUID] = None
+    _state: State = attr.ib()
+    _parent_node_id: Optional[UUID] = attr.ib(default=None)
 
-    _uuid: UUID = field(default_factory=uuid4)
+    _uuid: UUID = attr.ib(init=False, factory=uuid4)
 
-    _node_ids: List[UUID] = field(default_factory=list)
-    _port_ids: List[UUID] = field(default_factory=list)
-    _connections_ids: List[UUID] = field(default_factory=list)
+    _node_ids: List[UUID] = attr.ib(init=False, factory=list)
+    _port_ids: List[UUID] = attr.ib(init=False, factory=list)
+    _connections_ids: List[UUID] = attr.ib(init=False, factory=list)
 
     # Signals
-    node_registered: Signal[Node] = field(init=False, default_factory=Signal)
-    node_unregistered: Signal[Node] = field(init=False, default_factory=Signal)
-    port_registered: Signal[Port] = field(init=False, default_factory=Signal)
-    port_unregistered: Signal[Port] = field(init=False, default_factory=Signal)
-    connection_registered: Signal[Connection] = field(
-        init=False, default_factory=Signal
-    )
-    connection_unregistered: Signal[Connection] = field(
-        init=False, default_factory=Signal
-    )
+    node_registered: Signal[Node] = attr.ib(init=False, factory=Signal)
+    node_unregistered: Signal[Node] = attr.ib(init=False, factory=Signal)
+    port_registered: Signal[Port] = attr.ib(init=False, factory=Signal)
+    port_unregistered: Signal[Port] = attr.ib(init=False, factory=Signal)
+    connection_registered: Signal[Connection] = attr.ib(init=False, factory=Signal)
+    connection_unregistered: Signal[Connection] = attr.ib(init=False, factory=Signal)
 
     def state(self) -> State:
         """Return the state that owns this graph."""

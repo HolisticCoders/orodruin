@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Union
 from uuid import UUID, uuid4
+
+import attr
 
 if TYPE_CHECKING:
     from .graph import Graph
@@ -10,16 +11,16 @@ if TYPE_CHECKING:
     from .state import State
 
 
-@dataclass
+@attr.s
 class Connection:
     """Orodruin's port Connection Class."""
 
-    _state: State
-    _graph_id: UUID
-    _source_id: UUID
-    _target_id: UUID
+    _state: State = attr.ib()
+    _graph_id: UUID = attr.ib()
+    _source_id: UUID = attr.ib()
+    _target_id: UUID = attr.ib()
 
-    _uuid: UUID = field(default_factory=uuid4)
+    _uuid: UUID = attr.ib(factory=uuid4)
 
     def uuid(self) -> UUID:
         """UUID of this connection."""

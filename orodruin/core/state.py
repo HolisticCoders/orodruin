@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Type
 from uuid import UUID
+
+import attr
 
 from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
@@ -17,7 +18,7 @@ from .port import Port, PortLike, PortType
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@attr.s
 class State:
     """Orodruin's State class.
 
@@ -27,24 +28,24 @@ class State:
     with the State.object_from_objectlike methods.
     """
 
-    _root_graph: Graph = field(init=False)
+    _root_graph: Graph = attr.ib(init=False)
 
-    _graphs: Dict[UUID, Graph] = field(init=False, default_factory=dict)
-    _nodes: Dict[UUID, Node] = field(init=False, default_factory=dict)
-    _ports: Dict[UUID, Port] = field(init=False, default_factory=dict)
-    _connections: Dict[UUID, Connection] = field(init=False, default_factory=dict)
+    _graphs: Dict[UUID, Graph] = attr.ib(init=False, factory=dict)
+    _nodes: Dict[UUID, Node] = attr.ib(init=False, factory=dict)
+    _ports: Dict[UUID, Port] = attr.ib(init=False, factory=dict)
+    _connections: Dict[UUID, Connection] = attr.ib(init=False, factory=dict)
 
     # Signals
-    graph_created: Signal[Graph] = field(init=False, default_factory=Signal)
-    graph_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
-    node_created: Signal[Node] = field(init=False, default_factory=Signal)
-    node_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
-    port_created: Signal[Port] = field(init=False, default_factory=Signal)
-    port_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
-    connection_created: Signal[Connection] = field(init=False, default_factory=Signal)
-    connection_deleted: Signal[UUID] = field(init=False, default_factory=Signal)
+    graph_created: Signal[Graph] = attr.ib(init=False, factory=Signal)
+    graph_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    node_created: Signal[Node] = attr.ib(init=False, factory=Signal)
+    node_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    port_created: Signal[Port] = attr.ib(init=False, factory=Signal)
+    port_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    connection_created: Signal[Connection] = attr.ib(init=False, factory=Signal)
+    connection_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> Graph:
         self._root_graph = self.create_graph()
 
     def root_graph(self) -> Graph:
@@ -177,10 +178,10 @@ class State:
             parent_graph_id = self.root_graph().uuid()
 
         node = Node(
-            _state=self,
-            _parent_graph_id=parent_graph_id,
-            _name=name,
-            _library=library,
+            state=self,
+            name=name,
+            library=library,
+            parent_graph_id=parent_graph_id,
         )
         if node_type:
             node.set_type(node_type)

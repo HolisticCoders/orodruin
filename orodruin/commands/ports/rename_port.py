@@ -1,5 +1,5 @@
 """Rename Node command."""
-from dataclasses import dataclass, field
+import attr
 
 from orodruin.core.port.port import Port, PortLike
 from orodruin.core.state import State
@@ -8,19 +8,19 @@ from orodruin.core.utils import get_unique_port_name
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class RenamePort(Command):
     """Rename Node command."""
 
-    state: State
-    port: PortLike
-    name: str
+    state: State = attr.ib()
+    port: PortLike = attr.ib()
+    name: str = attr.ib()
 
-    _port: Port = field(init=False)
-    _old_name: str = field(init=False)
-    _new_name: str = field(init=False)
+    _port: Port = attr.ib(init=False)
+    _old_name: str = attr.ib(init=False)
+    _new_name: str = attr.ib(init=False)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._port = self.state.get_port(self.port)
 
     def do(self) -> str:

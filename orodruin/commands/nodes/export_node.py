@@ -1,8 +1,9 @@
 """Export Node command"""
 import json
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+import attr
 
 from orodruin.core import LibraryManager, Node, Port
 from orodruin.exceptions import LibraryDoesNotExistError
@@ -21,16 +22,16 @@ class OrodruinEncoder(json.JSONEncoder):
             return super().default(o)
 
 
-@dataclass
+@attr.s
 class ExportNode(Command):
     """Export Node command"""
 
-    node: Node
-    library_name: str
-    target_name: str = "orodruin"
-    node_name: Optional[str] = None
+    node: Node = attr.ib()
+    library_name: str = attr.ib()
+    target_name: str = attr.ib(default="orodruin")
+    node_name: Optional[str] = attr.ib(default=None)
 
-    _exported_path: Path = field(init=False)
+    _exported_path: Path = attr.ib(init=False)
 
     def do(self) -> Path:
         library = LibraryManager.find_library(self.library_name)

@@ -10,18 +10,18 @@ All custom types should raise a TypeError if the provided value can't be casted
 from __future__ import annotations
 
 from builtins import bool, float, int, str
-from dataclasses import dataclass, field
+import attr
 from enum import Enum
 from typing import List, TypeVar
 
 
-@dataclass
+@attr.s
 class Vector2:
     """Vector2 representation class."""
 
-    value: List[float] = field(default_factory=lambda: [0.0, 0.0])
+    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0])
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if isinstance(self.value, Vector2):
             self.value = self.value.value  # pylint: disable = no-member
 
@@ -29,13 +29,13 @@ class Vector2:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
-@dataclass
+@attr.s
 class Vector3:
     """Vector3 representation class."""
 
-    value: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0, 0.0])
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if isinstance(self.value, Vector3):
             self.value = self.value.value  # pylint: disable = no-member
 
@@ -43,13 +43,13 @@ class Vector3:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
-@dataclass
+@attr.s
 class Quaternion:
     """Quaternion representation class."""
 
-    value: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 1.0])
+    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0, 0.0, 1.0])
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if isinstance(self.value, Quaternion):
             self.value = self.value.value  # pylint: disable = no-member
 
@@ -57,13 +57,13 @@ class Quaternion:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
-@dataclass
+@attr.s
 class Matrix3:
     """Matrix representation class."""
 
-    value: List[float] = field(
+    value: List[float] = attr.ib(
         # fmt: off
-        default_factory=lambda: [
+        factory=lambda: [
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0,
@@ -71,7 +71,7 @@ class Matrix3:
         # fmt: on
     )
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if isinstance(self.value, Matrix3):
             self.value = self.value.value  # pylint: disable = no-member
 
@@ -79,13 +79,13 @@ class Matrix3:
             raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
 
 
-@dataclass
+@attr.s
 class Matrix4:
     """Matrix representation class."""
 
-    value: List[float] = field(
+    value: List[float] = attr.ib(
         # fmt: off
-        default_factory=lambda: [
+        factory=lambda: [
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
@@ -94,7 +94,7 @@ class Matrix4:
         # fmt: on
     )
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if isinstance(self.value, Matrix4):
             self.value = self.value.value  # pylint: disable = no-member
 

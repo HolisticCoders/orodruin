@@ -1,14 +1,14 @@
-from dataclasses import dataclass, field
+import attr
 from typing import Callable, Generic, List, TypeVar
 
 T = TypeVar("T")  # pylint: disable = invalid-name
 
 
-@dataclass
+@attr.s
 class Signal(Generic[T]):
     """Signal class used to notify clients of orodruin's state updates."""
 
-    _callbacks: List[Callable] = field(default_factory=list)
+    _callbacks: List[Callable] = attr.ib(factory=list)
 
     def subscribe(self, callback: Callable[[T], None]) -> None:
         """Add a new callback to be called when the signal is emited."""
