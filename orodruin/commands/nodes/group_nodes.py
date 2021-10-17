@@ -49,6 +49,7 @@ class GroupNodes(Command):
             for port in node.ports():
                 self._graph.unregister_port(port.uuid())
                 self._created_node.graph().register_port(port)
+                port.set_graph(self._created_node.graph())
 
                 for connection in list_connections(self._graph, port):
                     if (

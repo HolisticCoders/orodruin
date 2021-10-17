@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 
 import attr
 
-from orodruin.core.graph import Graph
+from orodruin.core.graph import Graph, GraphLike
 from orodruin.core.signal import Signal
 
 from .types import PortType
@@ -63,6 +63,10 @@ class Port(Generic[PortType]):
     def graph(self) -> Graph:
         """Return the graph that this port exists in."""
         return self._state.get_graph(self._graph_id)
+
+    def set_graph(self, graph: GraphLike) -> None:
+        graph = self.state().get_graph(graph)
+        self._graph_id = graph.uuid()
 
     def node(self) -> Node:
         """The Node this Port is attached on."""
