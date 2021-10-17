@@ -45,7 +45,7 @@ class State:
     connection_created: Signal[Connection] = attr.ib(init=False, factory=Signal)
     connection_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
 
-    def __attrs_post_init__(self) -> Graph:
+    def __attrs_post_init__(self) -> None:
         self._root_graph = self.create_graph()
 
     def root_graph(self) -> Graph:
