@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from orodruin.commands import CreateNode, DeleteNode, RenameNode
+from orodruin.commands import CreateNode, DeleteNode, GroupNodes, RenameNode
 from orodruin.core import State
 from orodruin.core.library import Library
 
@@ -97,3 +97,13 @@ def test_rename_node_same_name(state: State) -> None:
     command.redo()
 
     assert node.name() == node_name
+
+
+def test_group_nodes(state: State) -> None:
+    node1 = CreateNode(state, "Node1").do()
+    node2 = CreateNode(state, "Node2").do()
+
+    group_node = GroupNodes(state, state.root_graph(), [node1, node2]).do()
+
+    assert len(state.root_graph().nodes()) == 1
+    assert len(group_node.graph().nodes()) == 2

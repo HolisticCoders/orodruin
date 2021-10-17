@@ -1,6 +1,15 @@
 # pylint: disable = missing-module-docstring, missing-function-docstring
 
-from orodruin.commands import CreateNode, CreatePort, DeletePort
+from attr import asdict
+
+from orodruin.commands import (
+    CreateNode,
+    CreatePort,
+    DeletePort,
+    GetPort,
+    RenamePort,
+    SetPort,
+)
 from orodruin.core import PortDirection
 from orodruin.core.state import State
 
@@ -75,3 +84,37 @@ def test_delete_port_do_undo_redo(state: State) -> None:
     # assert not state.ports()
     # assert not state.root_graph().ports()
     # assert not node.ports()
+
+
+def test_get_port_do_undo_redo(state: State) -> None:
+    node = CreateNode(state, "my_node").do()
+
+    port = CreatePort(state, node, "my_port", PortDirection.input, int).do()
+
+    assert GetPort(port).do() == 0
+
+
+def test_set_port_do_undo_redo(state: State) -> None:
+    node = CreateNode(state, "my_node").do()
+
+    port = CreatePort(state, node, "my_port", PortDirection.input, int).do()
+
+    assert GetPort(port).do() == 0
+
+    SetPort(port, 42).do()
+
+    assert GetPort(port).do() == 42
+
+
+def test_rename_port_do_undo_redo(state: State) -> None:
+    node = CreateNode(state, "my_node").do()
+
+    port_name = "my_port"
+    port = CreatePort(state, node, port_name, PortDirection.input, int).do()
+
+    assert port.name() == port_name
+
+    new_name = "new_port_name"
+    RenamePort(state, port, new_name).do()
+
+    assert port.name() == new_name

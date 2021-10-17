@@ -1,14 +1,15 @@
 """Orodruin Library Management."""
 
 import os
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
+
+import attr
 
 from orodruin.exceptions import NoRegisteredLibraryError, TargetDoesNotExistError
 
 
-@dataclass
+@attr.s
 class Library:
     """Orodruin Library Class.
 
@@ -19,7 +20,7 @@ class Library:
     Any DCC Specific Node should be defined in the appropriate target folder.
     """
 
-    _path: Path
+    _path: Path = attr.ib()
 
     def name(self) -> str:
         """Name of the Library."""

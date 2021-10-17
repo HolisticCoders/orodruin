@@ -1,6 +1,7 @@
 """Create Node command."""
-from dataclasses import dataclass, field
 from typing import Optional
+
+import attr
 
 from orodruin.core import Graph, Library, Node
 from orodruin.core.graph import GraphLike
@@ -10,20 +11,20 @@ from orodruin.core.utils import get_unique_node_name
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class CreateNode(Command):
     """Create Node command."""
 
-    state: State
-    name: str
-    type: Optional[str] = None
-    library: Optional[Library] = None
-    graph: Optional[GraphLike] = None
+    state: State = attr.ib()
+    name: str = attr.ib()
+    type: Optional[str] = attr.ib(default=None)
+    library: Optional[Library] = attr.ib(default=None)
+    graph: Optional[GraphLike] = attr.ib(default=None)
 
-    _graph: Graph = field(init=False)
-    _created_node: Node = field(init=False)
+    _graph: Graph = attr.ib(init=False)
+    _created_node: Node = attr.ib(init=False)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         if self.graph:
             self._graph = self.state.get_graph(self.graph)
         else:

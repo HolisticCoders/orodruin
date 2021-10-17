@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, List, Optional, Union
 from uuid import UUID, uuid4
+
+import attr
 
 from .graph import Graph, GraphLike
 from .signal import Signal
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@attr.s
 class Node:
     """Orodruin's Node Class.
 
@@ -26,22 +27,21 @@ class Node:
     and can contain other Nodes as a subgraph
     """
 
-    _state: State
-    _parent_graph_id: Optional[UUID]
+    _state: State = attr.ib()
+    _name: str = attr.ib()
+    _type: str = attr.ib(factory=lambda: str(uuid4()))
+    _library: Optional[Library] = attr.ib(default=None)
+    _parent_graph_id: Optional[UUID] = attr.ib(default=None)
 
-    _name: str
-    _type: str = field(default_factory=lambda: str(uuid4()))
-    _library: Optional[Library] = None
+    _uuid: UUID = attr.ib(init=False, factory=uuid4)
 
-    _uuid: UUID = field(default_factory=uuid4)
-
-    _graph_id: UUID = field(init=False)
-    _port_ids: List[UUID] = field(default_factory=list)
+    _graph_id: UUID = attr.ib(init=False)
+    _port_ids: List[UUID] = attr.ib(factory=list)
 
     # Signals
-    name_changed: Signal[str] = field(init=False, default_factory=Signal)
-    port_registered: Signal[Port] = field(init=False, default_factory=Signal)
-    port_unregistered: Signal[Port] = field(init=False, default_factory=Signal)
+    name_changed: Signal[str] = attr.ib(init=False, factory=Signal)
+    port_registered: Signal[Port] = attr.ib(init=False, factory=Signal)
+    port_unregistered: Signal[Port] = attr.ib(init=False, factory=Signal)
 
     def post_node_created(self) -> None:
         """Method called after the state has created and registered the node."""

@@ -1,16 +1,16 @@
 """Get Port command."""
-from dataclasses import dataclass
+import attr
 
 from orodruin.core import Port, PortType
 
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class GetPort(Command[PortType]):
     """Get Port command."""
 
-    port: Port[PortType]
+    port: Port[PortType] = attr.ib()
 
     def do(self) -> PortType:
         return self.port.get()

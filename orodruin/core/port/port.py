@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Generic, List, Optional, Type, Union
 from uuid import UUID, uuid4
 
-from orodruin.core.graph import Graph
+import attr
+
+from orodruin.core.graph import Graph, GraphLike
 from orodruin.core.signal import Signal
 
 from .types import PortType
@@ -26,7 +27,7 @@ class PortDirection(Enum):
     output = "output"
 
 
-@dataclass
+@attr.s
 class Port(Generic[PortType]):
     """Orodruin's Port class
 
@@ -34,25 +35,26 @@ class Port(Generic[PortType]):
     It can be connected to other Ports and hold a value
     """
 
-    _state: State
-    _graph_id: UUID
-    _node_id: UUID
+    _state: State = attr.ib()
+    _graph_id: UUID = attr.ib()
+    _node_id: UUID = attr.ib()
 
-    _name: str
-    _direction: PortDirection
-    _type: Type[PortType]
+    _name: str = attr.ib()
+    _direction: PortDirection = attr.ib()
+    _type: Type[PortType] = attr.ib()
 
-    _value: PortType = field(init=False)
+    _value: PortType = attr.ib(init=False)
 
-    _parent_port_id: Optional[UUID] = field(init=False, default=None)
-    _child_port_ids: List[UUID] = field(init=False, default_factory=list)
+    _parent_port_id: Optional[UUID] = attr.ib(init=False, default=None)
+    _child_port_ids: List[UUID] = attr.ib(init=False, factory=list)
 
-    _uuid: UUID = field(default_factory=uuid4)
+    _uuid: UUID = attr.ib(factory=uuid4)
 
-    name_changed: Signal[str] = field(init=False, default_factory=Signal)
+    name_changed: Signal[str] = attr.ib(init=False, factory=Signal)
 
-    def __post_init__(self) -> None:
-        self._value = self._type()
+    @_value.default
+    def _instantiate_type(self) -> PortType:
+        return self._type()
 
     def state(self) -> State:
         """Return the state that owns this port."""
@@ -61,6 +63,11 @@ class Port(Generic[PortType]):
     def graph(self) -> Graph:
         """Return the graph that this port exists in."""
         return self._state.get_graph(self._graph_id)
+
+    def set_graph(self, graph: GraphLike) -> None:
+        """Set the graph that this port exists in."""
+        graph = self.state().get_graph(graph)
+        self._graph_id = graph.uuid()
 
     def node(self) -> Node:
         """The Node this Port is attached on."""

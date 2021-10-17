@@ -1,5 +1,5 @@
 """Rename Node command."""
-from dataclasses import dataclass, field
+import attr
 
 from orodruin.core import Node
 from orodruin.core.node import NodeLike
@@ -9,19 +9,19 @@ from orodruin.core.utils import get_unique_node_name
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class RenameNode(Command):
     """Rename Node command."""
 
-    state: State
-    node: NodeLike
-    name: str
+    state: State = attr.ib()
+    node: NodeLike = attr.ib()
+    name: str = attr.ib()
 
-    _node: Node = field(init=False)
-    _old_name: str = field(init=False)
-    _new_name: str = field(init=False)
+    _node: Node = attr.ib(init=False)
+    _old_name: str = attr.ib(init=False)
+    _new_name: str = attr.ib(init=False)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._node = self.state.get_node(self.node)
 
     def do(self) -> str:

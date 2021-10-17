@@ -1,8 +1,9 @@
 """Import Node command."""
 import json
-from dataclasses import dataclass, field
 from os import PathLike
 from typing import Any, Dict, List, Optional, Tuple
+
+import attr
 
 from orodruin.core import (
     Graph,
@@ -27,20 +28,20 @@ from ..ports import ConnectPorts, CreatePort, SetPort
 from .create_node import CreateNode
 
 
-@dataclass
+@attr.s
 class ImportNode(Command):
     """Import Node command."""
 
-    state: State
-    graph: GraphLike
-    node_name: str
-    library_name: str
-    target_name: str = "orodruin"
+    state: State = attr.ib()
+    graph: GraphLike = attr.ib()
+    node_name: str = attr.ib()
+    library_name: str = attr.ib()
+    target_name: str = attr.ib(default="orodruin")
 
-    _graph: Graph = field(init=False)
-    _imported_node: Node = field(init=False)
+    _graph: Graph = attr.ib(init=False)
+    _imported_node: Node = attr.ib(init=False)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._graph = self.state.get_graph(self.graph)
 
     def do(self) -> Node:

@@ -1,7 +1,8 @@
 """Create Node command."""
-from dataclasses import dataclass, field
 from typing import Dict, List
 from uuid import UUID
+
+import attr
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
 from orodruin.core import Graph, Node
@@ -17,21 +18,21 @@ from ..ports import ConnectPorts, CreatePort
 from .create_node import CreateNode
 
 
-@dataclass
+@attr.s
 class GroupNodes(Command):
     """Create Node command."""
 
-    state: State
-    graph: GraphLike
-    nodes: List[NodeLike]
+    state: State = attr.ib()
+    graph: GraphLike = attr.ib()
+    nodes: List[NodeLike] = attr.ib()
 
-    _nodes: List[Node] = field(init=False)
-    _graph: Graph = field(init=False)
-    _created_node: Node = field(init=False)
+    _nodes: List[Node] = attr.ib(init=False)
+    _graph: Graph = attr.ib(init=False)
+    _created_node: Node = attr.ib(init=False)
 
-    _created_ports: Dict[UUID, Port] = field(init=False, default_factory=dict)
+    _created_ports: Dict[UUID, Port] = attr.ib(init=False, factory=dict)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._nodes = [self.state.get_node(node) for node in self.nodes]
         self._graph = self.state.get_graph(self.graph)
 
@@ -48,6 +49,7 @@ class GroupNodes(Command):
             for port in node.ports():
                 self._graph.unregister_port(port.uuid())
                 self._created_node.graph().register_port(port)
+                port.set_graph(self._created_node.graph())
 
                 for connection in list_connections(self._graph, port):
                     if (

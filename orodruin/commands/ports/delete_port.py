@@ -1,23 +1,23 @@
 """Delete Port command."""
-from dataclasses import dataclass, field
+import attr
 
 from orodruin.core import Graph, Node, Port, PortLike, State
 
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class DeletePort(Command):
     """Delete Port command."""
 
-    state: State
-    port: PortLike
+    state: State = attr.ib()
+    port: PortLike = attr.ib()
 
-    _port: Port = field(init=False)
-    _graph: Graph = field(init=False)
-    _node: Node = field(init=False)
+    _port: Port = attr.ib(init=False)
+    _graph: Graph = attr.ib(init=False)
+    _node: Node = attr.ib(init=False)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._port = self.state.get_port(self.port)
         self._graph = self._port.graph()
         self._node = self._port.node()

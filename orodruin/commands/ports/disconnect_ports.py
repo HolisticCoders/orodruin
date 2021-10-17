@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
 from typing import Optional
+
+import attr
 
 from orodruin.core import Connection, Port, State
 from orodruin.core.graph import Graph, GraphLike
@@ -9,21 +10,21 @@ from orodruin.core.utils import find_connection
 from ..command import Command
 
 
-@dataclass
+@attr.s
 class DisconnectPorts(Command):
     """Connect two ports of the same graph."""
 
-    state: State
-    graph: GraphLike
-    source: PortLike
-    target: PortLike
+    state: State = attr.ib()
+    graph: GraphLike = attr.ib()
+    source: PortLike = attr.ib()
+    target: PortLike = attr.ib()
 
-    _source: Port = field(init=False)
-    _target: Port = field(init=False)
-    _graph: Graph = field(init=False)
-    _deleted_connection: Optional[Connection] = field(init=False, default=None)
+    _source: Port = attr.ib(init=False)
+    _target: Port = attr.ib(init=False)
+    _graph: Graph = attr.ib(init=False)
+    _deleted_connection: Optional[Connection] = attr.ib(init=False, default=None)
 
-    def __post_init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
         self._source = self.state.get_port(self.source)
         self._target = self.state.get_port(self.target)
         self._graph = self.state.get_graph(self.graph)
