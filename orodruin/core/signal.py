@@ -1,5 +1,6 @@
-import attr
 from typing import Callable, Generic, List, TypeVar
+
+import attr
 
 T = TypeVar("T")  # pylint: disable = invalid-name
 

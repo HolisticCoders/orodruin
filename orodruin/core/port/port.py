@@ -65,6 +65,7 @@ class Port(Generic[PortType]):
         return self._state.get_graph(self._graph_id)
 
     def set_graph(self, graph: GraphLike) -> None:
+        """Set the graph that this port exists in."""
         graph = self.state().get_graph(graph)
         self._graph_id = graph.uuid()
 

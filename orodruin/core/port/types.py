@@ -10,9 +10,10 @@ All custom types should raise a TypeError if the provided value can't be casted
 from __future__ import annotations
 
 from builtins import bool, float, int, str
-import attr
 from enum import Enum
 from typing import List, TypeVar
+
+import attr
 
 
 @attr.s
