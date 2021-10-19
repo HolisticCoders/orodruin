@@ -84,15 +84,15 @@ def list_connections(graph: Graph, port: Port) -> List[Connection]:
     return connections
 
 
-def port_from_path(node: Node, port_path: str) -> Optional[Port]:
+def port_from_path(parent_node: Node, port_path: str) -> Optional[Port]:
     """Get a port from the given path, relative to the node."""
     if port_path.startswith("."):
-        port = node.port(port_path.strip("."))
+        port = parent_node.port(port_path.strip("."))
     else:
         node_name, port_name = port_path.split(".")
 
         sub_node = None
-        for _sub_node in node.graph().nodes():
+        for _sub_node in parent_node.graph().nodes():
             if node_name == _sub_node.name():
                 sub_node = _sub_node
                 break
