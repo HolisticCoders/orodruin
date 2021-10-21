@@ -15,7 +15,7 @@ class Serializer:
 
     _serializers: List[ExternalSerializer] = attr.ib(init=False, factory=list)
 
-    def register(self, serializer: ExternalSerializer):
+    def register(self, serializer: ExternalSerializer) -> None:
         self._serializers.append(serializer)
 
     def serialize(self, root: Node) -> Dict:

@@ -294,7 +294,7 @@ class State:
 
         self.connection_deleted.emit(connection.uuid())
 
-    def serializers(self) -> List[Serializer]:
+    def serializers(self) -> List[ExternalSerializer]:
         return self._serializers
 
     def deserializers(self) -> List[ExternalDeserializer]:
