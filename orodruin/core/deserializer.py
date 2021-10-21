@@ -1,12 +1,13 @@
 """Deserialize core objects."""
 from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import attr
 
-from orodruin.commands.ports import ConnectPorts, CreatePort
 from orodruin.commands.nodes import CreateNode
+from orodruin.commands.ports import ConnectPorts, CreatePort
 from orodruin.core import (
     Connection,
     Graph,
@@ -17,10 +18,7 @@ from orodruin.core import (
     PortTypes,
 )
 from orodruin.core.utils import port_from_path
-from orodruin.exceptions import (
-    LibraryDoesNotExistError,
-    PortDoesNotExistError,
-)
+from orodruin.exceptions import LibraryDoesNotExistError, PortDoesNotExistError
 
 if TYPE_CHECKING:
     from orodruin.core import State
@@ -33,7 +31,7 @@ class Deserializer:
     state: State = attr.ib()
     _deserializers: List[ExternalDeserializer] = attr.ib(init=False, factory=list)
 
-    def register(self, deserializer: ExternalDeserializer):
+    def register(self, deserializer: ExternalDeserializer) -> None:
         self._deserializers.append(deserializer)
 
     def deserialize(self, data: Dict[str, Any], graph: Graph) -> Node:
@@ -90,7 +88,9 @@ class Deserializer:
         name = data["name"]
         direction = PortDirection[data["direction"]]
         port_type = PortTypes[data["type"]].value
+        value = data["value"]
         port = CreatePort(self.state, node, name, direction, port_type, parent).do()
+        port.set(value)
 
         for deserializer in self._deserializers:
             deserializer.deserialize_port(data, port)
