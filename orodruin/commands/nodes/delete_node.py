@@ -1,11 +1,15 @@
 """Delete Node command."""
+from __future__ import annotations
 import attr
+from typing import TYPE_CHECKING
 
-from orodruin.core import Graph, Node, NodeLike, State
 from orodruin.core.utils import list_connections
 
 from ..command import Command
 from ..ports import DeletePort, DisconnectPorts
+
+if TYPE_CHECKING:
+    from orodruin.core import Graph, Node, NodeLike, State
 
 
 @attr.s

@@ -1,11 +1,8 @@
-from typing import List, Optional
+from __future__ import annotations
+from typing import List, Optional, TYPE_CHECKING
 
 import attr
 
-from orodruin.core import Connection, Graph, Port
-from orodruin.core.graph import GraphLike
-from orodruin.core.port.port import PortLike
-from orodruin.core.state import State
 from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
     ConnectionOnSameNodeError,
@@ -16,6 +13,9 @@ from orodruin.exceptions import (
 )
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Connection, Graph, GraphLike, Port, PortLike, State
 
 
 @attr.s

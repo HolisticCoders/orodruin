@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 from uuid import UUID
 
 import attr
 
+from orodruin.core.deserializer import ExternalDeserializer, Deserializer
 from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
+from orodruin.core.serializer import ExternalSerializer, Serializer
 from orodruin.core.signal import Signal
 
 from .connection import Connection, ConnectionLike
@@ -29,11 +31,15 @@ class State:
     """
 
     _root_graph: Graph = attr.ib(init=False)
+    _root_serializer: Serializer = attr.ib(init=False)
+    _root_deserializer: Deserializer = attr.ib(init=False)
 
     _graphs: Dict[UUID, Graph] = attr.ib(init=False, factory=dict)
     _nodes: Dict[UUID, Node] = attr.ib(init=False, factory=dict)
     _ports: Dict[UUID, Port] = attr.ib(init=False, factory=dict)
     _connections: Dict[UUID, Connection] = attr.ib(init=False, factory=dict)
+    _serializers: List[ExternalSerializer] = attr.ib(init=False, factory=list)
+    _deserializers: List[ExternalDeserializer] = attr.ib(init=False, factory=list)
 
     # Signals
     graph_created: Signal[Graph] = attr.ib(init=False, factory=Signal)
@@ -47,6 +53,8 @@ class State:
 
     def __attrs_post_init__(self) -> None:
         self._root_graph = self.create_graph()
+        self._root_serializer = Serializer()
+        self._root_deserializer = Deserializer(self)
 
     def root_graph(self) -> Graph:
         "return the state's root graph"
@@ -285,3 +293,27 @@ class State:
         logger.debug("Deleted connection %s.", connection.uuid())
 
         self.connection_deleted.emit(connection.uuid())
+
+    def serializers(self) -> List[Serializer]:
+        return self._serializers
+
+    def deserializers(self) -> List[ExternalDeserializer]:
+        return self._deserializers
+
+    def register_serializer(self, serializer: ExternalSerializer) -> None:
+        self._serializers.append(serializer)
+        self._root_serializer.register(serializer)
+
+    def register_deserializer(self, deserializer: ExternalDeserializer) -> None:
+        self._deserializers.append(deserializer)
+        self._root_deserializer.register(deserializer)
+
+    def serialize(self, root: NodeLike) -> Dict[str, Any]:
+        root = self.get_node(root)
+        data = self._root_serializer.serialize(root)
+        return data
+
+    def deserialize(self, data: Dict[str, Any], graph: GraphLike) -> Node:
+        graph = self.get_graph(graph)
+        node = self._root_deserializer.deserialize(data, graph)
+        return node

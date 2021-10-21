@@ -1,11 +1,14 @@
 """Rename Node command."""
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import attr
 
-from orodruin.core.port.port import Port, PortLike
-from orodruin.core.state import State
 from orodruin.core.utils import get_unique_port_name
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core.port.port import Port, PortLike, State
 
 
 @attr.s

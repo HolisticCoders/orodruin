@@ -6,12 +6,17 @@ from .node import Node, NodeLike
 from .port import Port, PortDirection, PortLike, PortType, PortTypes
 from .signal import Signal
 from .state import State
+from .deserializer import Deserializer, ExternalDeserializer
+from .serializer import ExternalSerializer, Serializer
 
 __all__ = [
-    "Node",
-    "NodeLike",
     "Connection",
     "ConnectionLike",
+    "Deserializer",
+    "ExternalDeserializer",
+    "ExternalSerializer",
+    "Node",
+    "NodeLike",
     "Graph",
     "GraphLike",
     "Library",
@@ -21,6 +26,7 @@ __all__ = [
     "PortLike",
     "PortType",
     "PortTypes",
-    "state",
+    "Serializer",
     "Signal",
+    "State",
 ]

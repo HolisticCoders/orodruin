@@ -1,32 +1,24 @@
 """Import Node command."""
+from __future__ import annotations
 import json
-from os import PathLike
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 import attr
-
-from orodruin.core import (
-    Graph,
-    GraphLike,
-    Library,
-    LibraryManager,
-    Node,
-    Port,
-    PortDirection,
-    State,
-)
-from orodruin.core.deserializer import DefaultDeserializer
-from orodruin.core.port import types as port_types
-from orodruin.core.utils import port_from_path
 from orodruin.exceptions import (
     LibraryDoesNotExistError,
     NodeNotFoundError,
-    PortDoesNotExistError,
 )
 
+from orodruin.core import LibraryManager
 from ..command import Command
-from ..ports import ConnectPorts, CreatePort, SetPort
-from .create_node import CreateNode
+
+if TYPE_CHECKING:
+    from orodruin.core import (
+        Graph,
+        GraphLike,
+        Node,
+        State,
+    )
 
 
 @attr.s
@@ -61,12 +53,10 @@ class ImportNode(Command):
                 f"for target {self.target_name}"
             )
 
-        deserializer = DefaultDeserializer(self.state)
-
         with open(node_path, "r", encoding="utf-8") as handle:
             data = json.load(handle)
 
-        self._imported_node = deserializer.deserialize(data, self._graph)
+        self._imported_node = self.state.deserialize(data, self._graph)
 
         return self._imported_node
 

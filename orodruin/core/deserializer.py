@@ -1,6 +1,7 @@
 """Deserialize core objects."""
+from __future__ import annotations
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 import attr
 
@@ -14,7 +15,6 @@ from orodruin.core import (
     Port,
     PortDirection,
     PortTypes,
-    State,
 )
 from orodruin.core.utils import port_from_path
 from orodruin.exceptions import (
@@ -22,9 +22,19 @@ from orodruin.exceptions import (
     PortDoesNotExistError,
 )
 
+if TYPE_CHECKING:
+    from orodruin.core import State
 
-class Deserializer(metaclass=ABCMeta):
+
+@attr.s
+class Deserializer:
     """Deserialize data from an Orodruin file."""
+
+    state: State = attr.ib()
+    _deserializers: List[ExternalDeserializer] = attr.ib(init=False, factory=list)
+
+    def register(self, deserializer: ExternalDeserializer):
+        self._deserializers.append(deserializer)
 
     def deserialize(self, data: Dict[str, Any], graph: Graph) -> Node:
         node = self.deserialize_node(data, graph)
@@ -38,6 +48,11 @@ class Deserializer(metaclass=ABCMeta):
         for connection_data in data.get("graph", {}).get("connections", []):
             self.deserialize_connection(connection_data, node)
 
+        node_graph = node.graph()
+        if node_graph:
+            for deserializer in self._deserializers:
+                deserializer.deserialize_graph(data, node_graph)
+
         return node
 
     def _deserialize_port_recursive(
@@ -48,35 +63,6 @@ class Deserializer(metaclass=ABCMeta):
             self._deserialize_port_recursive(child_data, node, port)
         return port
 
-    @abstractmethod
-    def deserialize_graph(self, data: Dict[str, Any]) -> Graph:
-        pass
-
-    @abstractmethod
-    def deserialize_node(self, data: Dict[str, Any], graph: Graph) -> Node:
-        pass
-
-    @abstractmethod
-    def deserialize_port(
-        self, data: Dict[str, Any], node: Node, parent: Optional[Port] = None
-    ) -> Port:
-        pass
-
-    @abstractmethod
-    def deserialize_connection(
-        self, data: Dict[str, Any], parent_node: Node
-    ) -> Connection:
-        pass
-
-
-@attr.s
-class DefaultDeserializer(Deserializer):
-
-    state: State = attr.ib()
-
-    def deserialize_graph(self, data: Dict[str, Any]) -> Graph:
-        return super().deserialize_graph(data)
-
     def deserialize_node(self, data: Dict[str, Any], graph: Graph) -> Node:
         library = LibraryManager.find_library(data["library"])
 
@@ -85,7 +71,7 @@ class DefaultDeserializer(Deserializer):
                 f"Found no registered library called {data['library']}"
             )
 
-        return CreateNode(
+        node = CreateNode(
             state=self.state,
             graph=graph,
             name=data["name"],
@@ -93,13 +79,23 @@ class DefaultDeserializer(Deserializer):
             library=library,
         ).do()
 
+        for deserializer in self._deserializers:
+            deserializer.deserialize_node(data, node)
+
+        return node
+
     def deserialize_port(
         self, data: Dict[str, Any], node: Node, parent: Optional[Port] = None
     ) -> Port:
         name = data["name"]
         direction = PortDirection[data["direction"]]
         port_type = PortTypes[data["type"]].value
-        return CreatePort(self.state, node, name, direction, port_type, parent).do()
+        port = CreatePort(self.state, node, name, direction, port_type, parent).do()
+
+        for deserializer in self._deserializers:
+            deserializer.deserialize_port(data, port)
+
+        return port
 
     def deserialize_connection(
         self, data: Dict[str, Any], parent_node: Node
@@ -115,6 +111,31 @@ class DefaultDeserializer(Deserializer):
         if not target_port:
             raise PortDoesNotExistError(f"Port {target_name} not found")
 
-        return ConnectPorts(
+        connection = ConnectPorts(
             self.state, parent_node.graph(), source_port, target_port
         ).do()
+
+        for deserializer in self._deserializers:
+            deserializer.deserialize_connection(data, connection)
+
+        return connection
+
+
+class ExternalDeserializer(metaclass=ABCMeta):
+    @abstractmethod
+    def deserialize_graph(self, data: Dict[str, Any], graph: Graph) -> None:
+        pass
+
+    @abstractmethod
+    def deserialize_node(self, data: Dict[str, Any], node: Node) -> None:
+        pass
+
+    @abstractmethod
+    def deserialize_port(self, data: Dict[str, Any], port: Port) -> None:
+        pass
+
+    @abstractmethod
+    def deserialize_connection(
+        self, data: Dict[str, Any], connection: Connection
+    ) -> None:
+        pass

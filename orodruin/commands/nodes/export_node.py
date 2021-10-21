@@ -1,22 +1,26 @@
 """Export Node command"""
+from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import attr
 
-from orodruin.core import LibraryManager, Node
-from orodruin.core.serializer import DefaultSerializer
 from orodruin.exceptions import LibraryDoesNotExistError
 
+from orodruin.core import LibraryManager
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Node, State
 
 
 @attr.s
 class ExportNode(Command):
     """Export Node command"""
 
+    state: State = attr.ib()
     node: Node = attr.ib()
     library_name: str = attr.ib()
     target_name: str = attr.ib(default="orodruin")
@@ -36,11 +40,10 @@ class ExportNode(Command):
             self.node_name = self.node.name()
 
         self._exported_path = (
-            library.path() / self.target_name / f"{self.node_name}2.json"
+            library.path() / self.target_name / f"{self.node_name}.json"
         )
 
-        serializer = DefaultSerializer()
-        data = serializer.serialize(self.node)
+        data = self.state.serialize(self.node)
 
         with self._exported_path.open("w") as f:
             content = json.dumps(

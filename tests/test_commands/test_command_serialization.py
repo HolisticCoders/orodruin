@@ -35,7 +35,7 @@ def test_node_instance_data(state: State) -> None:
     node.port("input2").set(2)
     node.port("output").set(4)
 
-    command = ExportNode(node, "DummyName")
+    command = ExportNode(state, node, "DummyName")
 
     expected_data = {
         "type": f"Internal::{node.type()}",
@@ -82,7 +82,7 @@ def test_node_definition_data(state: State) -> None:
         state, parent.graph(), child_b.port("output"), parent.port("output")
     ).do()
 
-    command = ExportNode(parent, "DummyName")
+    command = ExportNode(state, parent, "DummyName")
 
     expected_data = {
         "definitions": {
