@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 import attr
+
 from orodruin.core.utils import find_connection
 
 from ..command import Command
 
 if TYPE_CHECKING:
-    from orodruin.core import Connection, Port, State, Graph, GraphLike, PortLike
+    from orodruin.core import Connection, Graph, GraphLike, Port, PortLike, State
 
 
 @attr.s

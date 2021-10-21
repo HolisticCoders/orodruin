@@ -1,11 +1,12 @@
 """Set Port command."""
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import attr
 
-
 from orodruin.core import PortType
+
 from ..command import Command
 
 if TYPE_CHECKING:

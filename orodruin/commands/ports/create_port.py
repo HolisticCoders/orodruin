@@ -1,6 +1,7 @@
 """Create Port command."""
 from __future__ import annotations
-from typing import Optional, Type, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Optional, Type
 
 import attr
 

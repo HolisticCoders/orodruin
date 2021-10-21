@@ -6,7 +6,7 @@ from uuid import UUID
 
 import attr
 
-from orodruin.core.deserializer import ExternalDeserializer, Deserializer
+from orodruin.core.deserializer import Deserializer, ExternalDeserializer
 from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
 from orodruin.core.serializer import ExternalSerializer, Serializer

@@ -1,6 +1,7 @@
 """Create Node command."""
 from __future__ import annotations
-from typing import Dict, List, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Dict, List
 from uuid import UUID
 
 import attr

@@ -1,8 +1,9 @@
 """Delete Port command."""
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import attr
 
+from typing import TYPE_CHECKING
+
+import attr
 
 from ..command import Command
 
