@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from orodruin.core import PortType
+from orodruin.core.port import PortType
 
 from ..command import Command
 

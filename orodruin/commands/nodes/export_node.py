@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Optional
 
 import attr
 
-from orodruin.core import LibraryManager
+from orodruin.core.library import LibraryManager
 from orodruin.exceptions import LibraryDoesNotExistError
 
 from ..command import Command

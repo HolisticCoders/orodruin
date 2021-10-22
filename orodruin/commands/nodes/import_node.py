@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from orodruin.core import LibraryManager
+from orodruin.core.library import LibraryManager
 from orodruin.exceptions import LibraryDoesNotExistError, NodeNotFoundError
 
 from ..command import Command

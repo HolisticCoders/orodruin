@@ -8,20 +8,13 @@ import attr
 
 from orodruin.commands.nodes import CreateNode
 from orodruin.commands.ports import ConnectPorts, CreatePort
-from orodruin.core import (
-    Connection,
-    Graph,
-    LibraryManager,
-    Node,
-    Port,
-    PortDirection,
-    PortTypes,
-)
+from orodruin.core.library import LibraryManager
+from orodruin.core.port import PortDirection, PortTypes
 from orodruin.core.utils import port_from_path
 from orodruin.exceptions import LibraryDoesNotExistError, PortDoesNotExistError
 
 if TYPE_CHECKING:
-    from orodruin.core import State
+    from orodruin.core import Connection, Graph, Node, Port, State
 
 
 @attr.s
