@@ -7,6 +7,7 @@ from uuid import UUID
 import attr
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
+from orodruin.core.port.port import PortDirection
 from orodruin.core.utils import list_connections
 
 from ..command import Command
@@ -14,16 +15,7 @@ from ..ports import ConnectPorts, CreatePort
 from .create_node import CreateNode
 
 if TYPE_CHECKING:
-    from orodruin.core import (
-        Connection,
-        Graph,
-        GraphLike,
-        Node,
-        NodeLike,
-        Port,
-        PortDirection,
-        State,
-    )
+    from orodruin.core import Connection, Graph, GraphLike, Node, NodeLike, Port, State
 
 
 @attr.s

@@ -20,26 +20,30 @@ if TYPE_CHECKING:
 
 
 class Deserializer(metaclass=ABCMeta):
+    """Deserialize graphs, nodes, ports and connections data."""
+
     @abstractmethod
     def deserialize_graph(self, data: Dict[str, Any], graph: Graph) -> None:
-        pass
+        """Deserialize data onto an existing graph."""
 
     @abstractmethod
     def deserialize_node(self, data: Dict[str, Any], node: Node) -> None:
-        pass
+        """Deserialize data onto an existing node."""
 
     @abstractmethod
     def deserialize_port(self, data: Dict[str, Any], port: Port) -> None:
-        pass
+        """Deserialize data onto an existing port."""
 
     @abstractmethod
     def deserialize_connection(
         self, data: Dict[str, Any], connection: Connection
     ) -> None:
-        pass
+        """Deserialize data onto an existing connection."""
 
 
 class OrodruinDeserializer(Deserializer):
+    """Deserialize orodruin specific data."""
+
     def deserialize_graph(self, data: Dict[str, Any], graph: Graph) -> None:
         pass
 
@@ -47,6 +51,7 @@ class OrodruinDeserializer(Deserializer):
         pass
 
     def deserialize_port(self, data: Dict[str, Any], port: Port) -> None:
+        """Set the port value."""
         serialization_type = SerializationType(data["metadata"]["serialization_type"])
         if serialization_type is SerializationType.instance:
             SetPort(port, data["value"]).do()
@@ -67,6 +72,7 @@ class RootDeserializer:
         return self.state.deserializers()
 
     def deserialize(self, data: Dict[str, Any], graph: Graph) -> Node:
+        """Recursively deserialize a node's data."""
         node = self.deserialize_node(data, graph)
 
         for port_data in data.get("ports", []):
@@ -94,6 +100,7 @@ class RootDeserializer:
         return port
 
     def deserialize_node(self, data: Dict[str, Any], graph: Graph) -> Node:
+        """Create a node, or import it from a library."""
         library_name = data["library"]
         metadata = data["metadata"]
         serialization_type = SerializationType(metadata["serialization_type"])
@@ -121,6 +128,7 @@ class RootDeserializer:
     def deserialize_port(
         self, data: Dict[str, Any], node: Node, parent: Optional[Port] = None
     ) -> Port:
+        """Create a port, and/or deserialize its data."""
 
         name = data["name"]
 
@@ -144,6 +152,7 @@ class RootDeserializer:
     def deserialize_connection(
         self, data: Dict[str, Any], parent_node: Node
     ) -> Connection:
+        """Create a connection."""
         source_name = data["source"]
         target_name = data["target"]
 

@@ -303,23 +303,35 @@ class State:
         self.connection_deleted.emit(connection.uuid())
 
     def serializers(self) -> List[Serializer]:
+        """Return the state serializers."""
         return self._serializers
 
     def deserializers(self) -> List[Deserializer]:
+        """Return the state deserializers."""
         return self._deserializers
 
     def register_serializer(self, serializer: Serializer) -> None:
+        """Register a new serializer."""
         self._serializers.append(serializer)
 
     def register_deserializer(self, deserializer: Deserializer) -> None:
+        """Register a new deserializer."""
         self._deserializers.append(deserializer)
 
     def serialize(self, root: NodeLike) -> Dict[str, Any]:
+        """Serialize a node.
+
+        See `RootSerializer.serialize`.
+        """
         root = self.get_node(root)
         data = self._root_serializer.serialize(root, SerializationType.definition)
         return data
 
     def deserialize(self, data: Dict[str, Any], graph: GraphLike) -> Node:
+        """Deserialize a node.
+
+        See `RootDeserializer.deserialize`.
+        """
         graph = self.get_graph(graph)
         node = self._root_deserializer.deserialize(data, graph)
         return node

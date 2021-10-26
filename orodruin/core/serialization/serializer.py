@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 import attr
 
 from orodruin.core import Connection, Graph, Node, Port, PortType
+
 from .types import SerializationType
 
 if TYPE_CHECKING:
@@ -14,23 +15,25 @@ if TYPE_CHECKING:
 
 
 class Serializer(metaclass=ABCMeta):
+    """Serialize graphs, nodes, ports and connections data."""
+
     @abstractmethod
     def serialize_graph(
         self, graph: Graph, serialization_type: SerializationType
     ) -> Dict[str, Any]:
-        pass
+        """Serialize a graph's data."""
 
     @abstractmethod
     def serialize_node(
         self, node: Node, serialization_type: SerializationType
     ) -> Dict[str, Any]:
-        pass
+        """Serialize a node's data."""
 
     @abstractmethod
     def serialize_port(
         self, port: Port, serialization_type: SerializationType
     ) -> Dict[str, Any]:
-        pass
+        """Serialize a port's data."""
 
     @abstractmethod
     def serialize_connection(
@@ -39,11 +42,11 @@ class Serializer(metaclass=ABCMeta):
         parent_node: Node,
         serialization_type: SerializationType,
     ) -> Dict[str, Any]:
-        pass
+        """Serialize a connection's data."""
 
 
 @attr.s
-class RootSerializer(Serializer):
+class RootSerializer:
     """Serialize data to save in an Orodruin file."""
 
     state: State = attr.ib()
@@ -52,6 +55,7 @@ class RootSerializer(Serializer):
         return self.state.serializers()
 
     def serialize(self, root: Node, serialization_type: SerializationType) -> Dict:
+        """Recursively serialize a node's data."""
         data = self.serialize_node(root, serialization_type)
 
         data["ports"] = [
@@ -82,6 +86,7 @@ class RootSerializer(Serializer):
     def serialize_graph(
         self, graph: Graph, serialization_type: SerializationType
     ) -> Dict[str, Any]:
+        """Serialize a graph's data."""
         parent_node = graph.parent_node()
         if not parent_node:
             raise NotImplementedError("Cannot serialize a graph with no parent node.")
@@ -114,6 +119,7 @@ class RootSerializer(Serializer):
     def serialize_node(
         self, node: Node, serialization_type: SerializationType
     ) -> Dict[str, Any]:
+        """Serialize a node's data."""
         library = node.library()
 
         if library is None:
@@ -126,8 +132,8 @@ class RootSerializer(Serializer):
             "type": node.type(),
             "library": library_name,
             "metadata": {
-            "serialization_type": serialization_type.value,
-                }
+                "serialization_type": serialization_type.value,
+            },
         }
 
         for serializer in self._state_serializers():
@@ -139,11 +145,12 @@ class RootSerializer(Serializer):
     def serialize_port(
         self, port: Port, serialization_type: SerializationType
     ) -> Dict[str, Any]:
+        """Serialize a port's data."""
         data = {
             "name": port.name(),
             "metadata": {
-            "serialization_type": serialization_type.value,
-                }
+                "serialization_type": serialization_type.value,
+            },
         }
 
         if serialization_type is SerializationType.definition:
@@ -165,6 +172,7 @@ class RootSerializer(Serializer):
         parent_node: Node,
         serialization_type: SerializationType,
     ) -> Dict[str, Any]:
+        """Serialize a connection's data."""
         data = {
             "source": str(connection.source().relative_path(parent_node)),
             "target": str(connection.target().relative_path(parent_node)),
