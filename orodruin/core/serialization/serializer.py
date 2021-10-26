@@ -2,17 +2,15 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from enum import Enum
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import attr
 
 from orodruin.core import Connection, Graph, Node, Port, PortType
+from .types import SerializationType
 
-
-class SerializationType(Enum):
-    instance = "instance"
-    definition = "definition"
+if TYPE_CHECKING:
+    from orodruin.core import State
 
 
 class Serializer(metaclass=ABCMeta):
@@ -48,10 +46,10 @@ class Serializer(metaclass=ABCMeta):
 class RootSerializer(Serializer):
     """Serialize data to save in an Orodruin file."""
 
-    _serializers: List[Serializer] = attr.ib(init=False, factory=list)
+    state: State = attr.ib()
 
-    def register(self, serializer: Serializer) -> None:
-        self._serializers.append(serializer)
+    def _state_serializers(self) -> List[Serializer]:
+        return self.state.serializers()
 
     def serialize(self, root: Node, serialization_type: SerializationType) -> Dict:
         data = self.serialize_node(root, serialization_type)
@@ -107,7 +105,7 @@ class RootSerializer(Serializer):
             for connection in graph.connections()
         ]
 
-        for serializer in self._serializers:
+        for serializer in self._state_serializers():
             serializer_data = serializer.serialize_graph(graph, serialization_type)
             graph_data.update(serializer_data)
 
@@ -127,10 +125,12 @@ class RootSerializer(Serializer):
             "name": node.name(),
             "type": node.type(),
             "library": library_name,
+            "metadata": {
             "serialization_type": serialization_type.value,
+                }
         }
 
-        for serializer in self._serializers:
+        for serializer in self._state_serializers():
             serializer_data = serializer.serialize_node(node, serialization_type)
             data.update(serializer_data)
 
@@ -141,6 +141,9 @@ class RootSerializer(Serializer):
     ) -> Dict[str, Any]:
         data = {
             "name": port.name(),
+            "metadata": {
+            "serialization_type": serialization_type.value,
+                }
         }
 
         if serialization_type is SerializationType.definition:
@@ -150,7 +153,7 @@ class RootSerializer(Serializer):
         if serialization_type is SerializationType.instance:
             data["value"] = self._encode_port_value(port.get())
 
-        for serializer in self._serializers:
+        for serializer in self._state_serializers():
             serializer_data = serializer.serialize_port(port, serialization_type)
             data.update(serializer_data)
 
@@ -167,7 +170,7 @@ class RootSerializer(Serializer):
             "target": str(connection.target().relative_path(parent_node)),
         }
 
-        for serializer in self._serializers:
+        for serializer in self._state_serializers():
             serializer_data = serializer.serialize_connection(
                 connection, parent_node, serialization_type
             )

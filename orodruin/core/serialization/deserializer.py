@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import attr
 
 from orodruin.commands.nodes import CreateNode, ImportNode
-from orodruin.commands.ports import ConnectPorts, CreatePort
+from orodruin.commands.ports import ConnectPorts, CreatePort, SetPort
 from orodruin.core.library import LibraryManager
 from orodruin.core.port import PortDirection, PortTypes
-from orodruin.core.serialization.serializer import SerializationType
 from orodruin.core.utils import port_from_path
 from orodruin.exceptions import LibraryDoesNotExistError, PortDoesNotExistError
+
+from .types import SerializationType
 
 if TYPE_CHECKING:
     from orodruin.core import Connection, Graph, Node, Port, State
@@ -38,15 +39,32 @@ class Deserializer(metaclass=ABCMeta):
         pass
 
 
+class OrodruinDeserializer(Deserializer):
+    def deserialize_graph(self, data: Dict[str, Any], graph: Graph) -> None:
+        pass
+
+    def deserialize_node(self, data: Dict[str, Any], node: Node) -> None:
+        pass
+
+    def deserialize_port(self, data: Dict[str, Any], port: Port) -> None:
+        serialization_type = SerializationType(data["metadata"]["serialization_type"])
+        if serialization_type is SerializationType.instance:
+            SetPort(port, data["value"]).do()
+
+    def deserialize_connection(
+        self, data: Dict[str, Any], connection: Connection
+    ) -> None:
+        pass
+
+
 @attr.s
 class RootDeserializer:
     """Deserialize data from an Orodruin file."""
 
     state: State = attr.ib()
-    _deserializers: List[Deserializer] = attr.ib(init=False, factory=list)
 
-    def register(self, deserializer: Deserializer) -> None:
-        self._deserializers.append(deserializer)
+    def _state_deserializers(self) -> List[Deserializer]:
+        return self.state.deserializers()
 
     def deserialize(self, data: Dict[str, Any], graph: Graph) -> Node:
         node = self.deserialize_node(data, graph)
@@ -62,7 +80,7 @@ class RootDeserializer:
 
         node_graph = node.graph()
         if node_graph:
-            for deserializer in self._deserializers:
+            for deserializer in self._state_deserializers():
                 deserializer.deserialize_graph(data, node_graph)
 
         return node
@@ -95,7 +113,7 @@ class RootDeserializer:
                 )
             node = ImportNode(self.state, graph, data["name"], library.name()).do()
 
-        for deserializer in self._deserializers:
+        for deserializer in self._state_deserializers():
             deserializer.deserialize_node(data, node)
 
         return node
@@ -103,14 +121,22 @@ class RootDeserializer:
     def deserialize_port(
         self, data: Dict[str, Any], node: Node, parent: Optional[Port] = None
     ) -> Port:
-        name = data["name"]
-        direction = PortDirection[data["direction"]]
-        port_type = PortTypes[data["type"]].value
-        value = data["value"]
-        port = CreatePort(self.state, node, name, direction, port_type, parent).do()
-        port.set(value)
 
-        for deserializer in self._deserializers:
+        name = data["name"]
+
+        serialization_type = SerializationType(data["metadata"]["serialization_type"])
+
+        if serialization_type is SerializationType.definition:
+
+            direction = PortDirection[data["direction"]]
+            port_type = PortTypes[data["type"]].value
+            port = CreatePort(self.state, node, name, direction, port_type, parent).do()
+
+        else:
+
+            port = node.port(name)
+
+        for deserializer in self._state_deserializers():
             deserializer.deserialize_port(data, port)
 
         return port
@@ -133,7 +159,7 @@ class RootDeserializer:
             self.state, parent_node.graph(), source_port, target_port
         ).do()
 
-        for deserializer in self._deserializers:
+        for deserializer in self._state_deserializers():
             deserializer.deserialize_connection(data, connection)
 
         return connection

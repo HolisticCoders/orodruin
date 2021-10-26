@@ -10,6 +10,7 @@ from orodruin.core.library import Library
 from orodruin.core.port.port import PortDirection
 from orodruin.core.serialization import (
     Deserializer,
+    OrodruinDeserializer,
     RootDeserializer,
     RootSerializer,
     SerializationType,
@@ -37,7 +38,7 @@ class State:
 
     _root_graph: Graph = attr.ib(init=False)
     _root_serializer: RootSerializer = attr.ib(init=False)
-    _root_deserializer: Deserializer = attr.ib(init=False)
+    _root_deserializer: RootDeserializer = attr.ib(init=False)
 
     _graphs: Dict[UUID, Graph] = attr.ib(init=False, factory=dict)
     _nodes: Dict[UUID, Node] = attr.ib(init=False, factory=dict)
@@ -58,8 +59,10 @@ class State:
 
     def __attrs_post_init__(self) -> None:
         self._root_graph = self.create_graph()
-        self._root_serializer = RootSerializer()
+        self._root_serializer = RootSerializer(self)
         self._root_deserializer = RootDeserializer(self)
+
+        self.register_deserializer(OrodruinDeserializer())
 
     def root_graph(self) -> Graph:
         "return the state's root graph"
@@ -307,11 +310,9 @@ class State:
 
     def register_serializer(self, serializer: Serializer) -> None:
         self._serializers.append(serializer)
-        self._root_serializer.register(serializer)
 
     def register_deserializer(self, deserializer: Deserializer) -> None:
         self._deserializers.append(deserializer)
-        self._root_deserializer.register(deserializer)
 
     def serialize(self, root: NodeLike) -> Dict[str, Any]:
         root = self.get_node(root)

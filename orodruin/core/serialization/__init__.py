@@ -1,10 +1,12 @@
-from .deserializer import Deserializer, RootDeserializer
-from .serializer import RootSerializer, SerializationType, Serializer
+from .deserializer import Deserializer, OrodruinDeserializer, RootDeserializer
+from .serializer import RootSerializer, Serializer
+from .types import SerializationType
 
 __all__ = [
+    "Deserializer",
+    "OrodruinDeserializer",
     "SerializationType",
     "Serializer",
-    "Deserializer",
     "RootDeserializer",
     "RootSerializer",
 ]
