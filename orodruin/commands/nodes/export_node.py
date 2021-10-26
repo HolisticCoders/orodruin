@@ -44,6 +44,8 @@ class ExportNode(Command):
             library.path() / self.target_name / f"{self.node_name}.json"
         )
 
+        self.node.set_library(library)
+
         data = self.state.serialize(self.node)
 
         with self._exported_path.open("w") as f:

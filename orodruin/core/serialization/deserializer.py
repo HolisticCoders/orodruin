@@ -102,23 +102,36 @@ class RootDeserializer:
     def deserialize_node(self, data: Dict[str, Any], graph: Graph) -> Node:
         """Create a node, or import it from a library."""
         library_name = data["library"]
-        metadata = data["metadata"]
-        serialization_type = SerializationType(metadata["serialization_type"])
-        if serialization_type is SerializationType.definition:
-            node = CreateNode(
-                state=self.state,
-                graph=graph,
-                name=data["name"],
-                type=data["type"],
-            ).do()
+        if library_name != "Internal":
 
-        else:
             library = LibraryManager.find_library(library_name)
-            if library is None and library_name != "Internal":
+
+            if library is None:
                 raise LibraryDoesNotExistError(
                     f"Found no registered library called {library_name}"
                 )
-            node = ImportNode(self.state, graph, data["name"], library.name()).do()
+
+            library_name = library.name()
+
+        else:
+            library = None
+
+        metadata = data["metadata"]
+        serialization_type = SerializationType(metadata["serialization_type"])
+
+        if serialization_type is SerializationType.definition:
+
+            node = CreateNode(
+                state=self.state,
+                name=data["name"],
+                type=data["type"],
+                library=library,
+                graph=graph,
+            ).do()
+
+        else:
+
+            node = ImportNode(self.state, graph, data["name"], library_name).do()
 
         for deserializer in self._state_deserializers():
             deserializer.deserialize_node(data, node)
