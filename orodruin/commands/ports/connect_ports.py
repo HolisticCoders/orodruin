@@ -127,9 +127,9 @@ class ConnectPorts(Command):
                     self._graph.unregister_connection(connection.uuid())
             else:
                 raise PortAlreadyConnectedError(
-                    f"Port {self._source.name()} "
-                    f"cannot be connected to {self._target.name()}. "
-                    f"port {self._target.name()} is already connected "
+                    f"Port {self._source.path()} "
+                    f"cannot be connected to {self._target.path()}. "
+                    f"port {self._target.path()} is already connected "
                     "use `force=True` to connect regardless."
                 )
 
