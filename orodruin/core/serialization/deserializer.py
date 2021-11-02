@@ -78,16 +78,24 @@ class RootDeserializer:
         for port_data in data.get("ports", []):
             self._deserialize_port_recursive(port_data, node)
 
-        for child_data in data.get("graph", {}).get("nodes", []):
-            self.deserialize(child_data, node.graph())
+        metadata = data["metadata"]
+        serialization_type = SerializationType(metadata["serialization_type"])
 
-        for connection_data in data.get("graph", {}).get("connections", []):
-            self.deserialize_connection(connection_data, node)
+        if serialization_type is SerializationType.definition:
+            # deserialize the node's graph only if we're in a definition
+            # otherwise the sub nodes will be created durint both
+            # the definition _and_ the instance deserialization of the node.
 
-        node_graph = node.graph()
-        if node_graph:
-            for deserializer in self._state_deserializers():
-                deserializer.deserialize_graph(data, node_graph)
+            for child_data in data.get("graph", {}).get("nodes", []):
+                self.deserialize(child_data, node.graph())
+
+            for connection_data in data.get("graph", {}).get("connections", []):
+                self.deserialize_connection(connection_data, node)
+
+            node_graph = node.graph()
+            if node_graph:
+                for deserializer in self._state_deserializers():
+                    deserializer.deserialize_graph(data, node_graph)
 
         return node
 
@@ -131,7 +139,8 @@ class RootDeserializer:
 
         else:
 
-            node = ImportNode(self.state, graph, data["name"], library_name).do()
+            node = ImportNode(self.state, graph, data["type"], library_name).do()
+            node.set_name(data["name"])
 
         for deserializer in self._state_deserializers():
             deserializer.deserialize_node(data, node)
