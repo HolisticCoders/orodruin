@@ -21,7 +21,7 @@ class ImportNode(Command):
 
     state: State = attr.ib()
     graph: GraphLike = attr.ib()
-    node_name: str = attr.ib()
+    node_type: str = attr.ib()
     library_name: str = attr.ib()
     target_name: str = attr.ib(default="orodruin")
 
@@ -39,7 +39,7 @@ class ImportNode(Command):
                 f"Found no registered library called {self.library_name}"
             )
 
-        node_path = library.find_node(self.node_name, self.target_name)
+        node_path = library.find_node(self.node_type, self.target_name)
 
         if not node_path:
             raise NodeNotFoundError(
