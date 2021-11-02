@@ -1,12 +1,16 @@
 """Rename Node command."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import attr
 
-from orodruin.core import Node
-from orodruin.core.node import NodeLike
-from orodruin.core.state import State
 from orodruin.core.utils import get_unique_node_name
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Node, NodeLike, State
 
 
 @attr.s

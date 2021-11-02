@@ -1,11 +1,9 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 import attr
 
-from orodruin.core import Connection, Graph, Port
-from orodruin.core.graph import GraphLike
-from orodruin.core.port.port import PortLike
-from orodruin.core.state import State
 from orodruin.core.utils import list_connections
 from orodruin.exceptions import (
     ConnectionOnSameNodeError,
@@ -16,6 +14,9 @@ from orodruin.exceptions import (
 )
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Connection, Graph, GraphLike, Port, PortLike, State
 
 
 @attr.s
@@ -126,9 +127,9 @@ class ConnectPorts(Command):
                     self._graph.unregister_connection(connection.uuid())
             else:
                 raise PortAlreadyConnectedError(
-                    f"Port {self._source.name()} "
-                    f"cannot be connected to {self._target.name()}. "
-                    f"port {self._target.name()} is already connected "
+                    f"Port {self._source.path()} "
+                    f"cannot be connected to {self._target.path()}. "
+                    f"port {self._target.path()} is already connected "
                     "use `force=True` to connect regardless."
                 )
 

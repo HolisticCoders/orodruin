@@ -95,7 +95,7 @@ class LibraryManager:
         return [Library(Path(p)) for p in libraries_string.split(";")]
 
     @classmethod
-    def register_library(cls, path: Path) -> None:
+    def register_library(cls, path: Path) -> Library:
         """Register the given library."""
 
         if not path.exists():
@@ -110,6 +110,7 @@ class LibraryManager:
             libraries.append(library)
 
         cls._set_libraries_var(libraries)
+        return library
 
     @classmethod
     def unregister_library(cls, path: Path) -> None:

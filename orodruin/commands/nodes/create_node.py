@@ -1,14 +1,16 @@
 """Create Node command."""
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 import attr
 
-from orodruin.core import Graph, Library, Node
-from orodruin.core.graph import GraphLike
-from orodruin.core.state import State
 from orodruin.core.utils import get_unique_node_name
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Graph, GraphLike, Library, Node, State
 
 
 @attr.s

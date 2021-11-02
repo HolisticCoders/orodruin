@@ -1,21 +1,21 @@
 """Create Node command."""
-from typing import Dict, List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List
 from uuid import UUID
 
 import attr
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
-from orodruin.core import Graph, Node
-from orodruin.core.connection import Connection
-from orodruin.core.graph import GraphLike
-from orodruin.core.node import NodeLike
-from orodruin.core.port.port import Port, PortDirection
-from orodruin.core.state import State
+from orodruin.core.port.port import PortDirection
 from orodruin.core.utils import list_connections
 
 from ..command import Command
 from ..ports import ConnectPorts, CreatePort
 from .create_node import CreateNode
+
+if TYPE_CHECKING:
+    from orodruin.core import Connection, Graph, GraphLike, Node, NodeLike, Port, State
 
 
 @attr.s

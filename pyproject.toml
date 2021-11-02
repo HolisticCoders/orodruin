@@ -42,6 +42,7 @@ disable = [
     "import-error",
     "missing-module-docstring",
     "too-few-public-methods",
+    "too-many-public-methods",
     "too-many-arguments",
     "too-many-instance-attributes",
     "invalid-name",

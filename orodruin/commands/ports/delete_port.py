@@ -1,9 +1,14 @@
 """Delete Port command."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import attr
 
-from orodruin.core import Graph, Node, Port, PortLike, State
-
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import Graph, Node, Port, PortLike, State
 
 
 @attr.s

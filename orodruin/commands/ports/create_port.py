@@ -1,13 +1,24 @@
 """Create Port command."""
-from typing import Optional, Type
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Type
 
 import attr
 
-from orodruin.core import Graph, Node, NodeLike, Port, PortDirection, State
-from orodruin.core.port.port import PortLike
 from orodruin.core.utils import get_unique_port_name
 
 from ..command import Command
+
+if TYPE_CHECKING:
+    from orodruin.core import (
+        Graph,
+        Node,
+        NodeLike,
+        Port,
+        PortDirection,
+        PortLike,
+        State,
+    )
 
 
 @attr.s

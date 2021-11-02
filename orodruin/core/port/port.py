@@ -51,6 +51,7 @@ class Port(Generic[PortType]):
     _uuid: UUID = attr.ib(factory=uuid4)
 
     name_changed: Signal[str] = attr.ib(init=False, factory=Signal)
+    value_changed: Signal[PortType] = attr.ib(init=False, factory=Signal)
 
     @_value.default
     def _instantiate_type(self) -> PortType:
@@ -121,6 +122,8 @@ class Port(Generic[PortType]):
             ) from error
 
         self._value = value
+
+        self.value_changed.emit(value)
 
     def parent_port(self) -> Optional[Port]:
         """Parent port of the port."""
