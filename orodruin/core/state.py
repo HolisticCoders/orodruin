@@ -49,13 +49,13 @@ class State:
 
     # Signals
     graph_created: Signal[Graph] = attr.ib(init=False, factory=Signal)
-    graph_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    graph_deleted: Signal[Graph] = attr.ib(init=False, factory=Signal)
     node_created: Signal[Node] = attr.ib(init=False, factory=Signal)
-    node_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    node_deleted: Signal[Node] = attr.ib(init=False, factory=Signal)
     port_created: Signal[Port] = attr.ib(init=False, factory=Signal)
-    port_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    port_deleted: Signal[Port] = attr.ib(init=False, factory=Signal)
     connection_created: Signal[Connection] = attr.ib(init=False, factory=Signal)
-    connection_deleted: Signal[UUID] = attr.ib(init=False, factory=Signal)
+    connection_deleted: Signal[Connection] = attr.ib(init=False, factory=Signal)
 
     def __attrs_post_init__(self) -> None:
         self._root_graph = self.create_graph()
@@ -180,7 +180,7 @@ class State:
 
         logger.debug("Deleted graph %s.", graph.uuid())
 
-        self.graph_deleted.emit(graph.uuid())
+        self.graph_deleted.emit(graph)
 
     def create_node(
         self,
@@ -221,7 +221,7 @@ class State:
 
         logger.debug("Deleted node %s.", node.path())
 
-        self.node_deleted.emit(node.uuid())
+        self.node_deleted.emit(node)
 
     def create_port(
         self,
@@ -268,7 +268,7 @@ class State:
 
         logger.debug("Deleted port %s from the state.", port.path())
 
-        self.port_deleted.emit(port.uuid())
+        self.port_deleted.emit(port)
 
     def create_connection(
         self,
@@ -300,7 +300,7 @@ class State:
 
         logger.debug("Deleted connection %s.", connection.uuid())
 
-        self.connection_deleted.emit(connection.uuid())
+        self.connection_deleted.emit(connection)
 
     def serializers(self) -> List[Serializer]:
         """Return the state serializers."""
