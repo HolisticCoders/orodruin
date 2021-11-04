@@ -11,9 +11,17 @@ from __future__ import annotations
 
 from builtins import bool, float, int, str
 from enum import Enum
-from typing import List, TypeVar
+from typing import List, Optional, TypeVar
+from uuid import UUID
 
 import attr
+
+
+@attr.s
+class Reference:
+    """Reference to an orodruin node."""
+
+    value: Optional[UUID] = attr.ib(default=None)
 
 
 @attr.s
@@ -120,6 +128,7 @@ PortType = TypeVar(
 class PortTypes(Enum):
     """Enum registering all the possible orodruin types."""
 
+    Reference = Reference
     Matrix3 = Matrix3
     Matrix4 = Matrix4
     Vector2 = Vector2
@@ -132,6 +141,7 @@ class PortTypes(Enum):
 
 
 __all__ = [
+    "Reference",
     "PortType",
     "PortTypes",
     "Matrix3",
