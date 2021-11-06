@@ -40,7 +40,17 @@ class DisconnectPorts(Command):
         )
         if self._deleted_connection:
             self._graph.unregister_connection(self._deleted_connection)
+            self._source.unregister_downstream_connection(self._deleted_connection)
+            self._target.unregister_upstream_connection(self._deleted_connection)
             self.state.delete_connection(self._deleted_connection)
+
+        self._notify_downstream_ports(self._target)
 
     def undo(self) -> None:
         raise NotImplementedError
+
+    def _notify_downstream_ports(self, port: Port) -> None:
+        """Recursively notify the downstream ports that a connection was deleted."""
+        port.upstream_connection_deleted.emit(port)
+        for connection in port.connections(source=False, target=True):
+            self._notify_downstream_ports(connection.target())

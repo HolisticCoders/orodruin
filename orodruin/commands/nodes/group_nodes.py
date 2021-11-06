@@ -8,7 +8,6 @@ import attr
 
 from orodruin.commands.ports.disconnect_ports import DisconnectPorts
 from orodruin.core.port.port import PortDirection
-from orodruin.core.utils import list_connections
 
 from ..command import Command
 from ..ports import ConnectPorts, CreatePort
@@ -51,7 +50,7 @@ class GroupNodes(Command):
                 self._created_node.graph().register_port(port)
                 port.set_graph(self._created_node.graph())
 
-                for connection in list_connections(self._graph, port):
+                for connection in port.connections():
                     if (
                         connection.source().node() in self._nodes
                         and connection.target().node() in self._nodes

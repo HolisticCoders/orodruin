@@ -74,14 +74,13 @@ def find_connection(graph: Graph, source: Port, target: Port) -> Optional[Connec
     return None
 
 
-def list_connections(graph: Graph, port: Port) -> List[Connection]:
-    """Find all the connections connected to the given port."""
-    connections = []
-    for connection in graph.connections():
-        if connection.source() is port or connection.target() is port:
-            connections.append(connection)
-
-    return connections
+def get_most_upstream_port(port: Port) -> Port:
+    """Recursively get the most upstream port connected to the given port."""
+    connections = port.connections(source=True, target=False)
+    if not connections:
+        return port
+    else:
+        return get_most_upstream_port(connections[0].source())
 
 
 def port_from_path(parent_node: Node, port_path: str) -> Optional[Port]:
