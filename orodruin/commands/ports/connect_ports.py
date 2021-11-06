@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 import attr
 
-from orodruin.core.utils import list_connections
+from orodruin.commands.ports.disconnect_ports import DisconnectPorts
 from orodruin.exceptions import (
     ConnectionOnSameNodeError,
     ConnectionToDifferentDirectionError,
@@ -32,7 +32,6 @@ class ConnectPorts(Command):
     _source: Port = attr.ib(init=False)
     _target: Port = attr.ib(init=False)
     _graph: Graph = attr.ib(init=False)
-    _deleted_connections: List[Connection] = attr.ib(factory=list)
     _created_connection: Optional[Connection] = attr.ib(init=False, default=None)
 
     def __attrs_post_init__(self) -> None:
@@ -120,11 +119,16 @@ class ConnectPorts(Command):
                     "can only be of the same direction."
                 )
 
-        self._deleted_connections = list_connections(self._graph, self._target)
-        if self._deleted_connections:
+        existing_connections = self._target.connections(source=True, target=False)
+        if existing_connections:
             if self.force:
-                for connection in self._deleted_connections:
-                    self._graph.unregister_connection(connection.uuid())
+                for connection in existing_connections:
+                    DisconnectPorts(
+                        self.state,
+                        connection.graph(),
+                        connection.source(),
+                        connection.target(),
+                    ).do()
             else:
                 raise PortAlreadyConnectedError(
                     f"Port {self._source.path()} "
@@ -138,7 +142,18 @@ class ConnectPorts(Command):
         )
         self._graph.register_connection(self._created_connection)
 
+        self._source.register_downstream_connection(self._created_connection)
+        self._target.register_upstream_connection(self._created_connection)
+
+        self._notify_downstream_ports(self._target)
+
         return self._created_connection
 
     def undo(self) -> None:
         raise NotImplementedError
+
+    def _notify_downstream_ports(self, port: Port) -> None:
+        """Recursively notify the downstream ports that a connection was created."""
+        port.upstream_connection_created.emit(port)
+        for connection in port.connections(source=False, target=True):
+            self._notify_downstream_ports(connection.target())

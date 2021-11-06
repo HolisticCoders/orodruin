@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from orodruin.core.utils import list_connections
-
 from ..command import Command
 from ..ports import DeletePort, DisconnectPorts
 
@@ -38,7 +36,7 @@ class DeleteNode(Command):
             DeleteNode(self.state, node).do()
 
         for port in self._node.ports():
-            for connection in list_connections(self._graph, port):
+            for connection in port.connections():
                 DisconnectPorts(
                     self.state,
                     self._graph,
@@ -46,6 +44,7 @@ class DeleteNode(Command):
                     connection.target(),
                 ).do()
 
+        for port in self._node.ports():
             DeletePort(self.state, port).do()
 
         self._graph.unregister_node(self._node)

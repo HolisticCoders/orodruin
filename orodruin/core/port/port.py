@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 
 import attr
 
+from orodruin.core.connection import Connection
 from orodruin.core.graph import Graph, GraphLike
 from orodruin.core.signal import Signal
 
@@ -50,8 +51,14 @@ class Port(Generic[PortType]):
 
     _uuid: UUID = attr.ib(factory=uuid4)
 
+    _upstream_connection_ids: List[UUID] = attr.ib(init=False, factory=list)
+    _downstream_connection_ids: List[UUID] = attr.ib(init=False, factory=list)
+
     name_changed: Signal[str] = attr.ib(init=False, factory=Signal)
     value_changed: Signal[PortType] = attr.ib(init=False, factory=Signal)
+
+    upstream_connection_created: Signal[Port] = attr.ib(init=False, factory=Signal)
+    upstream_connection_deleted: Signal[Port] = attr.ib(init=False, factory=Signal)
 
     @_value.default
     def _instantiate_type(self) -> PortType:
@@ -98,6 +105,25 @@ class Port(Generic[PortType]):
     def type(self) -> Type[PortType]:
         """Type of the port."""
         return self._type
+
+    def connections(self, source: bool = True, target: bool = True) -> List[Connection]:
+        """List all the connection of this port."""
+        connections = []
+        if source:
+            connections.extend(
+                [
+                    self._state.get_connection(uuid)
+                    for uuid in self._upstream_connection_ids
+                ]
+            )
+        if target:
+            connections.extend(
+                [
+                    self._state.get_connection(uuid)
+                    for uuid in self._downstream_connection_ids
+                ]
+            )
+        return connections
 
     def get(self) -> PortType:
         """Get the value of the Port.
@@ -155,6 +181,22 @@ class Port(Generic[PortType]):
             path = self.path().relative_to(relative_to.path())
 
         return path
+
+    def register_upstream_connection(self, connection: Connection) -> None:
+        """Register a new source connection to this port."""
+        self._upstream_connection_ids.append(connection.uuid())
+
+    def register_downstream_connection(self, connection: Connection) -> None:
+        """Register a new target connection to this port."""
+        self._downstream_connection_ids.append(connection.uuid())
+
+    def unregister_upstream_connection(self, connection: Connection) -> None:
+        """Register a source connection from this port."""
+        self._upstream_connection_ids.remove(connection.uuid())
+
+    def unregister_downstream_connection(self, connection: Connection) -> None:
+        """Unregister a target connection from this port."""
+        self._downstream_connection_ids.remove(connection.uuid())
 
 
 PortLike = Union[Port[PortType], UUID]

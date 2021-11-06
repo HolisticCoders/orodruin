@@ -43,8 +43,8 @@ class ImportNode(Command):
 
         if not node_path:
             raise NodeNotFoundError(
-                f"Found no node in library {self.library_name} "
-                f"for target {self.target_name}"
+                f"Found no node '{self.node_type}' in library '{self.library_name}' "
+                f"for target '{self.target_name}'"
             )
 
         with open(node_path, "r", encoding="utf-8") as handle:
