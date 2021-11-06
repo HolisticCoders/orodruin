@@ -6,12 +6,10 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import attr
 
-from orodruin.core import Connection, Graph, Node, Port, PortType
-
 from .types import SerializationType
 
 if TYPE_CHECKING:
-    from orodruin.core import State
+    from orodruin.core import Connection, Graph, Node, Port, PortType, State
 
 
 class Serializer(metaclass=ABCMeta):
