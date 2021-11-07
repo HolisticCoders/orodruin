@@ -53,6 +53,7 @@ class OrodruinDeserializer(Deserializer):
     def deserialize_port(self, data: Dict[str, Any], port: Port) -> None:
         """Set the port value."""
         serialization_type = SerializationType(data["metadata"]["serialization_type"])
+
         if serialization_type is SerializationType.instance:
             SetPort(port, data["value"]).do()
 
@@ -157,13 +158,14 @@ class RootDeserializer:
         serialization_type = SerializationType(data["metadata"]["serialization_type"])
 
         if serialization_type is SerializationType.definition:
-
             direction = PortDirection[data["direction"]]
             port_type = PortTypes[data["type"]].value
             port = CreatePort(self.state, node, name, direction, port_type, parent).do()
 
+            default_value = data.get("default_value", None)
+            if default_value:
+                port.set(default_value)
         else:
-
             port = node.port(name)
 
         for deserializer in self._state_deserializers():

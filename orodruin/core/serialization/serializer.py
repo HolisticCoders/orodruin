@@ -154,6 +154,7 @@ class RootSerializer:
         if serialization_type is SerializationType.definition:
             data["direction"] = port.direction().name
             data["type"] = port.type().__name__
+            data["default_value"] = self._encode_port_value(port.get())
 
         if serialization_type is SerializationType.instance:
             data["value"] = self._encode_port_value(port.get())
