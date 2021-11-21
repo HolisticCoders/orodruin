@@ -140,7 +140,7 @@ class Port(Generic[PortType]):
             SetConnectedPortError: when called and the port is connected.
         """
         try:
-            self._type(value)  # type: ignore[arg-type]
+            value = self._type(value)
         except Exception as error:
             raise TypeError(
                 f"Cannot set Port {self._name}[{self._type.__name__}] to a value "
