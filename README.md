@@ -10,5 +10,4 @@ A Python rigging graph library leveraging a composition based workflow.
 # Installation
 - Clone the repository.
 - cd in `orodruin`.
-- Run `poetry install --no-dev` to create a new virtual environment and install all the dependencies.
-    Remove the `--no-dev` argument if you want the dev dependencies.
+- Run `poetry install` to create a new virtual environment and install all the dependencies.
