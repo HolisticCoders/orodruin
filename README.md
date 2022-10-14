@@ -1,6 +1,8 @@
 # Orodruin
 A Python rigging graph library leveraging a composition based workflow.
 
+⚠⚠⚠ Orodruin is **NOT** Production Ready but more of a Proof of Concept at this point.⚠⚠⚠
+
 # Prerequisites
 - [Poetry](https://python-poetry.org/) must be installed
 - Python 3.7+ must be installed.
