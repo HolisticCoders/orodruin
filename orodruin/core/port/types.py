@@ -24,91 +24,102 @@ class Reference:
     value: Optional[UUID] = attr.ib(default=None)
 
 
-@attr.s
+@attr.s(init=False)
 class Vector2:
     """Vector2 representation class."""
 
-    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0])
+    value: List[float]
 
-    def __attrs_post_init__(self) -> None:
-        if isinstance(self.value, Vector2):
-            self.value = self.value.value  # pylint: disable = no-member
+    def __init__(self, value: Vector2 | List[float] | None = None) -> None:
+        if value is None:
+            self.value = [0.0, 0.0]
 
-        if not isinstance(self.value, list) or len(self.value) != 2:
-            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+        if isinstance(value, Vector2):
+            self.value = value.value
+
+        if not isinstance(value, list) or len(value) != 9:
+            raise TypeError(f"Invalid value {value} for {self.__class__.__name__}")
 
 
-@attr.s
+@attr.s(init=False)
 class Vector3:
     """Vector3 representation class."""
 
-    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0, 0.0])
+    value: List[float]
 
-    def __attrs_post_init__(self) -> None:
-        if isinstance(self.value, Vector3):
-            self.value = self.value.value  # pylint: disable = no-member
+    def __init__(self, value: Vector3 | List[float] | None = None) -> None:
+        if value is None:
+            self.value = [0.0, 0.0, 0.0]
 
-        if not isinstance(self.value, List) or len(self.value) != 3:
-            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+        if isinstance(value, Vector3):
+            self.value = value.value
+
+        if not isinstance(value, list) or len(value) != 9:
+            raise TypeError(f"Invalid value {value} for {self.__class__.__name__}")
 
 
-@attr.s
+@attr.s(init=False)
 class Quaternion:
     """Quaternion representation class."""
 
-    value: List[float] = attr.ib(factory=lambda: [0.0, 0.0, 0.0, 1.0])
+    value: List[float]
 
-    def __attrs_post_init__(self) -> None:
-        if isinstance(self.value, Quaternion):
-            self.value = self.value.value  # pylint: disable = no-member
+    def __init__(self, value: Quaternion | List[float] | None = None) -> None:
+        if value is None:
+            self.value = [0.0, 0.0, 0.0, 1.0]
 
-        if not isinstance(self.value, list) or len(self.value) != 4:
-            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+        if isinstance(value, Quaternion):
+            self.value = value.value
+
+        if not isinstance(value, list) or len(value) != 9:
+            raise TypeError(f"Invalid value {value} for {self.__class__.__name__}")
 
 
-@attr.s
+@attr.s(init=False)
 class Matrix3:
     """Matrix representation class."""
 
-    value: List[float] = attr.ib(
-        # fmt: off
-        factory=lambda: [
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0,
-        ]
-        # fmt: on
-    )
+    value: List[float]
 
-    def __attrs_post_init__(self) -> None:
-        if isinstance(self.value, Matrix3):
-            self.value = self.value.value  # pylint: disable = no-member
+    def __init__(self, value: Matrix3 | List[float] | None = None) -> None:
+        if value is None:
+            # fmt: off
+            self.value = [
+                1.0, 0.0, 0.0,
+                0.0, 1.0, 0.0,
+                0.0, 0.0, 1.0,
+            ]
+            # fmt: on
 
-        if not isinstance(self.value, list) or len(self.value) != 9:
-            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+        if isinstance(value, Matrix3):
+            self.value = value.value
+
+        if not isinstance(value, list) or len(value) != 9:
+            raise TypeError(f"Invalid value {value} for {self.__class__.__name__}")
 
 
-@attr.s
+@attr.s(init=False)
 class Matrix4:
     """Matrix representation class."""
 
-    value: List[float] = attr.ib(
-        # fmt: off
-        factory=lambda: [
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
-        ]
-        # fmt: on
-    )
+    value: List[float]
 
-    def __attrs_post_init__(self) -> None:
-        if isinstance(self.value, Matrix4):
-            self.value = self.value.value  # pylint: disable = no-member
+    def __init__(self, value: Matrix4 | List[float] | None = None) -> None:
+        if value is None:
+            # fmt: off
+            self.value = [
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            ]
+            # fmt: on
 
-        if not isinstance(self.value, list) or len(self.value) != 16:
-            raise TypeError(f"Invalid value {self.value} for {self.__class__.__name__}")
+        if isinstance(value, Matrix4):
+            self.value = value.value
+
+        if not isinstance(value, list) or len(value) != 16:
+            raise TypeError(f"Invalid value {value} for {self.__class__.__name__}")
 
 
 PortType = TypeVar(
